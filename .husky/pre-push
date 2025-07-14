@@ -1,0 +1,2 @@
+echo "Checking formatting..."
+npm run format:check
