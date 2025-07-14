@@ -12,8 +12,9 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   ...compat.config({
-    plugins: ['simple-import-sort'],
+    plugins: ['simple-import-sort', 'no-only-tests'],
     rules: {
+      // @typescript-eslint
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -29,8 +30,13 @@ const eslintConfig = [
           varsIgnorePattern: '^_',
         },
       ],
+
+      // simple-import-sort
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
+
+      // no-only-tests
+      'no-only-tests/no-only-tests': 'error',
     },
   }),
 ];
