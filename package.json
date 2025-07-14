@@ -8,10 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "test": "jest",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:ci": "start-server-and-test 'npm run build && npm run start' http://localhost:3000 'playwright test'",
+    "test": "NODE_ENV=test jest",
+    "test:e2e": "NODE_ENV=test playwright test",
+    "test:e2e:ui": "NODE_ENV=test playwright test --ui",
+    "test:e2e:ci": "NODE_ENV=test start-server-and-test 'npm run build && npm run start' http://localhost:3000 'playwright test'",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/"
   },
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/env": "^15.3.5",
     "@next/eslint-plugin-next": "^15.3.5",
     "@playwright/test": "^1.54.1",
     "@tailwindcss/postcss": "^4",

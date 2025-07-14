@@ -1,7 +1,7 @@
 import { LockIcon } from 'lucide-react';
 import { type ReactNode } from 'react';
 
-import { Sidebar, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar';
 
 export default async function VaultLayout({ children }: { children: ReactNode }) {
   return (
@@ -13,6 +13,13 @@ export default async function VaultLayout({ children }: { children: ReactNode })
             Next Secrets
           </div>
         </SidebarHeader>
+        <SidebarContent>
+          <div className={'p-4 text-sm'}>
+            <span className={'text-muted-foreground'} data-testid={'sidebar-empty-vault-message'}>
+              No projects found. Create a new project to get started.
+            </span>
+          </div>
+        </SidebarContent>
       </Sidebar>
       <main className={'flex flex-1 p-4'}>{children}</main>
     </SidebarProvider>
