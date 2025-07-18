@@ -1,23 +1,27 @@
 import { LockIcon } from 'lucide-react';
-import { type ReactNode } from 'react';
+import { type ReactNode, Suspense } from 'react';
 
+import ProjectList from '@/app/(vault)/project-list';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar';
+import { fetchProjects } from '@/lib/queries';
 
 export default async function VaultLayout({ children }: { children: ReactNode }) {
+  const projectsPromise = fetchProjects();
+
   return (
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div data-testid={'app-title'} className={'text-xl font-bold inline-flex gap-2 items-center p-2'}>
+          <div data-testid={'app-title'} className={'text-xl font-bold inline-flex gap-2 items-center px-2 pt-2'}>
             <LockIcon size={'20'} className={'stroke-blue-700'} />
             Next Secrets
           </div>
         </SidebarHeader>
         <SidebarContent>
           <div className={'p-4 text-sm'}>
-            <span className={'text-muted-foreground'} data-testid={'sidebar-empty-vault-message'}>
-              No projects found. Create a new project to get started.
-            </span>
+            <Suspense fallback={null}>
+              <ProjectList projects={projectsPromise} />
+            </Suspense>
           </div>
         </SidebarContent>
       </Sidebar>
