@@ -4,7 +4,15 @@ import { useForm } from 'react-hook-form';
 import { type z } from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -55,6 +63,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
   return (
     <Form {...form}>
       <Dialog open={props.open} onOpenChange={(open) => !open && onCloseDialog()}>
+        <DialogDescription className={'sr-only'}>Create a project via a dialog</DialogDescription>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className={'mb-3'}>Create new project</DialogTitle>
