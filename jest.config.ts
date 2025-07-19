@@ -17,7 +17,7 @@ const config: Config = {
   // cacheDirectory: "/private/var/folders/9b/nfvrdgj5731cyxzmf50y72br0000gn/T/jest_dx",
 
   // Automatically clear mock calls, instances, contexts and results before every test
-  // clearMocks: false,
+  clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
   collectCoverage: true,
@@ -29,9 +29,7 @@ const config: Config = {
   coverageDirectory: 'coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  coveragePathIgnorePatterns: ['/node_modules/', '/src/components/ui/*'],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'v8',
@@ -116,7 +114,7 @@ const config: Config = {
   // reporters: undefined,
 
   // Automatically reset mock state before every test
-  // resetMocks: false,
+  resetMocks: true,
 
   // Reset the module registry before running each individual test
   // resetModules: false,
@@ -125,7 +123,7 @@ const config: Config = {
   // resolver: undefined,
 
   // Automatically restore mock state and implementation before every test
-  // restoreMocks: false,
+  restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
   // rootDir: undefined,
