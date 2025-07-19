@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
 import { useForm } from 'react-hook-form';
 import { type z } from 'zod';
@@ -32,6 +33,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
       description: '',
     },
   });
+  const router = useRouter();
 
   const onCloseDialog = () => {
     form.reset();
@@ -43,6 +45,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
 
     if (result.success) {
       onCloseDialog();
+      router.push(`/projects/${result.data.id}`);
       return;
     }
 

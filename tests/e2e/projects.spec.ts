@@ -23,7 +23,10 @@ test.describe('Home page', () => {
     await page.getByRole('button', { name: 'Create project' }).click();
 
     // Verify the project was created
-    await expect(page.getByTestId('sidebar-project-item').filter({ hasText: projectName })).toBeVisible();
     await expect(page.getByRole('dialog', { name: 'Create new project' })).not.toBeVisible();
+    await expect(page.getByTestId('sidebar-project-item').filter({ hasText: projectName })).toBeVisible();
+
+    // The page navigates to Project page for the newly created project
+    await expect(page).toHaveURL(/\/projects\/[a-f0-9-]{36}/i);
   });
 });

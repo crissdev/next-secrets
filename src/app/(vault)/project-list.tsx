@@ -1,10 +1,13 @@
 'use client';
 
 import { PlusIcon } from 'lucide-react';
+import Link from 'next/link';
 import { use, useState } from 'react';
 
 import CreateProjectDialog from '@/app/(vault)/create-project-dialog';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type Project } from '@/lib/definitions';
 
 interface ProjectListProps {
@@ -35,13 +38,24 @@ export default function ProjectList({ projects }: ProjectListProps) {
           </span>
         )}
 
-        <div className="space-y-2">
-          {projectsList.map((project) => (
-            <div key={project.id} className="px-2 py-1 rounded hover:bg-muted" data-testid={'sidebar-project-item'}>
-              {project.name}
-            </div>
-          ))}
-        </div>
+        <ScrollArea>
+          <SidebarMenu>
+            {projectsList.map((project) => (
+              <SidebarMenuItem key={project.id}>
+                <SidebarMenuButton asChild>
+                  <Link
+                    className={'py-3 h-auto'}
+                    data-testid={'sidebar-project-item'}
+                    prefetch={false}
+                    href={`/projects/${project.id}`}
+                  >
+                    {project.name}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </ScrollArea>
       </div>
     </div>
   );
