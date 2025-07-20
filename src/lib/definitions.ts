@@ -3,3 +3,10 @@ export interface Project {
   name: string;
   description: string;
 }
+
+export interface Secret {
+  id: string;
+  name: string;
+  description: string;
+  value: string;
+}

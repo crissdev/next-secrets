@@ -2,6 +2,7 @@
 
 import { PlusIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { use, useState } from 'react';
 
 import CreateProjectDialog from '@/app/(vault)/create-project-dialog';
@@ -17,6 +18,7 @@ interface ProjectListProps {
 export default function ProjectList({ projects }: ProjectListProps) {
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const projectsList = use(projects);
+  const { id: selectedProjectId } = useParams();
 
   return (
     <div>
@@ -42,7 +44,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
           <SidebarMenu>
             {projectsList.map((project) => (
               <SidebarMenuItem key={project.id}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild isActive={project.id === selectedProjectId}>
                   <Link
                     className={'py-3 h-auto'}
                     data-testid={'sidebar-project-item'}

@@ -15,3 +15,7 @@ export async function createProject(input: Omit<Project, 'id'>): Promise<Project
   });
   return newProject;
 }
+
+export function getProject(id: string): Promise<Project | undefined> {
+  return db.getProject(id);
+}

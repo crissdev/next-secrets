@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { expect, test } from '@playwright/test';
+
+import { expect, test } from './fixtures';
 
 test.describe('Home page', () => {
   test('Display application title', async ({ page }) => {
@@ -9,24 +10,24 @@ test.describe('Home page', () => {
     await expect(page.getByTestId('app-title')).toHaveText('Next Secrets');
   });
 
-  test('Create new project via modal', async ({ page }) => {
+  test('Navigate to project page via sidebar link', async ({ page, projectsPage }) => {
     await page.goto('/');
 
-    const projectName = faker.lorem.word();
-    const projectDescription = faker.lorem.words(3);
+    let projectName = faker.lorem.words(2);
+    await projectsPage.createProjectViaModal({ name: projectName });
 
-    await page.getByTestId('sidebar-create-project-button').click();
-    await expect(page.getByRole('dialog', { name: 'Create new project' })).toBeVisible();
+    projectName = faker.lorem.words(2);
+    await projectsPage.createProjectViaModal({ name: projectName });
 
-    await page.getByRole('textbox', { name: 'Project name' }).fill(projectName);
-    await page.getByRole('textbox', { name: 'Description' }).fill(projectDescription);
-    await page.getByRole('button', { name: 'Create project' }).click();
+    await expect(page.getByTestId('selected-project-title')).toHaveText(projectName);
+  });
 
-    // Verify the project was created
-    await expect(page.getByRole('dialog', { name: 'Create new project' })).not.toBeVisible();
-    await expect(page.getByTestId('sidebar-project-item').filter({ hasText: projectName })).toBeVisible();
+  test('Display list of secrets for the selected project', async ({ page, projectsPage }) => {
+    await page.goto('/');
 
-    // The page navigates to Project page for the newly created project
-    await expect(page).toHaveURL(/\/projects\/[a-f0-9-]{36}/i);
+    const projectName = faker.lorem.words(2);
+    await projectsPage.createProjectViaModal({ name: projectName });
+
+    await expect(page.getByTestId('project-secrets-count')).toHaveText('0 secrets');
   });
 });

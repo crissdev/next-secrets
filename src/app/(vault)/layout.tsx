@@ -25,7 +25,7 @@ export default async function VaultLayout({ children }: { children: ReactNode })
           </div>
         </SidebarContent>
       </Sidebar>
-      <main className={'flex flex-1 p-4'}>{children}</main>
+      <main className={'flex flex-1'}>{children}</main>
     </SidebarProvider>
   );
 }
