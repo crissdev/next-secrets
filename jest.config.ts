@@ -29,7 +29,7 @@ const config: Config = {
   coverageDirectory: 'coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '/src/components/ui/*'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/src/components/ui/*', '/src/hooks/use-mobile.ts'],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'v8',

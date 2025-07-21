@@ -6,7 +6,7 @@ export const createProjectSchema = z.object({
 });
 
 export const createSecretSchema = z.object({
-  name: z.string().min(1, 'Project name cannot be empty.'),
+  name: z.string().min(1, 'Secret name cannot be empty.'),
   value: z.string(),
   description: z.string(),
 });

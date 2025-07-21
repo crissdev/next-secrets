@@ -1,8 +1,15 @@
 import { act, render, screen } from '@testing-library/react';
+import { useParams } from 'next/navigation';
 
 import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 
 describe('Secret list', () => {
+  const useParamsMock = useParams as jest.Mock;
+
+  beforeEach(() => {
+    useParamsMock.mockResolvedValueOnce({});
+  });
+
   test('Display no secrets message', async () => {
     await act(async () => {
       const secretsPromise = Promise.resolve([]);

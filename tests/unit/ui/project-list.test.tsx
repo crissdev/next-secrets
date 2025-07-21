@@ -6,9 +6,11 @@ import ProjectList from '@/app/(vault)/project-list';
 describe('Project list', () => {
   const useParamsMock = useParams as jest.Mock;
 
-  test('Display empty vault message', async () => {
+  beforeEach(() => {
     useParamsMock.mockResolvedValueOnce({});
+  });
 
+  test('Display empty vault message', async () => {
     await act(async () => {
       const projectsPromise = Promise.resolve([]);
       render(<ProjectList projects={projectsPromise} />);

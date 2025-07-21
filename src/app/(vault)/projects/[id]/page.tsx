@@ -1,3 +1,5 @@
+import { redirect, RedirectType } from 'next/navigation';
+
 import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
 
@@ -11,8 +13,9 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
   const params = await props.params;
   const project = await fetchProject(params.id);
 
-  // todo: 404 if project is not found
-  if (!project) throw new Error('No project');
+  if (!project) {
+    redirect('/404', RedirectType.replace);
+  }
 
   const secretsPromise = fetchSecrets(project.id);
 

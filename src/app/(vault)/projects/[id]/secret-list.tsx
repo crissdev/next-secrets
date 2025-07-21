@@ -1,13 +1,18 @@
 'use client';
 
 import { LockIcon } from 'lucide-react';
-import { use } from 'react';
+import { useParams } from 'next/navigation';
+import { use, useState } from 'react';
 
+import CreateSecretDialog from '@/app/(vault)/projects/[id]/create-secret-dialog';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type Secret } from '@/lib/definitions';
 
 export default function SecretList(props: { secretsPromise: Promise<Secret[]>; projectName?: string }) {
   const secrets = use(props.secretsPromise);
+  const [createSecretDialogOpen, setCreateSecretDialogOpen] = useState(false);
+  const { id: selectedProjectId } = useParams<{ id: string }>();
 
   return secrets.length === 0 ? (
     <div className={'h-full flex items-center'}>
@@ -24,10 +29,42 @@ export default function SecretList(props: { secretsPromise: Promise<Secret[]>; p
           Add your first secret to the &#34;{props.projectName}&#34; project.
         </div>
 
-        <Button variant={'default'}>Add secret</Button>
-      </div>
+        <Button variant={'default'} onClick={() => setCreateSecretDialogOpen(true)}>
+          Add secret
+        </Button>
 
-      <p></p>
+        <CreateSecretDialog
+          projectId={selectedProjectId}
+          open={createSecretDialogOpen}
+          onClose={() => setCreateSecretDialogOpen(false)}
+        />
+      </div>
     </div>
-  ) : null;
+  ) : (
+    <div className={'p-5 h-full'}>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[300px]">Name</TableHead>
+            <TableHead>Value</TableHead>
+            <TableHead className="text-right">Last updated</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {secrets.map((secret) => (
+            <TableRow key={secret.id}>
+              <TableCell className="font-medium">
+                <div className={'flex flex-col'}>
+                  <span>{secret.name}</span>
+                  <span className={'text-sm text-muted-foreground'}>{secret.description}</span>
+                </div>
+              </TableCell>
+              <TableCell>{secret.value.replaceAll(/./g, '•')}</TableCell>
+              <TableCell className={'text-right'}>&ndash;</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 }

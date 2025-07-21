@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { type z } from 'zod';
+import type z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,23 +18,26 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { createProjectAction } from '@/lib/actions/projects.actions';
+import { createSecretAction } from '@/lib/actions/projects.actions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
-import { createProjectSchema } from '@/lib/services/schemas';
+import { type createProjectSchema, createSecretSchema } from '@/lib/services/schemas';
 
-type CreateProjectDialogProps = {
+type CreateSecretDialogProps = {
+  projectId: string;
   open: boolean;
   onClose: () => void;
 };
 
-export default function CreateProjectDialog(props: CreateProjectDialogProps) {
-  const form = useForm<z.infer<typeof createProjectSchema>>({
-    resolver: zodResolver(createProjectSchema),
+export default function CreateSecretDialog(props: CreateSecretDialogProps) {
+  const form = useForm<z.infer<typeof createSecretSchema>>({
+    resolver: zodResolver(createSecretSchema),
     defaultValues: {
       name: '',
       description: '',
+      value: '',
     },
   });
+  const [showValue, setShowValue] = useState(true);
   const router = useRouter();
 
   const onCloseDialog = () => {
@@ -41,12 +45,16 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
     props.onClose();
   };
 
+  const toggleValueVisibility = () => {
+    setShowValue(!showValue);
+  };
+
   const [, action, isPending] = useActionState(async () => {
-    const result = await createProjectAction(form.getValues());
+    const result = await createSecretAction(props.projectId, form.getValues());
 
     if (result.success) {
       onCloseDialog();
-      router.push(`/projects/${result.data.id}`);
+      router.refresh();
       return;
     }
 
@@ -67,10 +75,10 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
   return (
     <Form {...form}>
       <Dialog open={props.open} onOpenChange={(open) => !open && onCloseDialog()}>
-        <DialogDescription className={'sr-only'}>Create a project via modal</DialogDescription>
+        <DialogDescription className={'sr-only'}>Add a project secret via modal</DialogDescription>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className={'mb-3'}>Create new project</DialogTitle>
+            <DialogTitle className={'mb-3'}>Add new secret</DialogTitle>
           </DialogHeader>
           <form action={action} className={'flex flex-col gap-5'}>
             {form.formState.errors.root && (
@@ -81,15 +89,14 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
               name={'name'}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project name</FormLabel>
+                  <FormLabel>Secret name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="e.g., API Tokens" autoComplete={'off'} name={'name'} />
+                    <Input {...field} placeholder="e.g., API_KEY" autoComplete={'off'} name={'name'} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               name={'description'}
               control={form.control}
@@ -100,7 +107,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
                     <Textarea
                       {...field}
                       name={'description'}
-                      placeholder={'What is this project for?'}
+                      placeholder={'What is this secret for?'}
                       className={'min-h-20'}
                       rows={3}
                       autoComplete={'off'}
@@ -110,7 +117,37 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name={'value'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Secret value</FormLabel>
+                  <div className={'relative'}>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Enter secret value"
+                        autoComplete={'off'}
+                        name={'value'}
+                        type={showValue ? 'text' : 'password'}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      onClick={toggleValueVisibility}
+                    >
+                      {showValue ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
 
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" onClick={onCloseDialog} disabled={isPending}>
@@ -118,7 +155,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
                 </Button>
               </DialogClose>
               <Button type="submit" disabled={isPending}>
-                Create project
+                Add secret
               </Button>
             </DialogFooter>
           </form>

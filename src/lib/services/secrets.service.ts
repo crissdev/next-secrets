@@ -13,6 +13,6 @@ export async function createSecret(projectId: string, input: Omit<Secret, 'id'>)
 }
 
 export async function getSecrets(projectId: string): Promise<Secret[]> {
-  const secrets = db.getSecrets(projectId);
+  const secrets = await db.getSecrets(projectId);
   return secrets;
 }
