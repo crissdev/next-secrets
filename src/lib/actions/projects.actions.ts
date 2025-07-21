@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { ZodError } from 'zod';
 
 import { type Project, type Secret } from '@/lib/definitions';
@@ -32,7 +33,7 @@ export async function createSecretAction(projectId: string, data: Omit<Secret, '
   try {
     const { name, description, value } = data;
     const newSecret = await createSecret(projectId, { name, description, value });
-    revalidateProjects();
+    revalidatePath(`/projects/${projectId}`);
     return { success: true as const, data: newSecret };
   } catch (err) {
     if (err instanceof ZodError) {

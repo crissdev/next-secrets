@@ -23,4 +23,6 @@ export function revalidateProjects() {
   revalidateTag(FETCH_PROJECTS_TAG);
 }
 
-export const fetchSecrets = async (projectId: string) => cachedGetSecrets(projectId);
+export const fetchSecrets = unstable_cache(async (projectId: string) => cachedGetSecrets(projectId), ['secrets'], {
+  revalidate: 5 * 60,
+});

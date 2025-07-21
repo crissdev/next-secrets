@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
@@ -38,7 +37,6 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
     },
   });
   const [showValue, setShowValue] = useState(true);
-  const router = useRouter();
 
   const onCloseDialog = () => {
     form.reset();
@@ -54,7 +52,6 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
 
     if (result.success) {
       onCloseDialog();
-      router.refresh();
       return;
     }
 

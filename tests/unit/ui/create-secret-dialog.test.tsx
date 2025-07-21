@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { revalidatePath } from 'next/cache';
 
 import CreateSecretDialog from '@/app/(vault)/projects/[id]/create-secret-dialog';
-import { revalidateProjects } from '@/lib/queries';
 import { createSecret } from '@/lib/store/db';
-
-import { useRouterMockFactory } from '../factories';
 
 jest.mock('@/lib/store/db');
 jest.mock('@/lib/queries');
@@ -14,7 +12,6 @@ jest.mock('@/lib/queries');
 describe('Create secret dialog', () => {
   test('Create a new secret via dialog', async () => {
     const projectId = crypto.randomUUID();
-    const { refreshMock } = useRouterMockFactory();
 
     const onCloseMock = jest.fn();
     render(<CreateSecretDialog projectId={projectId} open onClose={onCloseMock} />);
@@ -37,11 +34,8 @@ describe('Create secret dialog', () => {
     });
     expect(onCloseMock).toHaveBeenCalled();
 
-    // Expect page to refresh
-    expect(refreshMock).toHaveBeenCalledTimes(1);
-    expect(refreshMock).toHaveBeenCalledWith();
-
     // Expect cache to be invalidated for selected project
-    expect(revalidateProjects).toHaveBeenCalledTimes(1);
+    expect(revalidatePath).toHaveBeenCalledTimes(1);
+    expect(revalidatePath).toHaveBeenCalledWith(`/projects/${projectId}`);
   });
 });
