@@ -1,5 +1,7 @@
 import { redirect, RedirectType } from 'next/navigation';
+import { Suspense } from 'react';
 
+import SecretCount from '@/app/(vault)/projects/[id]/secret-count';
 import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
 
@@ -27,7 +29,9 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
             {project?.name}
           </h2>
           <span data-testid={'project-secrets-count'} className={'font-normal text-muted-foreground text-sm'}>
-            0 secrets
+            <Suspense fallback={null}>
+              <SecretCount secretsPromise={secretsPromise} />
+            </Suspense>
           </span>
         </div>
       </header>
