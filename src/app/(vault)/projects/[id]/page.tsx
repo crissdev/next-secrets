@@ -1,6 +1,8 @@
+import { PlusIcon } from 'lucide-react';
 import { redirect, RedirectType } from 'next/navigation';
 import { Suspense } from 'react';
 
+import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
 import SecretCount from '@/app/(vault)/projects/[id]/secret-count';
 import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
@@ -23,7 +25,7 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
 
   return (
     <div className={'bg-white w-full flex flex-col'}>
-      <header className={'bg-white dark:bg-slate-800 py-3 px-4 border-b border-border'}>
+      <header className={'bg-white dark:bg-slate-800 py-3 px-4 border-b border-border flex items-center gap-2'}>
         <div className={'flex flex-col'}>
           <h2 className={'font-bold text-xl'} data-testid={'selected-project-title'}>
             {project?.name}
@@ -33,6 +35,9 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
               <SecretCount secretsPromise={secretsPromise} />
             </Suspense>
           </span>
+        </div>
+        <div className={'ml-auto'}>
+          <AddSecretButton icon={<PlusIcon size={20} />} testId={'topbar-add-secret'} />
         </div>
       </header>
 

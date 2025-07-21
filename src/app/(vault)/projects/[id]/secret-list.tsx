@@ -1,18 +1,14 @@
 'use client';
 
 import { LockIcon } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { use, useState } from 'react';
+import { use } from 'react';
 
-import CreateSecretDialog from '@/app/(vault)/projects/[id]/create-secret-dialog';
-import { Button } from '@/components/ui/button';
+import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type Secret } from '@/lib/definitions';
 
 export default function SecretList(props: { secretsPromise: Promise<Secret[]>; projectName?: string }) {
   const secrets = use(props.secretsPromise);
-  const [createSecretDialogOpen, setCreateSecretDialogOpen] = useState(false);
-  const { id: selectedProjectId } = useParams<{ id: string }>();
 
   return secrets.length === 0 ? (
     <div className={'h-full flex items-center'}>
@@ -29,15 +25,7 @@ export default function SecretList(props: { secretsPromise: Promise<Secret[]>; p
           Add your first secret to the &#34;{props.projectName}&#34; project.
         </div>
 
-        <Button variant={'default'} onClick={() => setCreateSecretDialogOpen(true)}>
-          Add secret
-        </Button>
-
-        <CreateSecretDialog
-          projectId={selectedProjectId}
-          open={createSecretDialogOpen}
-          onClose={() => setCreateSecretDialogOpen(false)}
-        />
+        <AddSecretButton testId={'empty-list-add-secret'} />
       </div>
     </div>
   ) : (
@@ -51,12 +39,14 @@ export default function SecretList(props: { secretsPromise: Promise<Secret[]>; p
           </TableRow>
         </TableHeader>
         <TableBody>
-          {secrets.map((secret) => (
+          {secrets.map((secret, index) => (
             <TableRow key={secret.id}>
               <TableCell className="font-medium">
                 <div className={'flex flex-col'}>
-                  <span>{secret.name}</span>
-                  <span className={'text-sm text-muted-foreground'}>{secret.description}</span>
+                  <span data-testid={`secret-name-${index}`}>{secret.name}</span>
+                  <span data-testid={`secret-description-${index}`} className={'text-sm text-muted-foreground'}>
+                    {secret.description}
+                  </span>
                 </div>
               </TableCell>
               <TableCell>{secret.value.replaceAll(/./g, '•')}</TableCell>

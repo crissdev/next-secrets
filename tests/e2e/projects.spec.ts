@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { screen } from '@testing-library/react';
 
 import { expect, test } from './fixtures';
 
@@ -14,10 +13,10 @@ test.describe('Home page', () => {
   test('Navigate to project page via sidebar link', async ({ page, projectsPage }) => {
     await page.goto('/');
 
-    let projectName = faker.lorem.words(2);
+    let projectName = faker.lorem.words(3);
     await projectsPage.createProjectViaModal({ name: projectName });
 
-    projectName = faker.lorem.words(2);
+    projectName = faker.lorem.words(3);
     await projectsPage.createProjectViaModal({ name: projectName });
 
     await expect(page.getByTestId('selected-project-title')).toHaveText(projectName);
@@ -26,7 +25,7 @@ test.describe('Home page', () => {
   test('Display list of secrets for the selected project', async ({ page, projectsPage }) => {
     await page.goto('/');
 
-    const projectName = faker.lorem.words(2);
+    const projectName = faker.lorem.words(3);
     await projectsPage.createProjectViaModal({ name: projectName });
 
     await expect(page.getByTestId('project-secrets-count')).toHaveText('0 secrets');
@@ -36,7 +35,7 @@ test.describe('Home page', () => {
     await page.goto('/');
     await projectsPage.createProjectViaModal();
 
-    await page.getByRole('button', { name: 'Add secret' }).click();
+    await page.getByTestId('empty-list-add-secret').click();
     await expect(page.getByRole('dialog', { name: 'Add new secret' })).toBeVisible();
 
     const secretName = faker.lorem.words(3);
@@ -48,11 +47,11 @@ test.describe('Home page', () => {
     await page.getByRole('textbox', { name: 'Secret value' }).fill(secretValue);
     await page.getByRole('button', { name: 'Add secret' }).click();
 
-    await expect(page.getByRole('table').getByText(secretName)).toBeVisible();
-    await expect(page.getByRole('table').getByText(secretDescription)).toBeVisible();
+    await expect(page.getByTestId('secret-name-0')).toHaveText(secretName);
+    await expect(page.getByTestId('secret-description-0')).toHaveText(secretDescription);
 
     await expect(page.getByTestId('project-secrets-count')).toHaveText('1 secret');
-    expect(screen.getByTestId('no-secrets-message')).not.toBeDefined();
-    expect(screen.getByTestId('no-secrets-hint')).not.toBeDefined();
+    await expect(page.getByTestId('no-secrets-message')).not.toBeAttached();
+    await expect(page.getByTestId('no-secrets-hint')).not.toBeAttached();
   });
 });
