@@ -4,7 +4,7 @@ import { LockIcon } from 'lucide-react';
 import { use } from 'react';
 
 import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import SecretsTable from '@/app/(vault)/projects/[id]/secrets-table';
 import { type Secret } from '@/lib/definitions';
 
 export default function SecretList(props: { secretsPromise: Promise<Secret[]>; projectName?: string }) {
@@ -30,31 +30,7 @@ export default function SecretList(props: { secretsPromise: Promise<Secret[]>; p
     </div>
   ) : (
     <div className={'p-5 h-full'}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[300px]">Name</TableHead>
-            <TableHead>Value</TableHead>
-            <TableHead className="text-right">Last updated</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {secrets.map((secret, index) => (
-            <TableRow key={secret.id}>
-              <TableCell className="font-medium">
-                <div className={'flex flex-col'}>
-                  <span data-testid={`secret-name-${index}`}>{secret.name}</span>
-                  <span data-testid={`secret-description-${index}`} className={'text-sm text-muted-foreground'}>
-                    {secret.description}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>{secret.value.replaceAll(/./g, '•')}</TableCell>
-              <TableCell className={'text-right'}>&ndash;</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <SecretsTable data={secrets} />
     </div>
   );
 }
