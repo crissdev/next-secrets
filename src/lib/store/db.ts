@@ -5,6 +5,17 @@ import path from 'node:path';
 
 import type { Project, Secret } from '@/lib/definitions';
 
+export async function deleteProject(id: string) {
+  const { projects } = await DataLayer.read();
+  const index = projects.findIndex((p) => p.id === id);
+  if (index > -1) {
+    projects.splice(index, 1);
+  }
+  await DataLayer.write({
+    projects,
+  });
+}
+
 // Projects
 
 function toProject(project: StoreProject) {

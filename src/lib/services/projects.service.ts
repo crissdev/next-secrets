@@ -19,3 +19,7 @@ export async function createProject(input: Omit<Project, 'id'>): Promise<Project
 export function getProject(id: string): Promise<Project | undefined> {
   return db.getProject(id);
 }
+
+export async function deleteProject(id: string): Promise<void> {
+  await db.deleteProject(id);
+}

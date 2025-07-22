@@ -1,14 +1,20 @@
 'use client';
 
-import { PlusIcon } from 'lucide-react';
+import { MoreVertical, PencilLineIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { use, useState } from 'react';
 
 import CreateProjectDialog from '@/app/(vault)/create-project-dialog';
+import DeleteProjectDialog from '@/app/(vault)/delete-project-dialog';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type Project } from '@/lib/definitions';
 
 interface ProjectListProps {
@@ -17,8 +23,12 @@ interface ProjectListProps {
 
 export default function ProjectList({ projects }: ProjectListProps) {
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
+  const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
+  const [contextMenuProjectId, setContextMenuProjectId] = useState<string | null>(null);
+
   const projectsList = use(projects);
-  const { id: selectedProjectId } = useParams();
+  const { id: selectedProjectId } = useParams<{ id: string }>();
+  const selectedProjectName = projectsList.find((p) => p.id === selectedProjectId)?.name ?? '';
 
   return (
     <div>
@@ -34,30 +44,64 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
         <CreateProjectDialog open={createProjectDialogOpen} onClose={() => setCreateProjectDialogOpen(false)} />
 
+        {contextMenuProjectId && (
+          <DeleteProjectDialog
+            projectId={contextMenuProjectId}
+            projectName={selectedProjectName}
+            open={deleteProjectDialogOpen}
+            onClose={() => {
+              setDeleteProjectDialogOpen(false);
+              setContextMenuProjectId(null);
+            }}
+          ></DeleteProjectDialog>
+        )}
+
         {projectsList.length === 0 && (
           <span className={'text-muted-foreground'} data-testid={'sidebar-empty-vault-message'}>
             No projects found. Create a new project to get started.
           </span>
         )}
 
-        <ScrollArea>
-          <SidebarMenu>
-            {projectsList.map((project) => (
-              <SidebarMenuItem key={project.id}>
-                <SidebarMenuButton asChild isActive={project.id === selectedProjectId}>
-                  <Link
-                    className={'py-3 h-auto'}
-                    data-testid={'sidebar-project-item'}
-                    prefetch={false}
-                    href={`/projects/${project.id}`}
-                  >
-                    {project.name}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </ScrollArea>
+        <SidebarMenu>
+          {projectsList.map((project) => (
+            <SidebarMenuItem key={project.id} className={`group/actions`}>
+              <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
+                <Link data-testid={'sidebar-project-item'} prefetch={false} href={`/projects/${project.id}`}>
+                  {project.name}
+                </Link>
+              </SidebarMenuButton>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuAction className={`opacity-0 group-hover/actions:opacity-100 mt-1 cursor-pointer`}>
+                    <MoreVertical />
+                  </SidebarMenuAction>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="right" align="start">
+                  <DropdownMenuItem asChild>
+                    <SidebarMenuButton variant={'outline'} onClick={() => alert('edit')}>
+                      <PencilLineIcon />
+                      <span>Edit</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <SidebarMenuButton
+                      className={'text-destructive'}
+                      variant={'outline'}
+                      onClick={() => {
+                        setContextMenuProjectId(project.id);
+                        setDeleteProjectDialogOpen(true);
+                      }}
+                    >
+                      <Trash2Icon size={20} className={'text-destructive'} />
+                      <span>Delete</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
       </div>
     </div>
   );
