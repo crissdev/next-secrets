@@ -62,6 +62,7 @@ export async function createSecret(projectId: string, secret: Omit<Secret, 'id'>
     id: crypto.randomUUID(),
     name: secret.name,
     value: secret.value,
+    type: secret.type,
     description: secret.description,
   };
   project.secrets.push(newSecret);

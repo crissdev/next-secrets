@@ -7,6 +7,7 @@ export async function createSecret(projectId: string, input: Omit<Secret, 'id'>)
   const newSecret = await db.createSecret(projectId, {
     name: secretInput.name,
     description: secretInput.description,
+    type: secretInput.type,
     value: secretInput.value,
   });
   return newSecret;

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Secret } from '@/lib/definitions';
+import { type Secret, SECRET_TYPES } from '@/lib/definitions';
 import { createProject } from '@/lib/services/projects.service';
 import { createSecret, getSecrets } from '@/lib/services/secrets.service';
 
@@ -12,6 +12,7 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
+      type: SECRET_TYPES.EnvironmentVariable,
     });
 
     expect(secret).toEqual<Secret>({
@@ -19,6 +20,7 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
+      type: SECRET_TYPES.EnvironmentVariable,
     });
   });
 
@@ -33,10 +35,17 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
+      type: SECRET_TYPES.EnvironmentVariable,
     });
     const secrets = await getSecrets(project.id);
     expect(secrets).toStrictEqual<Secret[]>([
-      { id: expect.any(String), name: 'CI Token', value: '12345', description: 'Token used in CI' },
+      {
+        id: expect.any(String),
+        name: 'CI Token',
+        value: '12345',
+        description: 'Token used in CI',
+        type: SECRET_TYPES.EnvironmentVariable,
+      },
     ]);
   });
 });

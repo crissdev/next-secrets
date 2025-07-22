@@ -67,6 +67,10 @@ export default function SecretsTable(props: { data: Secret[] }) {
         },
       },
       {
+        header: 'Type',
+        accessorKey: 'type',
+      },
+      {
         id: 'actions',
         header: () => <div className={'text-right'}>Actions</div>,
         cell: () => {

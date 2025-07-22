@@ -16,8 +16,10 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction } from '@/lib/actions/projects.actions';
+import { SECRET_TYPES } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { type createProjectSchema, createSecretSchema } from '@/lib/services/schemas';
 
@@ -27,6 +29,13 @@ type CreateSecretDialogProps = {
   onClose: () => void;
 };
 
+const SecretTypes = [
+  {
+    label: 'Environment Variable',
+    value: SECRET_TYPES.EnvironmentVariable,
+  },
+];
+
 export default function CreateSecretDialog(props: CreateSecretDialogProps) {
   const form = useForm<z.infer<typeof createSecretSchema>>({
     resolver: zodResolver(createSecretSchema),
@@ -34,6 +43,7 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
       name: '',
       description: '',
       value: '',
+      type: SECRET_TYPES.EnvironmentVariable,
     },
   });
   const [showValue, setShowValue] = useState(true);
@@ -56,6 +66,7 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
     }
 
     if (result.error.code === SERVICE_ERROR.VALIDATION_FAILED) {
+      console.log(result.error);
       // If the error is a ZodError, we can extract the first error message
       const firstError = JSON.parse(result.error.message)[0];
       form.setError(firstError.path[0] as keyof z.infer<typeof createProjectSchema>, {
@@ -88,7 +99,14 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
                 <FormItem>
                   <FormLabel>Secret name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="e.g., API_KEY" autoComplete={'off'} name={'name'} />
+                    <Input
+                      {...field}
+                      placeholder="e.g., API_KEY"
+                      autoComplete={'off'}
+                      aria-autocomplete={'none'}
+                      data-lpignore="true"
+                      name={'name'}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,6 +134,30 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
             />
             <FormField
               control={form.control}
+              name={'type'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor={'secret-type'}>Secret type</FormLabel>
+                  <FormControl>
+                    <Select {...field} onValueChange={(value) => field.onChange(value)} value={field.value}>
+                      <SelectTrigger id={'secret-type'} className={'w-full'}>
+                        <SelectValue placeholder="Select a secret type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SecretTypes.map(({ label, value }) => (
+                          <SelectItem value={value} key={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name={'value'}
               render={({ field }) => (
                 <FormItem>
@@ -126,6 +168,8 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
                         {...field}
                         placeholder="Enter secret value"
                         autoComplete={'off'}
+                        aria-autocomplete={'none'}
+                        data-lpignore="true"
                         name={'value'}
                         type={showValue ? 'text' : 'password'}
                       />
