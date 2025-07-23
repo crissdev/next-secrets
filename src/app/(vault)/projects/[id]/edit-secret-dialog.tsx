@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
 
@@ -18,13 +18,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { createSecretAction } from '@/lib/actions/projects.actions';
-import { SECRET_TYPES } from '@/lib/definitions';
+import { createSecretAction, updateSecretAction } from '@/lib/actions/projects.actions';
+import { type Secret, SECRET_TYPES } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { type createProjectSchema, createSecretSchema } from '@/lib/services/schemas';
 
-type CreateSecretDialogProps = {
+type EditSecretDialogProps = {
   projectId: string;
+  secret?: Secret;
   open: boolean;
   onClose: () => void;
 };
@@ -36,7 +37,7 @@ const SecretTypes = [
   },
 ];
 
-export default function CreateSecretDialog(props: CreateSecretDialogProps) {
+export default function EditSecretDialog(props: EditSecretDialogProps) {
   const form = useForm<z.infer<typeof createSecretSchema>>({
     resolver: zodResolver(createSecretSchema),
     defaultValues: {
@@ -56,9 +57,22 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
   const toggleValueVisibility = () => {
     setShowValue(!showValue);
   };
+  
+  useEffect(() => {
+    if (props.secret) {
+      form.reset({
+        name: props.secret.name,
+        description: props.secret.description,
+        type: props.secret.type,
+        value: props.secret.value,
+      });
+    }
+  }, [form, props.secret]);
 
   const [, action, isPending] = useActionState(async () => {
-    const result = await createSecretAction(props.projectId, form.getValues());
+    const result = props.secret
+      ? await updateSecretAction(props.projectId, { id: props.secret.id, ...form.getValues() })
+      : await createSecretAction(props.projectId, form.getValues());
 
     if (result.success) {
       onCloseDialog();
@@ -83,10 +97,14 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
   return (
     <Form {...form}>
       <Dialog open={props.open} onOpenChange={(open) => !open && onCloseDialog()}>
-        <DialogDescription className={'sr-only'}>Add a project secret via modal</DialogDescription>
+        <DialogDescription className={'sr-only'}>
+          {props.secret ? 'Edit a project secret via modal' : 'Add a project secret via modal'}
+        </DialogDescription>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className={'mb-3'}>Add new secret</DialogTitle>
+            <DialogTitle className={'mb-3'}>
+              {props.secret ? 'Edit secret' : 'Add new secret'}
+            </DialogTitle>
           </DialogHeader>
           <form action={action} className={'flex flex-col gap-5'}>
             {form.formState.errors.root && (
@@ -196,7 +214,7 @@ export default function CreateSecretDialog(props: CreateSecretDialogProps) {
                 </Button>
               </DialogClose>
               <Button type="submit" disabled={isPending}>
-                Add secret
+                {props.secret ? 'Update secret' : 'Add secret'}
               </Button>
             </DialogFooter>
           </form>

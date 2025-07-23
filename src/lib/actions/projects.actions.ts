@@ -7,7 +7,7 @@ import { type Project, type Secret } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
-import { createSecret } from '@/lib/services/secrets.service';
+import { createSecret, updateSecret } from '@/lib/services/secrets.service';
 import { deleteSecret } from '@/lib/store/db';
 
 // Projects
@@ -102,6 +102,25 @@ export async function deleteSecretAction(projectId: string, secretId: string) {
         code: SERVICE_ERROR.INTERNAL_ERROR,
         message: 'Cannot delete secret',
       },
+    };
+  }
+}
+
+export async function updateSecretAction(projectId: string, secret: Secret) {
+  try {
+    const updatedSecret = await updateSecret(projectId, secret);
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true as const, data: updatedSecret };
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return {
+        success: false as const,
+        error: { code: SERVICE_ERROR.VALIDATION_FAILED, message: err.message },
+      };
+    }
+    return {
+      success: false as const,
+      error: { code: SERVICE_ERROR.INTERNAL_ERROR, message: 'Failed to update secret' },
     };
   }
 }

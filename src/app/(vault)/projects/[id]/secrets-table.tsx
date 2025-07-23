@@ -11,6 +11,7 @@ import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
+import EditSecretDialog from '@/app/(vault)/projects/[id]/edit-secret-dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type Secret } from '@/lib/definitions';
@@ -76,27 +77,37 @@ export default function SecretsTable(props: { data: Secret[] }) {
         id: 'actions',
         header: () => <div className={'text-right'}>Actions</div>,
         cell: function ActionsCellRenderer({ row }) {
-          const [dialogOpen, setDialogOpen] = useState(false);
+          const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+          const [editDialogOpen, setEditDialogOpen] = useState(false);
           const { id: selectedProjectId } = useParams<{ id: string }>();
 
           return (
             <div className={'flex items-center justify-end'}>
-              <Button variant={'link'}>
+              <Button variant={'link'} onClick={() => setEditDialogOpen(true)}>
                 <PencilLineIcon />
                 <span className={'sr-only'}>Edit</span>
               </Button>
-              <Button variant={'link'} className={'text-destructive'} onClick={() => setDialogOpen(true)}>
+              <Button variant={'link'} className={'text-destructive'} onClick={() => setDeleteDialogOpen(true)}>
                 <Trash2Icon size={20} className={'text-destructive'} />
                 <span className={'sr-only'}>Delete</span>
               </Button>
 
-              {dialogOpen && (
+              {deleteDialogOpen && (
                 <DeleteSecretDialog
                   open
-                  onClose={() => setDialogOpen(false)}
+                  onClose={() => setDeleteDialogOpen(false)}
                   projectId={selectedProjectId}
                   secretId={row.original.id}
                   secretName={row.original.name}
+                />
+              )}
+              
+              {editDialogOpen && (
+                <EditSecretDialog
+                  open
+                  onClose={() => setEditDialogOpen(false)}
+                  projectId={selectedProjectId}
+                  secret={row.original}
                 />
               )}
             </div>

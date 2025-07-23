@@ -100,6 +100,28 @@ export async function deleteSecret(projectId: string, secretId: string): Promise
   }
 }
 
+export async function updateSecret(projectId: string, secret: Secret): Promise<Secret> {
+  const { projects } = await DataLayer.read();
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) {
+    throw new Error(`Project with id "${projectId}" does not exist.`);
+  }
+
+  const data = project.secrets.find((s) => s.id === secret.id);
+  if (!data) {
+    throw new Error(`Secret with id "${secret.id}" does not exist in project.`);
+  }
+
+  // Update the secret properties directly
+  data.name = secret.name;
+  data.description = secret.description;
+  data.type = secret.type;
+  data.value = secret.value;
+
+  await DataLayer.write({ projects });
+  return data;
+}
+
 //------
 type StoreProject = Project & {
   secrets: Secret[];
