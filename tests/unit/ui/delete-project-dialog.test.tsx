@@ -28,12 +28,15 @@ describe('Delete project dialog', () => {
     render(<DeleteProjectDialog projectId={projectId} projectName={projectName} open onClose={onCloseMock} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Delete project' }));
-
+    expect(screen.getByTestId('warning-message')).toHaveTextContent(
+      `Are you sure you want to delete "${projectName}"? This action cannot be undone and will delete all secrets within this project.`,
+    );
     expect(deleteProjectMock).toHaveBeenCalledTimes(1);
     expect(deleteProjectMock).toHaveBeenCalledWith(projectId);
     expect(revalidateProjects).toHaveBeenCalledTimes(1);
     expect(revalidatePath).toHaveBeenCalledWith(`/projects/${projectId}`);
     expect(pushMock).toHaveBeenCalledTimes(1);
     expect(pushMock).toHaveBeenCalledWith('/');
+    expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 });

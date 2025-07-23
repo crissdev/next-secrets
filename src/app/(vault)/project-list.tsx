@@ -79,7 +79,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="right" align="start">
                   <DropdownMenuItem asChild>
-                    <SidebarMenuButton variant={'outline'} onClick={() => alert('edit')}>
+                    <SidebarMenuButton variant={'outline'}>
                       <PencilLineIcon />
                       <span>Edit</span>
                     </SidebarMenuButton>

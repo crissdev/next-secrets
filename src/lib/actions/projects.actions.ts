@@ -8,6 +8,7 @@ import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject } from '@/lib/services/projects.service';
 import { createSecret } from '@/lib/services/secrets.service';
+import { deleteSecret } from '@/lib/store/db';
 
 export async function createProjectAction(data: Omit<Project, 'id'>) {
   try {
@@ -62,6 +63,23 @@ export async function deleteProjectAction(projectId: string) {
       error: {
         code: SERVICE_ERROR.INTERNAL_ERROR,
         message: `Cannot delete project`,
+      },
+    };
+  }
+}
+
+export async function deleteSecretAction(projectId: string, secretId: string) {
+  try {
+    await deleteSecret(projectId, secretId);
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true as const };
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false as const,
+      error: {
+        code: SERVICE_ERROR.INTERNAL_ERROR,
+        message: 'Cannot delete secret',
       },
     };
   }

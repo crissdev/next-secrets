@@ -7,8 +7,10 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, PencilLineIcon, Trash2Icon } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type Secret } from '@/lib/definitions';
@@ -73,17 +75,30 @@ export default function SecretsTable(props: { data: Secret[] }) {
       {
         id: 'actions',
         header: () => <div className={'text-right'}>Actions</div>,
-        cell: () => {
+        cell: function ActionsCellRenderer({ row }) {
+          const [dialogOpen, setDialogOpen] = useState(false);
+          const { id: selectedProjectId } = useParams<{ id: string }>();
+
           return (
             <div className={'flex items-center justify-end'}>
               <Button variant={'link'}>
                 <PencilLineIcon />
                 <span className={'sr-only'}>Edit</span>
               </Button>
-              <Button variant={'link'} className={'text-destructive'}>
+              <Button variant={'link'} className={'text-destructive'} onClick={() => setDialogOpen(true)}>
                 <Trash2Icon size={20} className={'text-destructive'} />
                 <span className={'sr-only'}>Delete</span>
               </Button>
+
+              {dialogOpen && (
+                <DeleteSecretDialog
+                  open
+                  onClose={() => setDialogOpen(false)}
+                  projectId={selectedProjectId}
+                  secretId={row.original.id}
+                  secretName={row.original.name}
+                />
+              )}
             </div>
           );
         },

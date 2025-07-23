@@ -5,17 +5,6 @@ import path from 'node:path';
 
 import type { Project, Secret } from '@/lib/definitions';
 
-export async function deleteProject(id: string) {
-  const { projects } = await DataLayer.read();
-  const index = projects.findIndex((p) => p.id === id);
-  if (index > -1) {
-    projects.splice(index, 1);
-  }
-  await DataLayer.write({
-    projects,
-  });
-}
-
 // Projects
 
 function toProject(project: StoreProject) {
@@ -52,6 +41,17 @@ export async function createProject(project: Omit<Project, 'id'>): Promise<Proje
   return toProject(newProject);
 }
 
+export async function deleteProject(id: string) {
+  const { projects } = await DataLayer.read();
+  const index = projects.findIndex((p) => p.id === id);
+  if (index > -1) {
+    projects.splice(index, 1);
+  }
+  await DataLayer.write({
+    projects,
+  });
+}
+
 // Secrets
 export async function createSecret(projectId: string, secret: Omit<Secret, 'id'>): Promise<Secret> {
   const { projects: allProjects } = await DataLayer.read();
@@ -75,6 +75,18 @@ export async function getSecrets(projectId: string): Promise<Secret[]> {
   const project = projects.find((p) => p.id === projectId);
   if (!project) throw new Error(`Project with name "${projectId}" does not exist.`);
   return project.secrets;
+}
+
+export async function deleteSecret(projectId: string, secretId: string): Promise<void> {
+  const { projects } = await DataLayer.read();
+  const project = projects.find((p) => p.id === projectId);
+  if (project) {
+    const index = project.secrets.findIndex((p) => p.id === secretId);
+    if (index > -1) {
+      project.secrets.splice(index, 1);
+      await DataLayer.write({ projects });
+    }
+  }
 }
 
 //------

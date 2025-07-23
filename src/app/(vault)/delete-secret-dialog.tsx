@@ -1,4 +1,3 @@
-import { useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -11,28 +10,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { deleteProjectAction } from '@/lib/actions/projects.actions';
+import { deleteSecretAction } from '@/lib/actions/projects.actions';
 
-type DeleteProjectDialogProps = {
-  projectId: string;
-  projectName: string;
+type DeleteSecretDialogProps = {
   open: boolean;
   onClose: () => void;
+  projectId: string;
+  secretId: string;
+  secretName: string;
 };
 
-export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
+export default function DeleteSecretDialog(props: DeleteSecretDialogProps) {
   const [error, setError] = useState<string>('');
-  const router = useRouter();
-
   const onCloseDialog = () => {
     props.onClose();
   };
 
   const [, action, isPending] = useActionState(async () => {
-    const result = await deleteProjectAction(props.projectId);
+    const result = await deleteSecretAction(props.projectId, props.secretId);
     if (result.success) {
       onCloseDialog();
-      router.push('/');
       setError('');
     } else {
       setError(result.error.message);
@@ -41,16 +38,15 @@ export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
 
   return (
     <Dialog open={props.open} onOpenChange={(open) => !open && onCloseDialog()}>
-      <DialogDescription className={'sr-only'}>Delete a project via modal</DialogDescription>
+      <DialogDescription>Delete a project secret via dialog</DialogDescription>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className={'mb-3'}>Delete project</DialogTitle>
+          <DialogTitle className={'mb-3'}>Delete secret</DialogTitle>
         </DialogHeader>
 
         {error && <p className={'text-destructive'}>{error}</p>}
         <p data-testid={'warning-message'}>
-          Are you sure you want to delete &#34;<span>{props.projectName}</span>&#34;? This action cannot be undone and
-          will delete all secrets within this project.
+          Are you sure you want to delete &#34;<span>{props.secretName}</span>&#34;? This action cannot be undone.
         </p>
 
         <form action={action}>
@@ -61,7 +57,7 @@ export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
               </Button>
             </DialogClose>
             <Button type="submit" disabled={isPending} variant="destructive">
-              Delete project
+              Delete secret
             </Button>
           </DialogFooter>
         </form>
