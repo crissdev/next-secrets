@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { type z } from 'zod';
 
@@ -17,11 +17,13 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { createProjectAction } from '@/lib/actions/projects.actions';
+import { createProjectAction, updateProjectAction } from '@/lib/actions/projects.actions';
+import { type Project } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProjectSchema } from '@/lib/services/schemas';
 
 type CreateProjectDialogProps = {
+  project?: Project;
   open: boolean;
   onClose: () => void;
 };
@@ -41,12 +43,27 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
     props.onClose();
   };
 
+  useEffect(() => {
+    if (props.project) {
+      form.reset({
+        name: props.project.name,
+        description: props.project.description,
+      });
+    }
+  }, [form, props.project]);
+
   const [, action, isPending] = useActionState(async () => {
-    const result = await createProjectAction(form.getValues());
+    const result = props.project
+      ? await updateProjectAction({ id: props.project.id, ...form.getValues() })
+      : await createProjectAction(form.getValues());
 
     if (result.success) {
       onCloseDialog();
-      router.push(`/projects/${result.data.id}`);
+
+      // Redirect if we are creating a new project
+      if (!props.project) {
+        router.push(`/projects/${result.data.id}`);
+      }
       return;
     }
 
@@ -70,7 +87,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
         <DialogDescription className={'sr-only'}>Create a project via modal</DialogDescription>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className={'mb-3'}>Create new project</DialogTitle>
+            <DialogTitle className={'mb-3'}>{props.project ? 'Edit project' : 'Create new project'}</DialogTitle>
           </DialogHeader>
           <form action={action} className={'flex flex-col gap-5'}>
             {form.formState.errors.root && (
@@ -118,7 +135,7 @@ export default function CreateProjectDialog(props: CreateProjectDialogProps) {
                 </Button>
               </DialogClose>
               <Button type="submit" disabled={isPending}>
-                Create project
+                {props.project ? 'Update project' : 'Create project'}
               </Button>
             </DialogFooter>
           </form>

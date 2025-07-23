@@ -46,10 +46,21 @@ export async function deleteProject(id: string) {
   const index = projects.findIndex((p) => p.id === id);
   if (index > -1) {
     projects.splice(index, 1);
+    await DataLayer.write({ projects });
   }
-  await DataLayer.write({
-    projects,
-  });
+}
+
+export async function updateProject(project: Omit<Project, 'secrets'>): Promise<Project> {
+  const { projects } = await DataLayer.read();
+  const data = projects.find((p) => p.id === project.id);
+  if (!data) {
+    throw new Error('Project not found');
+  }
+
+  data.name = project.name;
+  data.description = project.description;
+  await DataLayer.write({ projects });
+  return data;
 }
 
 // Secrets

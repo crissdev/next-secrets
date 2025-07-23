@@ -13,3 +13,7 @@ export const createSecretSchema = z.object({
   description: z.string(),
   type: z.enum(SECRET_TYPES),
 });
+
+export const updateProjectSchema = createProjectSchema.extend({
+  id: z.uuid(),
+});

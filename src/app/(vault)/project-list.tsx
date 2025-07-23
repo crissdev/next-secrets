@@ -42,7 +42,14 @@ export default function ProjectList({ projects }: ProjectListProps) {
           Create Project
         </Button>
 
-        <CreateProjectDialog open={createProjectDialogOpen} onClose={() => setCreateProjectDialogOpen(false)} />
+        <CreateProjectDialog
+          open={createProjectDialogOpen}
+          onClose={() => {
+            setCreateProjectDialogOpen(false);
+            setContextMenuProjectId(null);
+          }}
+          project={contextMenuProjectId ? projectsList.find((p) => p.id === contextMenuProjectId) : undefined}
+        />
 
         {contextMenuProjectId && (
           <DeleteProjectDialog
@@ -79,7 +86,13 @@ export default function ProjectList({ projects }: ProjectListProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="right" align="start">
                   <DropdownMenuItem asChild>
-                    <SidebarMenuButton variant={'outline'}>
+                    <SidebarMenuButton
+                      variant={'outline'}
+                      onClick={() => {
+                        setContextMenuProjectId(project.id);
+                        setCreateProjectDialogOpen(true);
+                      }}
+                    >
                       <PencilLineIcon />
                       <span>Edit</span>
                     </SidebarMenuButton>

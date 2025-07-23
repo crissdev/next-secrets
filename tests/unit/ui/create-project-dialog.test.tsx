@@ -3,12 +3,13 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import CreateProjectDialog from '@/app/(vault)/create-project-dialog';
+import { type Project } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
-import { createProject } from '@/lib/store/db';
 
 import { useRouterMockFactory } from '../factories';
 
 jest.mock('@/lib/store/db');
+import { createProject, updateProject } from '@/lib/store/db';
 
 jest.mock('@/lib/queries');
 
@@ -47,5 +48,36 @@ describe('Create project dialog', () => {
     // Expect page to navigate
     expect(pushMock).toHaveBeenCalledTimes(1);
     expect(pushMock).toHaveBeenCalledWith(`/projects/${projectId}`);
+  });
+
+  test('Edit project via dialog', async () => {
+    const onCloseMock = jest.fn();
+    const project: Project = {
+      id: crypto.randomUUID(),
+      name: faker.lorem.words(2),
+      description: faker.lorem.sentence(3),
+    };
+
+    render(<CreateProjectDialog open onClose={onCloseMock} project={project} />);
+    expect(screen.getByRole('dialog', { name: 'Edit project' })).toBeVisible();
+    expect(screen.getByRole('textbox', { name: 'Project name' })).toHaveValue(project.name);
+    expect(screen.getByRole('textbox', { name: 'Description (optional)' })).toHaveValue(project.description);
+
+    await userEvent.clear(screen.getByRole('textbox', { name: 'Project name' }));
+    await userEvent.type(screen.getByRole('textbox', { name: 'Project name' }), 'Updated name');
+    await userEvent.clear(screen.getByRole('textbox', { name: 'Description (optional)' }));
+    await userEvent.type(screen.getByRole('textbox', { name: 'Description (optional)' }), 'Updated description');
+    await userEvent.click(screen.getByRole('button', { name: 'Update project' }));
+
+    expect(updateProject).toHaveBeenCalledTimes(1);
+    expect(updateProject).toHaveBeenCalledWith({
+      id: project.id,
+      name: 'Updated name',
+      description: 'Updated description',
+    });
+    expect(onCloseMock).toHaveBeenCalledTimes(1);
+
+    // Expect cache to be invalidated
+    expect(revalidateProjects).toHaveBeenCalledTimes(1);
   });
 });

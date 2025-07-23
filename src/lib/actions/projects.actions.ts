@@ -6,10 +6,11 @@ import { ZodError } from 'zod';
 import { type Project, type Secret } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
-import { createProject, deleteProject } from '@/lib/services/projects.service';
+import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
 import { createSecret } from '@/lib/services/secrets.service';
 import { deleteSecret } from '@/lib/store/db';
 
+// Projects
 export async function createProjectAction(data: Omit<Project, 'id'>) {
   try {
     const { name, description } = data;
@@ -30,6 +31,44 @@ export async function createProjectAction(data: Omit<Project, 'id'>) {
   }
 }
 
+export async function deleteProjectAction(projectId: string) {
+  try {
+    await deleteProject(projectId);
+    revalidateProjects();
+    revalidatePath(`/projects/${projectId}`);
+    return { success: true as const };
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false as const,
+      error: {
+        code: SERVICE_ERROR.INTERNAL_ERROR,
+        message: `Cannot delete project`,
+      },
+    };
+  }
+}
+
+export async function updateProjectAction(project: Omit<Project, 'secrets'>) {
+  try {
+    const updatedProject = await updateProject(project);
+    revalidateProjects();
+    return { success: true as const, data: updatedProject };
+  } catch (err) {
+    if (err instanceof ZodError) {
+      return {
+        success: false as const,
+        error: { code: SERVICE_ERROR.VALIDATION_FAILED, message: err.message },
+      };
+    }
+    return {
+      success: false as const,
+      error: { code: SERVICE_ERROR.INTERNAL_ERROR, message: 'Failed to update project' },
+    };
+  }
+}
+
+// Secrets
 export async function createSecretAction(projectId: string, data: Omit<Secret, 'id'>) {
   try {
     const { name, description, type, value } = data;
@@ -46,24 +85,6 @@ export async function createSecretAction(projectId: string, data: Omit<Secret, '
     return {
       success: false as const,
       error: { code: SERVICE_ERROR.INTERNAL_ERROR, message: 'Failed to create secret' },
-    };
-  }
-}
-
-export async function deleteProjectAction(projectId: string) {
-  try {
-    await deleteProject(projectId);
-    revalidateProjects();
-    revalidatePath(`/projects/${projectId}`);
-    return { success: true as const };
-  } catch (err) {
-    console.error(err);
-    return {
-      success: false as const,
-      error: {
-        code: SERVICE_ERROR.INTERNAL_ERROR,
-        message: `Cannot delete project`,
-      },
     };
   }
 }
