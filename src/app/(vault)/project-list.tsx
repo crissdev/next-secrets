@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { use, useState } from 'react';
 
-import CreateProjectDialog from '@/app/(vault)/create-project-dialog';
 import DeleteProjectDialog from '@/app/(vault)/delete-project-dialog';
+import EditProjectDialog from '@/app/(vault)/edit-project-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -42,7 +42,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
           Create Project
         </Button>
 
-        <CreateProjectDialog
+        <EditProjectDialog
           open={createProjectDialogOpen}
           onClose={() => {
             setCreateProjectDialogOpen(false);

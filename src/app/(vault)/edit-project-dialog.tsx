@@ -22,13 +22,13 @@ import { type Project } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProjectSchema } from '@/lib/services/schemas';
 
-type CreateProjectDialogProps = {
+type EditProjectDialogProps = {
   project?: Project;
   open: boolean;
   onClose: () => void;
 };
 
-export default function CreateProjectDialog(props: CreateProjectDialogProps) {
+export default function EditProjectDialog(props: EditProjectDialogProps) {
   const form = useForm<z.infer<typeof createProjectSchema>>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {

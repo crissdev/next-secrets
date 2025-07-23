@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import CreateProjectDialog from '@/app/(vault)/create-project-dialog';
+import EditProjectDialog from '@/app/(vault)/edit-project-dialog';
 import { type Project } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 
@@ -13,7 +13,7 @@ import { createProject, updateProject } from '@/lib/store/db';
 
 jest.mock('@/lib/queries');
 
-describe('Create project dialog', () => {
+describe('Edit project dialog', () => {
   const createProjectMock = createProject as jest.Mock<
     ReturnType<typeof createProject>,
     Parameters<typeof createProject>
@@ -28,7 +28,7 @@ describe('Create project dialog', () => {
     createProjectMock.mockResolvedValueOnce({ id: projectId, name: projectName, description: projectDescription });
 
     const onCloseMock = jest.fn();
-    render(<CreateProjectDialog open={true} onClose={onCloseMock} />);
+    render(<EditProjectDialog open={true} onClose={onCloseMock} />);
     expect(screen.getByRole('dialog')).toBeVisible();
 
     await userEvent.type(screen.getByRole('textbox', { name: 'Project name' }), projectName);
@@ -58,7 +58,7 @@ describe('Create project dialog', () => {
       description: faker.lorem.sentence(3),
     };
 
-    render(<CreateProjectDialog open onClose={onCloseMock} project={project} />);
+    render(<EditProjectDialog open onClose={onCloseMock} project={project} />);
     expect(screen.getByRole('dialog', { name: 'Edit project' })).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Project name' })).toHaveValue(project.name);
     expect(screen.getByRole('textbox', { name: 'Description (optional)' })).toHaveValue(project.description);
