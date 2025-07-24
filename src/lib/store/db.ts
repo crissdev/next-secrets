@@ -41,7 +41,7 @@ export async function createProject(project: Omit<Project, 'id'>): Promise<Proje
   return toProject(newProject);
 }
 
-export async function deleteProject(id: string) {
+export async function deleteProject(id: string): Promise<void> {
   const { projects } = await DataLayer.read();
   const index = projects.findIndex((p) => p.id === id);
   if (index > -1) {
