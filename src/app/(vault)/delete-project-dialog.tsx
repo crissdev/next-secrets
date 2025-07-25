@@ -1,4 +1,4 @@
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ type DeleteProjectDialogProps = {
 export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
   const [error, setError] = useState<string>('');
   const router = useRouter();
+  const { id: selectedProjectId } = useParams<{ id?: string }>();
 
   const onCloseDialog = () => {
     props.onClose();
@@ -32,7 +33,11 @@ export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
     const result = await deleteProjectAction(props.projectId);
     if (result.success) {
       onCloseDialog();
-      router.push('/');
+      if (selectedProjectId) {
+        router.replace('/');
+      } else {
+        router.push('/');
+      }
       setError('');
     } else {
       setError(result.error.message);

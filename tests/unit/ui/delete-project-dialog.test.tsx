@@ -9,6 +9,8 @@ jest.mock('@/lib/queries');
 import { revalidateProjects } from '@/lib/queries';
 
 jest.mock('@/lib/store/db');
+import { useParams } from 'next/navigation';
+
 import { deleteProject } from '@/lib/store/db';
 
 import { useRouterMockFactory } from '../factories';
@@ -18,6 +20,11 @@ describe('Delete project dialog', () => {
     ReturnType<typeof deleteProject>,
     Parameters<typeof deleteProject>
   >;
+  const useParamsMock = useParams as jest.Mock<{ id?: string }, []>;
+
+  beforeEach(() => {
+    useParamsMock.mockReturnValue({});
+  });
 
   test('Delete a project via dialog', async () => {
     const projectId = crypto.randomUUID();
