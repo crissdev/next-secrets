@@ -34,9 +34,9 @@ const SecretTypes = [
   { label: 'API Key', value: SECRET_TYPE.ApiKey },
   { label: 'Connection String', value: SECRET_TYPE.ConnectionString },
   { label: 'Environment Variable', value: SECRET_TYPE.EnvironmentVariable },
-  { label: 'Other', value: SECRET_TYPE.Other },
   { label: 'Password', value: SECRET_TYPE.Password },
   { label: 'Token', value: SECRET_TYPE.Token },
+  { label: 'Other', value: SECRET_TYPE.Other },
 ];
 
 export default function EditSecretDialog(props: EditSecretDialogProps) {

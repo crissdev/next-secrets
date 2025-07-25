@@ -89,4 +89,21 @@ describe('Create secret dialog', () => {
     expect(revalidatePath).toHaveBeenCalledTimes(1);
     expect(revalidatePath).toHaveBeenCalledWith(`/projects/${projectId}`);
   });
+
+  test('All secret types are available', async () => {
+    const onCloseMock = jest.fn();
+    const projectId = crypto.randomUUID();
+
+    render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
+    expect(screen.getByRole('dialog')).toBeVisible();
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Secret type' }));
+    expect(
+      screen
+        .getAllByRole('option')
+        .map((e) => e.textContent)
+        .sort()
+        .join(','),
+    ).toEqual(Object.values(SECRET_TYPE).sort().join(','));
+  });
 });
