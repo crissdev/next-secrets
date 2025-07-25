@@ -23,6 +23,7 @@ import { useMemo, useState } from 'react';
 
 import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
 import EditSecretDialog from '@/app/(vault)/projects/[id]/edit-secret-dialog';
+import { secretTypeColors } from '@/app/(vault)/secret-color-mapping';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type Secret, SECRET_TYPE } from '@/lib/definitions';
@@ -98,7 +99,19 @@ export default function SecretsTable(props: { data: Secret[] }) {
         },
       },
       {
-        header: 'Value',
+        header: () => <div className={'pl-2'}>Type</div>,
+        accessorKey: 'type',
+        cell: ({ row }) => {
+          const type: SECRET_TYPE = row.getValue('type');
+          return (
+            <span className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}>
+              {type}
+            </span>
+          );
+        },
+      },
+      {
+        header: () => <div className={'pl-2'}>Value</div>,
         accessorKey: 'value',
         cell: ({ row }) => {
           const value = row.getValue<string>('value');
@@ -108,12 +121,8 @@ export default function SecretsTable(props: { data: Secret[] }) {
         },
       },
       {
-        header: 'Type',
-        accessorKey: 'type',
-      },
-      {
         id: 'actions',
-        header: () => <div className={'text-right'}>Actions</div>,
+        header: () => <div className={'text-right pr-4'}>Actions</div>,
         cell: function ActionsCellRenderer({ row }) {
           const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
           const [editDialogOpen, setEditDialogOpen] = useState(false);
