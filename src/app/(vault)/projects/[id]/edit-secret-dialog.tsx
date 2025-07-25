@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction, updateSecretAction } from '@/lib/actions/projects.actions';
-import { type Secret, SECRET_TYPES } from '@/lib/definitions';
+import { type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { type createProjectSchema, createSecretSchema } from '@/lib/services/schemas';
 
@@ -31,10 +31,12 @@ type EditSecretDialogProps = {
 };
 
 const SecretTypes = [
-  {
-    label: 'Environment Variable',
-    value: SECRET_TYPES.EnvironmentVariable,
-  },
+  { label: 'API Key', value: SECRET_TYPE.ApiKey },
+  { label: 'Connection String', value: SECRET_TYPE.ConnectionString },
+  { label: 'Environment Variable', value: SECRET_TYPE.EnvironmentVariable },
+  { label: 'Other', value: SECRET_TYPE.Other },
+  { label: 'Password', value: SECRET_TYPE.Password },
+  { label: 'Token', value: SECRET_TYPE.Token },
 ];
 
 export default function EditSecretDialog(props: EditSecretDialogProps) {
@@ -44,7 +46,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
       name: '',
       description: '',
       value: '',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     },
   });
   const [showValue, setShowValue] = useState(true);
@@ -57,7 +59,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
   const toggleValueVisibility = () => {
     setShowValue(!showValue);
   };
-  
+
   useEffect(() => {
     if (props.secret) {
       form.reset({
@@ -102,9 +104,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
         </DialogDescription>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className={'mb-3'}>
-              {props.secret ? 'Edit secret' : 'Add new secret'}
-            </DialogTitle>
+            <DialogTitle className={'mb-3'}>{props.secret ? 'Edit secret' : 'Add new secret'}</DialogTitle>
           </DialogHeader>
           <form action={action} className={'flex flex-col gap-5'}>
             {form.formState.errors.root && (

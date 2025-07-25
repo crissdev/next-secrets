@@ -6,7 +6,18 @@ import {
   type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown, PencilLineIcon, Trash2Icon } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Code,
+  Database,
+  FileText,
+  Key,
+  Lock,
+  PencilLineIcon,
+  Trash2Icon,
+} from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
@@ -14,7 +25,7 @@ import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
 import EditSecretDialog from '@/app/(vault)/projects/[id]/edit-secret-dialog';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { type Secret } from '@/lib/definitions';
+import { type Secret, SECRET_TYPE } from '@/lib/definitions';
 
 export default function SecretsTable(props: { data: Secret[] }) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -47,14 +58,41 @@ export default function SecretsTable(props: { data: Secret[] }) {
         ),
         accessorKey: 'name',
         cell: ({ row }) => {
+          const secretTypeColors: Record<SECRET_TYPE, string> = {
+            [SECRET_TYPE.ApiKey]: 'bg-blue-100 text-blue-800',
+            [SECRET_TYPE.ConnectionString]: 'bg-green-100 text-green-800',
+            [SECRET_TYPE.EnvironmentVariable]: 'bg-purple-100 text-purple-800',
+            [SECRET_TYPE.Other]: 'bg-slate-100 text-slate-800',
+            [SECRET_TYPE.Password]: 'bg-amber-100 text-amber-800',
+            [SECRET_TYPE.Token]: 'bg-indigo-100 text-indigo-800',
+          };
+          const getColorForSecretType = (type: SECRET_TYPE) => {
+            return secretTypeColors[type] || 'bg-slate-100 text-slate-800';
+          };
+          const typeColor = getColorForSecretType(row.original.type);
           return (
-            <div className={'flex flex-col'}>
-              <span className={'font-medium'} data-testid={`secret-name-${row.index}`}>
-                {row.getValue('name')}
-              </span>
-              <span data-testid={`secret-description-${row.index}`} className={'text-sm text-muted-foreground'}>
-                {row.original.description}
-              </span>
+            <div className={'flex items-center gap-4'}>
+              <div className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-md ${typeColor}`}>
+                {row.original.type === SECRET_TYPE.Token || row.original.type === SECRET_TYPE.ApiKey ? (
+                  <Key className="h-5 w-5" />
+                ) : row.original.type === 'Password' ? (
+                  <Lock className="h-5 w-5" />
+                ) : row.original.type === 'Connection String' ? (
+                  <Database className="h-5 w-5" />
+                ) : row.original.type === 'Environment Variable' ? (
+                  <Code className="h-5 w-5" />
+                ) : (
+                  <FileText className="h-5 w-5" />
+                )}
+              </div>
+              <div className={'flex flex-col'}>
+                <span className={'font-medium'} data-testid={`secret-name-${row.index}`}>
+                  {row.getValue('name')}
+                </span>
+                <span data-testid={`secret-description-${row.index}`} className={'text-sm text-muted-foreground'}>
+                  {row.original.description}
+                </span>
+              </div>
             </div>
           );
         },
@@ -101,7 +139,7 @@ export default function SecretsTable(props: { data: Secret[] }) {
                   secretName={row.original.name}
                 />
               )}
-              
+
               {editDialogOpen && (
                 <EditSecretDialog
                   open
@@ -135,7 +173,7 @@ export default function SecretsTable(props: { data: Secret[] }) {
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id}>
+                <TableHead key={header.id} className={'h-12'}>
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               );
@@ -148,7 +186,9 @@ export default function SecretsTable(props: { data: Secret[] }) {
           table.getRowModel().rows.map((row) => (
             <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                <TableCell className={'p-4'} key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
               ))}
             </TableRow>
           ))

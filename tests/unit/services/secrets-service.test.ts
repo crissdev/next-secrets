@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { type Secret, SECRET_TYPES } from '@/lib/definitions';
+import { type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { createProject } from '@/lib/services/projects.service';
 import { createSecret, getSecrets, updateSecret } from '@/lib/services/secrets.service';
 
@@ -12,7 +12,7 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
 
     expect(secret).toEqual<Secret>({
@@ -20,7 +20,7 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
   });
 
@@ -35,7 +35,7 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
     const secrets = await getSecrets(project.id);
     expect(secrets).toStrictEqual<Secret[]>([
@@ -44,7 +44,7 @@ describe('Secret service', () => {
         name: 'CI Token',
         value: '12345',
         description: 'Token used in CI',
-        type: SECRET_TYPES.EnvironmentVariable,
+        type: SECRET_TYPE.EnvironmentVariable,
       },
     ]);
   });
@@ -61,7 +61,7 @@ describe('Secret service', () => {
       name: 'CI Token',
       value: '12345',
       description: 'Token used in CI',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
 
     const updatedSecret = await updateSecret(project.id, {
@@ -69,7 +69,7 @@ describe('Secret service', () => {
       name: 'Updated CI Token',
       value: '67890',
       description: 'Updated token used in CI',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
 
     expect(updatedSecret).toEqual<Secret>({
@@ -77,7 +77,7 @@ describe('Secret service', () => {
       name: 'Updated CI Token',
       value: '67890',
       description: 'Updated token used in CI',
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
 
     // Verify the secret was actually updated in the database

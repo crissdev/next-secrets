@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 
 import EditSecretDialog from '@/app/(vault)/projects/[id]/edit-secret-dialog';
-import { type Secret, SECRET_TYPES } from '@/lib/definitions';
+import { type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { createSecret, updateSecret } from '@/lib/store/db';
 
 jest.mock('@/lib/store/db');
@@ -32,7 +32,7 @@ describe('Create secret dialog', () => {
       name: secretName,
       description: secretDescription,
       value: secretValue,
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
     expect(onCloseMock).toHaveBeenCalled();
 
@@ -48,7 +48,7 @@ describe('Create secret dialog', () => {
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     };
 
     const onCloseMock = jest.fn();
@@ -81,7 +81,7 @@ describe('Create secret dialog', () => {
       name: updatedName,
       description: updatedDescription,
       value: updatedValue,
-      type: SECRET_TYPES.EnvironmentVariable,
+      type: SECRET_TYPE.EnvironmentVariable,
     });
     expect(onCloseMock).toHaveBeenCalled();
 

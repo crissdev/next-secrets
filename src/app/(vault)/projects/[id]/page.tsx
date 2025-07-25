@@ -24,8 +24,12 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
   const secretsPromise = fetchSecrets(project.id);
 
   return (
-    <div className={'bg-white w-full flex flex-col'}>
-      <header className={'bg-white dark:bg-slate-800 py-3 px-4 border-b border-border flex items-center gap-2'}>
+    <div className={'w-full flex flex-col'}>
+      <header
+        className={
+          'bg-white dark:bg-slate-800 py-3 px-4 border-b border-border flex items-center gap-2 sticky top-0 left-0 w-full z-10'
+        }
+      >
         <div className={'flex flex-col'}>
           <h2 className={'font-bold text-xl'} data-testid={'selected-project-title'}>
             {project?.name}
