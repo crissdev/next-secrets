@@ -1,4 +1,5 @@
-import { useActionState, useState } from 'react';
+import { startTransition, useActionState, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +31,12 @@ export default function DeleteSecretDialog(props: DeleteSecretDialogProps) {
     const result = await deleteSecretAction(props.projectId, props.secretId);
     if (result.success) {
       onCloseDialog();
+      startTransition(() => {
+        toast.message('Secret deleted', {
+          description: `"${props.secretName}" has been deleted successfully.`,
+          position: 'bottom-right',
+        });
+      });
       setError('');
     } else {
       setError(result.error.message);

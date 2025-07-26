@@ -3,8 +3,8 @@
 import { LockIcon } from 'lucide-react';
 import { use } from 'react';
 
-import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
 import SecretsTable from '@/app/(vault)/projects/[id]/secrets-table';
+import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
 import { type Secret } from '@/lib/definitions';
 
 export default function SecretList(props: { secretsPromise: Promise<Secret[]>; projectName?: string }) {

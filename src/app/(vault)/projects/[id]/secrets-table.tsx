@@ -22,7 +22,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
-import EditSecretDialog from '@/app/(vault)/projects/[id]/edit-secret-dialog';
+import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
 import { secretTypeColors } from '@/app/(vault)/secret-color-mapping';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

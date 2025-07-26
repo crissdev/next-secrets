@@ -54,6 +54,7 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
   }, [form, props.project]);
 
   const [, action, isPending] = useActionState(async () => {
+    const projectName = form.getValues().name;
     const result = props.project
       ? await updateProjectAction({ id: props.project.id, ...form.getValues() })
       : await createProjectAction(form.getValues());
@@ -63,7 +64,7 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
 
       startTransition(() => {
         toast.success(props.project ? 'Project updated' : 'Project created', {
-          description: `"${props.project?.name}" has been ${props.project ? 'updated' : 'created'} successfully.`,
+          description: `"${projectName}" has been ${props.project ? 'updated' : 'created'} successfully.`,
           position: 'bottom-right',
         });
       });

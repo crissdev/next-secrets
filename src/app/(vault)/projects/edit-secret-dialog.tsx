@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction, updateSecretAction } from '@/lib/actions/projects.actions';
 import { type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
-import { type createProjectSchema, createSecretSchema } from '@/lib/services/schemas';
+import { createSecretSchema } from '@/lib/services/schemas';
 
 type EditSecretDialogProps = {
   projectId: string;
@@ -73,6 +73,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
   }, [form, props.secret]);
 
   const [, action, isPending] = useActionState(async () => {
+    const secretName = form.getValues().name;
     const result = props.secret
       ? await updateSecretAction(props.projectId, { id: props.secret.id, ...form.getValues() })
       : await createSecretAction(props.projectId, form.getValues());
@@ -81,7 +82,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
       onCloseDialog();
       startTransition(() => {
         toast.success(props.secret ? 'Secret updated' : 'Secret created', {
-          description: `"${props.secret?.name}" has been ${props.secret ? 'updated' : 'created'} successfully.`,
+          description: `"${secretName}" has been ${props.secret ? 'updated' : 'created'} successfully.`,
           position: 'bottom-right',
         });
       });
@@ -92,7 +93,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
       console.log(result.error);
       // If the error is a ZodError, we can extract the first error message
       const firstError = JSON.parse(result.error.message)[0];
-      form.setError(firstError.path[0] as keyof z.infer<typeof createProjectSchema>, {
+      form.setError(firstError.path[0] as keyof z.infer<typeof createSecretSchema>, {
         message: firstError.message,
       });
     } else {

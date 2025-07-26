@@ -2,9 +2,9 @@ import { PlusIcon } from 'lucide-react';
 import { redirect, RedirectType } from 'next/navigation';
 import { Suspense } from 'react';
 
-import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
 import SecretCount from '@/app/(vault)/projects/[id]/secret-count';
 import SecretList from '@/app/(vault)/projects/[id]/secret-list';
+import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
 
 export const dynamicParams = true;
