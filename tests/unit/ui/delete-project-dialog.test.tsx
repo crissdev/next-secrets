@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 
-import DeleteProjectDialog from '@/app/(vault)/delete-project-dialog';
+import DeleteProjectDialog from '@/app/(vault)/projects/delete-project-dialog';
 
 jest.mock('@/lib/queries');
 import { revalidateProjects } from '@/lib/queries';

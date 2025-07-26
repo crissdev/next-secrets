@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 
-import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
+import DeleteSecretDialog from '@/app/(vault)/projects/delete-secret-dialog';
 
 jest.mock('@/lib/store/db');
 import { faker } from '@faker-js/faker';

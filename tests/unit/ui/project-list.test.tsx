@@ -1,7 +1,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { useParams } from 'next/navigation';
 
-import ProjectList from '@/app/(vault)/project-list';
+import ProjectList from '@/app/(vault)/projects/project-list';
 
 describe('Project list', () => {
   const useParamsMock = useParams as jest.Mock<{ id?: string }, []>;

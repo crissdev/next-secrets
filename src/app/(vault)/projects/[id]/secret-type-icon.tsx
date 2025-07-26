@@ -1,6 +1,6 @@
 import { Code, Database, FileText, Key, Lock } from 'lucide-react';
 
-import { secretTypeColors } from '@/app/(vault)/secret-color-mapping';
+import { secretTypeColors } from '@/app/(vault)/projects/secret-color-mapping';
 import { SECRET_TYPE } from '@/lib/definitions';
 
 export default function SecretTypeIcon(props: { type: SECRET_TYPE }) {
