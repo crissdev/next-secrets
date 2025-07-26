@@ -10,6 +10,7 @@ export interface Secret {
   description: string;
   type: SECRET_TYPE;
   value: string;
+  lastUpdated: string;
 }
 
 export enum SECRET_TYPE {

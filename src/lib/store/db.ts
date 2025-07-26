@@ -64,7 +64,7 @@ export async function updateProject(project: Omit<Project, 'secrets'>): Promise<
 }
 
 // Secrets
-export async function createSecret(projectId: string, secret: Omit<Secret, 'id'>): Promise<Secret> {
+export async function createSecret(projectId: string, secret: Omit<Secret, 'id' | 'lastUpdated'>): Promise<Secret> {
   const { projects: allProjects } = await DataLayer.read();
   const project = allProjects.find((p) => p.id === projectId);
   if (!project) throw new Error(`Project with name "${projectId}" does not exist.`);
@@ -75,6 +75,7 @@ export async function createSecret(projectId: string, secret: Omit<Secret, 'id'>
     value: secret.value,
     type: secret.type,
     description: secret.description,
+    lastUpdated: new Date().toISOString(),
   };
   project.secrets.push(newSecret);
   await DataLayer.write({ projects: allProjects });
@@ -100,7 +101,7 @@ export async function deleteSecret(projectId: string, secretId: string): Promise
   }
 }
 
-export async function updateSecret(projectId: string, secret: Secret): Promise<Secret> {
+export async function updateSecret(projectId: string, secret: Omit<Secret, 'lastUpdated'>): Promise<Secret> {
   const { projects } = await DataLayer.read();
   const project = projects.find((p) => p.id === projectId);
   if (!project) {
@@ -117,6 +118,7 @@ export async function updateSecret(projectId: string, secret: Secret): Promise<S
   data.description = secret.description;
   data.type = secret.type;
   data.value = secret.value;
+  data.lastUpdated = new Date().toISOString();
 
   await DataLayer.write({ projects });
   return data;

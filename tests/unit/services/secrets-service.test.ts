@@ -21,6 +21,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
+      lastUpdated: expect.any(String),
     });
   });
 
@@ -45,6 +46,7 @@ describe('Secret service', () => {
         value: '12345',
         description: 'Token used in CI',
         type: SECRET_TYPE.EnvironmentVariable,
+        lastUpdated: expect.any(String),
       },
     ]);
   });
@@ -78,6 +80,7 @@ describe('Secret service', () => {
       value: '67890',
       description: 'Updated token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
+      lastUpdated: expect.any(String),
     });
 
     // Verify the secret was actually updated in the database

@@ -49,6 +49,7 @@ describe('Create secret dialog', () => {
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
       type: SECRET_TYPE.EnvironmentVariable,
+      lastUpdated: new Date().toISOString(),
     };
 
     const onCloseMock = jest.fn();
@@ -82,6 +83,7 @@ describe('Create secret dialog', () => {
       description: updatedDescription,
       value: updatedValue,
       type: SECRET_TYPE.EnvironmentVariable,
+      lastUpdated: expect.any(String),
     });
     expect(onCloseMock).toHaveBeenCalled();
 

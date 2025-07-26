@@ -69,7 +69,7 @@ export async function updateProjectAction(project: Omit<Project, 'secrets'>) {
 }
 
 // Secrets
-export async function createSecretAction(projectId: string, data: Omit<Secret, 'id'>) {
+export async function createSecretAction(projectId: string, data: Omit<Secret, 'id' | 'lastUpdated'>) {
   try {
     const { name, description, type, value } = data;
     const newSecret = await createSecret(projectId, { name, description, type, value });
@@ -106,7 +106,7 @@ export async function deleteSecretAction(projectId: string, secretId: string) {
   }
 }
 
-export async function updateSecretAction(projectId: string, secret: Secret) {
+export async function updateSecretAction(projectId: string, secret: Omit<Secret, 'lastUpdated'>) {
   try {
     const updatedSecret = await updateSecret(projectId, secret);
     revalidatePath(`/projects/${projectId}`);

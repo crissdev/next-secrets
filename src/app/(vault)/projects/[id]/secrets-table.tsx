@@ -19,7 +19,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import DeleteSecretDialog from '@/app/(vault)/delete-secret-dialog';
 import EditSecretDialog from '@/app/(vault)/projects/[id]/edit-secret-dialog';
@@ -27,6 +27,28 @@ import { secretTypeColors } from '@/app/(vault)/secret-color-mapping';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type Secret, SECRET_TYPE } from '@/lib/definitions';
+
+function formatDate(date: Date) {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffMonths = Math.floor(diffDays / 30);
+
+  if (diffMonths > 0) {
+    return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+  } else if (diffDays > 0) {
+    return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+  } else if (diffHours > 0) {
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+  } else if (diffMins > 0) {
+    return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
+  } else {
+    return 'Just now';
+  }
+}
 
 export default function SecretsTable(props: { data: Secret[] }) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -118,6 +140,25 @@ export default function SecretsTable(props: { data: Secret[] }) {
           const showSecrets = false;
 
           return <div>{showSecrets ? value : '•'.repeat(8)}</div>;
+        },
+      },
+      {
+        header: () => <div className={'pl-2'}>Last Updated</div>,
+        accessorKey: 'lastUpdated',
+        cell: function LastUpdatedCellRenderer({ row }) {
+          const lastUpdated = row.getValue<string>('lastUpdated');
+          const [localeDate, setLocaleDate] = useState(lastUpdated);
+
+          const date = useMemo(() => (lastUpdated ? new Date(lastUpdated) : null), [lastUpdated]);
+          const formattedDate = date ? formatDate(date) : null;
+
+          useEffect(() => {
+            if (date) {
+              setLocaleDate(date.toLocaleString());
+            }
+          }, [date]);
+
+          return !lastUpdated ? <div>&ndash;</div> : <div title={localeDate}>{formattedDate}</div>;
         },
       },
       {
