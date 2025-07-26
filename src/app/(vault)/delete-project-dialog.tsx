@@ -1,5 +1,6 @@
 import { useParams, useRouter } from 'next/navigation';
-import { useActionState, useState } from 'react';
+import { startTransition, useActionState, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +34,12 @@ export default function DeleteProjectDialog(props: DeleteProjectDialogProps) {
     const result = await deleteProjectAction(props.projectId);
     if (result.success) {
       onCloseDialog();
+      startTransition(() => {
+        toast.message('Project deleted', {
+          description: `"${props.projectName}" has been deleted successfully.`,
+          position: 'bottom-right',
+        });
+      });
       if (selectedProjectId) {
         router.replace('/');
       } else {

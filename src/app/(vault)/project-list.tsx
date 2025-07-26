@@ -25,10 +25,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
   const [contextMenuProjectId, setContextMenuProjectId] = useState<string | null>(null);
+  const { id: selectedProjectId } = useParams<{ id?: string }>();
 
   const projectsList = use(projects);
-  const { id: selectedProjectId } = useParams<{ id: string }>();
-  const selectedProjectName = projectsList.find((p) => p.id === selectedProjectId)?.name ?? '';
+  const contextMenuProjectName = projectsList.find((p) => p.id === contextMenuProjectId)?.name ?? 'N/A';
 
   return (
     <div>
@@ -51,10 +51,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
           project={contextMenuProjectId ? projectsList.find((p) => p.id === contextMenuProjectId) : undefined}
         />
 
-        {contextMenuProjectId && (
+        {contextMenuProjectId && contextMenuProjectName && (
           <DeleteProjectDialog
             projectId={contextMenuProjectId}
-            projectName={selectedProjectName}
+            projectName={contextMenuProjectName}
             open={deleteProjectDialogOpen}
             onClose={() => {
               setDeleteProjectDialogOpen(false);

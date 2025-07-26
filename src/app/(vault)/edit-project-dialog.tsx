@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useActionState, useEffect } from 'react';
+import { startTransition, useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { type z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -60,10 +61,18 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
     if (result.success) {
       onCloseDialog();
 
+      startTransition(() => {
+        toast.success(props.project ? 'Project updated' : 'Project created', {
+          description: `"${props.project?.name}" has been ${props.project ? 'updated' : 'created'} successfully.`,
+          position: 'bottom-right',
+        });
+      });
+
       // Redirect if we are creating a new project
       if (!props.project) {
         router.push(`/projects/${result.data.id}`);
       }
+
       return;
     }
 

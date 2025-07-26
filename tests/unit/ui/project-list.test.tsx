@@ -4,10 +4,10 @@ import { useParams } from 'next/navigation';
 import ProjectList from '@/app/(vault)/project-list';
 
 describe('Project list', () => {
-  const useParamsMock = useParams as jest.Mock;
+  const useParamsMock = useParams as jest.Mock<{ id?: string }, []>;
 
   beforeEach(() => {
-    useParamsMock.mockResolvedValueOnce({});
+    useParamsMock.mockReturnValue({});
   });
 
   test('Display empty vault message', async () => {
