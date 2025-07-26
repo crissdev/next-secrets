@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
-import { useActionState, useEffect, useState } from 'react';
+import { startTransition, useActionState, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import type z from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,12 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
 
     if (result.success) {
       onCloseDialog();
+      startTransition(() => {
+        toast.success(props.secret ? 'Secret updated' : 'Secret created', {
+          description: `"${props.secret?.name}" has been ${props.secret ? 'updated' : 'created'} successfully.`,
+          position: 'bottom-right',
+        });
+      });
       return;
     }
 
