@@ -1,14 +1,16 @@
 import {
+  type Column,
   type ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  type SortDirection,
   type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import SecretTypeIcon from '@/app/(vault)/projects/[id]/secret-type-icon';
 import DeleteSecretDialog from '@/app/(vault)/projects/delete-secret-dialog';
@@ -40,8 +42,56 @@ function formatDate(date: Date) {
   }
 }
 
-export default function SecretsTable(props: { data: Secret[] }) {
+function SortIcon(props: { direction: false | SortDirection }) {
+  return props.direction === false ? (
+    <ArrowUpDown className="ml-2 h-4 w-4" />
+  ) : props.direction === 'asc' ? (
+    <ArrowUp className="ml-2 h-4 w-4" />
+  ) : props.direction === 'desc' ? (
+    <ArrowDown className="ml-2 h-4 w-4" />
+  ) : null;
+}
+
+function useSortingState() {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const onChangeSorting = useCallback((column: Column<Secret>) => {
+    let newSorting: SortingState = [];
+
+    if (column.getIsSorted() === false) {
+      newSorting = [
+        {
+          id: column.id,
+          desc: !!column.columnDef.sortDescFirst,
+        },
+      ];
+    } else if (column.columnDef.sortDescFirst) {
+      if (column.getIsSorted() !== 'asc') {
+        newSorting = [
+          {
+            id: column.id,
+            desc: column.getIsSorted() === 'asc',
+          },
+        ];
+      }
+    } else if (column.getIsSorted() !== 'desc') {
+      newSorting = [
+        {
+          id: column.id,
+          desc: column.getIsSorted() === 'asc',
+        },
+      ];
+    }
+    setSorting(newSorting);
+  }, []);
+
+  return {
+    sorting,
+    onChangeSorting,
+  };
+}
+
+export default function SecretsTable(props: { data: Secret[] }) {
+  const { sorting, onChangeSorting } = useSortingState();
 
   const columns = useMemo<ColumnDef<Secret>[]>(
     () => [
@@ -49,24 +99,11 @@ export default function SecretsTable(props: { data: Secret[] }) {
         header: ({ column }) => (
           <Button
             variant={'ghost'}
-            onClick={() => {
-              if (column.getIsSorted() === 'desc') {
-                setSorting([]);
-              } else {
-                setSorting([
-                  {
-                    id: column.id,
-                    desc: column.getIsSorted() === 'asc',
-                  },
-                ]);
-              }
-            }}
+            onClick={() => onChangeSorting(column)}
             className="hover:!bg-transparent w-full justify-start"
           >
             Name
-            {column.getIsSorted() === false && <ArrowUpDown className="ml-2 h-4 w-4" />}
-            {column.getIsSorted() === 'asc' && <ArrowUp className="ml-2 h-4 w-4" />}
-            {column.getIsSorted() === 'desc' && <ArrowDown className="ml-2 h-4 w-4" />}
+            <SortIcon direction={column.getIsSorted()} />
           </Button>
         ),
         accessorKey: 'name',
@@ -87,7 +124,16 @@ export default function SecretsTable(props: { data: Secret[] }) {
         },
       },
       {
-        header: () => <div className={'pl-2'}>Type</div>,
+        header: ({ column }) => (
+          <Button
+            variant={'ghost'}
+            onClick={() => onChangeSorting(column)}
+            className="hover:!bg-transparent w-full justify-start"
+          >
+            Type
+            <SortIcon direction={column.getIsSorted()} />
+          </Button>
+        ),
         accessorKey: 'type',
         cell: ({ row }) => {
           const type: SECRET_TYPE = row.getValue('type');
@@ -109,7 +155,17 @@ export default function SecretsTable(props: { data: Secret[] }) {
         },
       },
       {
-        header: () => <div className={'pl-2'}>Last Updated</div>,
+        header: ({ column }) => (
+          <Button
+            variant={'ghost'}
+            onClick={() => onChangeSorting(column)}
+            className="hover:!bg-transparent w-full justify-start"
+          >
+            Last Updated
+            <SortIcon direction={column.getIsSorted()} />
+          </Button>
+        ),
+        sortDescFirst: true,
         accessorKey: 'lastUpdated',
         cell: function LastUpdatedCellRenderer({ row }) {
           const lastUpdated = row.getValue<string>('lastUpdated');
@@ -169,7 +225,7 @@ export default function SecretsTable(props: { data: Secret[] }) {
         },
       },
     ],
-    [],
+    [onChangeSorting],
   );
 
   const table = useReactTable({
