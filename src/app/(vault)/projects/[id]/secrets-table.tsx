@@ -8,7 +8,7 @@ import {
   type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowDown, ArrowUp, ArrowUpDown, PencilLineIcon, Trash2Icon } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, EyeOff, PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -147,11 +147,31 @@ export default function SecretsTable(props: { data: Secret[] }) {
       {
         header: () => <div className={'pl-2'}>Value</div>,
         accessorKey: 'value',
-        cell: ({ row }) => {
+        cell: function ValueCellRenderer({ row }) {
           const value = row.getValue<string>('value');
-          const showSecrets = false;
+          const [showSecret, setShowSecret] = useState(false);
 
-          return <div>{showSecrets ? value : '•'.repeat(8)}</div>;
+          return (
+            <div className={'flex items-center gap-3'}>
+              <span className={'w-[18ch] overflow-hidden text-ellipsis bg-muted rounded-md py-1 px-3 h-7'}>
+                {showSecret ? value : '•'.repeat(8)}
+              </span>
+              <div className={'flex items-center'}>
+                <Button aria-label={'Copy secret'} variant={'ghost'} size={'icon'} className={'px-0 size-8'}>
+                  <Copy />
+                </Button>
+                <Button
+                  aria-label={'Show secret'}
+                  variant={'ghost'}
+                  size={'icon'}
+                  className={'px-0 size-8'}
+                  onClick={() => setShowSecret(!showSecret)}
+                >
+                  {showSecret ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
+            </div>
+          );
         },
       },
       {
