@@ -11,6 +11,7 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, EyeOff, PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import SecretTypeIcon from '@/app/(vault)/projects/[id]/secret-type-icon';
 import DeleteSecretDialog from '@/app/(vault)/projects/delete-secret-dialog';
@@ -151,13 +152,28 @@ export default function SecretsTable(props: { data: Secret[] }) {
           const value = row.getValue<string>('value');
           const [showSecret, setShowSecret] = useState(false);
 
+          const onCopyToClipboard = async (text: string) => {
+            await navigator.clipboard.writeText(text);
+            toast.message('Copied to clipboard', {
+              description: 'Secret value has been copied to clipboard..',
+              invert: true,
+              position: 'bottom-right',
+            });
+          };
+
           return (
             <div className={'flex items-center gap-3'}>
               <span className={'w-[18ch] overflow-hidden text-ellipsis bg-muted rounded-md py-1 px-3 h-7'}>
                 {showSecret ? value : '•'.repeat(8)}
               </span>
               <div className={'flex items-center'}>
-                <Button aria-label={'Copy secret'} variant={'ghost'} size={'icon'} className={'px-0 size-8'}>
+                <Button
+                  aria-label={'Copy secret'}
+                  variant={'ghost'}
+                  size={'icon'}
+                  className={'px-0 size-8'}
+                  onClick={() => onCopyToClipboard(value)}
+                >
                   <Copy />
                 </Button>
                 <Button
