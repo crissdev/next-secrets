@@ -3,6 +3,7 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   type SortDirection,
   type SortingState,
@@ -91,7 +92,7 @@ function useSortingState() {
   };
 }
 
-export default function SecretsTable(props: { data: Secret[] }) {
+export default function SecretsTable(props: { data: Secret[]; filter?: string }) {
   const { sorting, onChangeSorting } = useSortingState();
 
   const columns = useMemo<ColumnDef<Secret>[]>(
@@ -269,8 +270,10 @@ export default function SecretsTable(props: { data: Secret[] }) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      globalFilter: props.filter,
     },
   });
 
