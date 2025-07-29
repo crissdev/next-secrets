@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Next Secrets',
   description:
-    'SecretVault is a web application for managing environment variables and secrets across ' +
+    'NextSecrets is a web application for managing environment variables and secrets across ' +
     'different deployment environments (Development, Staging, Production).',
 };
 
