@@ -71,8 +71,8 @@ export async function updateProjectAction(project: Omit<Project, 'secrets'>) {
 // Secrets
 export async function createSecretAction(projectId: string, data: Omit<Secret, 'id' | 'lastUpdated'>) {
   try {
-    const { name, description, type, value } = data;
-    const newSecret = await createSecret(projectId, { name, description, type, value });
+    const { name, description, type, environmentId, value } = data;
+    const newSecret = await createSecret(projectId, { name, description, type, environmentId, value });
     revalidatePath(`/projects/${projectId}`);
     return { success: true as const, data: newSecret };
   } catch (err) {

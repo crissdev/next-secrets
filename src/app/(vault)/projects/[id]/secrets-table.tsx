@@ -18,9 +18,10 @@ import SecretTypeIcon from '@/app/(vault)/projects/[id]/secret-type-icon';
 import DeleteSecretDialog from '@/app/(vault)/projects/delete-secret-dialog';
 import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
 import { secretTypeColors } from '@/app/(vault)/projects/secret-color-mapping';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { type Secret, type SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret, type SECRET_TYPE } from '@/lib/definitions';
 
 function formatDate(date: Date) {
   const now = new Date();
@@ -143,6 +144,28 @@ export default function SecretsTable(props: { data: Secret[]; filter?: string })
             <span className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}>
               {type}
             </span>
+          );
+        },
+      },
+      {
+        header: ({ column }) => (
+          <Button
+            variant={'ghost'}
+            onClick={() => onChangeSorting(column)}
+            className="hover:!bg-transparent w-full justify-start"
+          >
+            Environment
+            <SortIcon direction={column.getIsSorted()} />
+          </Button>
+        ),
+        accessorKey: 'environmentId',
+        cell: ({ row }) => {
+          const environmentId = row.getValue<number>('environmentId');
+          const environmentName = DEFAULT_ENVIRONMENTS.find((e) => e.id === environmentId)?.name;
+          return (
+            <Badge variant={'outline'} className={'rounded-full'}>
+              {environmentName ?? '–'}
+            </Badge>
           );
         },
       },

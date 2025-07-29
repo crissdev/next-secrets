@@ -3,7 +3,7 @@ import 'server-only';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Project, Secret } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Project, type Secret } from '@/lib/definitions';
 
 // Projects
 
@@ -69,13 +69,14 @@ export async function createSecret(projectId: string, secret: Omit<Secret, 'id' 
   const project = allProjects.find((p) => p.id === projectId);
   if (!project) throw new Error(`Project with name "${projectId}" does not exist.`);
 
-  const newSecret = {
+  const newSecret: Secret = {
     id: crypto.randomUUID(),
     name: secret.name,
     value: secret.value,
     type: secret.type,
     description: secret.description,
     lastUpdated: new Date().toISOString(),
+    environmentId: secret.environmentId,
   };
   project.secrets.push(newSecret);
   await DataLayer.write({ projects: allProjects });
@@ -119,6 +120,7 @@ export async function updateSecret(projectId: string, secret: Omit<Secret, 'last
   data.type = secret.type;
   data.value = secret.value;
   data.lastUpdated = new Date().toISOString();
+  data.environmentId = secret.environmentId;
 
   await DataLayer.write({ projects });
   return data;
@@ -133,7 +135,7 @@ export const dataFilePath = path.resolve(process.env.DATA_FILE_PATH!);
 
 const DataLayer = {
   async write(data: { projects: StoreProject[] }) {
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
+    await fs.writeFile(dataFilePath, JSON.stringify({ ...data, environments: DEFAULT_ENVIRONMENTS }, null, 2), 'utf-8');
   },
   async read(): Promise<{ projects: StoreProject[] }> {
     try {

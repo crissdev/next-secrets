@@ -13,6 +13,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: 100,
     });
 
     expect(secret).toEqual<Secret>({
@@ -22,6 +23,7 @@ describe('Secret service', () => {
       description: 'Token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
       lastUpdated: expect.any(String),
+      environmentId: 100,
     });
   });
 
@@ -33,6 +35,7 @@ describe('Secret service', () => {
         description: faker.lorem.sentence(),
         type: SECRET_TYPE.EnvironmentVariable,
         value: '',
+        environmentId: 100,
       }),
     ).rejects.toThrow('Secret value cannot be empty.');
   });
@@ -45,6 +48,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: 100,
     });
     const secrets = await getSecrets(project.id);
     expect(secrets).toStrictEqual<Secret[]>([
@@ -55,6 +59,7 @@ describe('Secret service', () => {
         description: 'Token used in CI',
         type: SECRET_TYPE.EnvironmentVariable,
         lastUpdated: expect.any(String),
+        environmentId: 100,
       },
     ]);
   });
@@ -67,6 +72,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: 100,
     });
 
     const updatedSecret = await updateSecret(project.id, {
@@ -75,6 +81,7 @@ describe('Secret service', () => {
       value: '67890',
       description: 'Updated token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: 200,
     });
 
     expect(updatedSecret).toEqual<Secret>({
@@ -84,6 +91,7 @@ describe('Secret service', () => {
       description: 'Updated token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
       lastUpdated: expect.any(String),
+      environmentId: 200,
     });
 
     // Verify the secret was actually updated in the database
@@ -100,6 +108,7 @@ describe('Secret service', () => {
         description: faker.lorem.sentence(),
         type: SECRET_TYPE.EnvironmentVariable,
         value: '',
+        environmentId: 100,
       }),
     ).rejects.toThrow('Secret value cannot be empty.');
   });

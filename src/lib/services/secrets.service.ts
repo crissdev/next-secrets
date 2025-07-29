@@ -9,6 +9,7 @@ export async function createSecret(projectId: string, input: Omit<Secret, 'id' |
     description: secretInput.description,
     type: secretInput.type,
     value: secretInput.value,
+    environmentId: secretInput.environmentId,
   });
   return newSecret;
 }
@@ -26,6 +27,7 @@ export async function updateSecret(projectId: string, input: Omit<Secret, 'lastU
     description: secretInput.description,
     type: secretInput.type,
     value: secretInput.value,
+    environmentId: secretInput.environmentId,
   });
   return updatedSecret;
 }

@@ -11,6 +11,7 @@ export interface Secret {
   type: SECRET_TYPE;
   value: string;
   lastUpdated: string;
+  environmentId: number;
 }
 
 export enum SECRET_TYPE {
@@ -21,3 +22,14 @@ export enum SECRET_TYPE {
   Password = 'Password',
   Token = 'Token',
 }
+
+export interface Environment {
+  id: number;
+  name: string;
+}
+
+export const DEFAULT_ENVIRONMENTS: Environment[] = [
+  { id: 1, name: 'Development' },
+  { id: 2, name: 'Staging' },
+  { id: 3, name: 'Production' },
+];

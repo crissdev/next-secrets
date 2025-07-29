@@ -12,6 +12,7 @@ export const createSecretSchema = z.object({
   value: z.string().min(1, 'Secret value cannot be empty.'),
   description: z.string(),
   type: z.enum(SECRET_TYPE),
+  environmentId: z.coerce.number<number>(),
 });
 
 export const updateProjectSchema = createProjectSchema.extend({

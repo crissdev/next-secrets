@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction, updateSecretAction } from '@/lib/actions/projects.actions';
-import { type Secret, SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createSecretSchema } from '@/lib/services/schemas';
 
@@ -48,6 +48,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
       description: '',
       value: '',
       type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: DEFAULT_ENVIRONMENTS[0].id,
     },
   });
   const [showValue, setShowValue] = useState(true);
@@ -68,6 +69,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
         description: props.secret.description,
         type: props.secret.type,
         value: props.secret.value,
+        environmentId: props.secret.environmentId,
       });
     }
   }, [form, props.secret]);
@@ -173,6 +175,34 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
                         {SecretTypes.map(({ label, value }) => (
                           <SelectItem value={value} key={value}>
                             {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={'environmentId'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor={'secret-environment-id'}>Environment</FormLabel>
+                  <FormControl>
+                    <Select
+                      {...field}
+                      onValueChange={(value) => field.onChange(Number(value))}
+                      value={String(field.value)}
+                    >
+                      <SelectTrigger id={'secret-environment-id'} className={'w-full'}>
+                        <SelectValue placeholder="Select an envrionment this secret is defined for" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DEFAULT_ENVIRONMENTS.map(({ id, name }) => (
+                          <SelectItem value={String(id)} key={id}>
+                            {name}
                           </SelectItem>
                         ))}
                       </SelectContent>
