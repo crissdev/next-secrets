@@ -9,7 +9,7 @@ export const createProjectSchema = z.object({
 
 export const createSecretSchema = z.object({
   name: z.string().min(1, 'Secret name cannot be empty.'),
-  value: z.string(),
+  value: z.string().min(1, 'Secret value cannot be empty.'),
   description: z.string(),
   type: z.enum(SECRET_TYPE),
 });

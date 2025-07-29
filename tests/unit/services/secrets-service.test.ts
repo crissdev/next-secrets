@@ -25,11 +25,19 @@ describe('Secret service', () => {
     });
   });
 
-  test('Retrieve a list of secrets for a project', async () => {
-    // Create a project
-    // Add secrets
-    // Fetch secrets
+  test('Secret value is required', async () => {
+    const project = await createProject({ name: faker.lorem.words(2), description: '' });
+    await expect(() =>
+      createSecret(project.id, {
+        name: faker.lorem.words(2),
+        description: faker.lorem.sentence(),
+        type: SECRET_TYPE.EnvironmentVariable,
+        value: '',
+      }),
+    ).rejects.toThrow('Secret value cannot be empty.');
+  });
 
+  test('Retrieve a list of secrets for a project', async () => {
     const project = await createProject({ name: faker.lorem.words(2), description: '' });
 
     await createSecret(project.id, {
@@ -52,11 +60,6 @@ describe('Secret service', () => {
   });
 
   test('Update a secret for a project', async () => {
-    // Create a project
-    // Create a secret
-    // Update the secret
-    // Verify the secret was updated
-
     const project = await createProject({ name: faker.lorem.words(2), description: '' });
 
     const secret = await createSecret(project.id, {
@@ -86,5 +89,18 @@ describe('Secret service', () => {
     // Verify the secret was actually updated in the database
     const secrets = await getSecrets(project.id);
     expect(secrets).toStrictEqual<Secret[]>([updatedSecret]);
+  });
+
+  test('Secret value is required when updating a secret', async () => {
+    const project = await createProject({ name: faker.lorem.words(2), description: '' });
+    await expect(() =>
+      updateSecret(project.id, {
+        id: crypto.randomUUID(),
+        name: faker.lorem.words(2),
+        description: faker.lorem.sentence(),
+        type: SECRET_TYPE.EnvironmentVariable,
+        value: '',
+      }),
+    ).rejects.toThrow('Secret value cannot be empty.');
   });
 });
