@@ -2,8 +2,11 @@
   "name": "next-secrets",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.6.0"
+  },
   "scripts": {
-    "dev": "next dev",
+    "dev": "node validate-env.mts && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
