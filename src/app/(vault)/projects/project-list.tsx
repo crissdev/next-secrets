@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type Project } from '@/lib/definitions';
+import type { Project } from '@/lib/definitions';
 
 interface ProjectListProps {
   projects: Promise<Project[]>;

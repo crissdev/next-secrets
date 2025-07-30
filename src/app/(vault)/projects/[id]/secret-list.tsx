@@ -6,7 +6,7 @@ import { use, useState } from 'react';
 import SecretsTable from '@/app/(vault)/projects/[id]/secrets-table';
 import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
 import { Input } from '@/components/ui/input';
-import { type Secret } from '@/lib/definitions';
+import type { Secret } from '@/lib/definitions';
 
 export default function SecretList(props: { secretsPromise: Promise<Secret[]>; projectName?: string }) {
   const secrets = use(props.secretsPromise);

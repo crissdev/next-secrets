@@ -1,4 +1,4 @@
-import { type Project } from '@/lib/definitions';
+import type { Project } from '@/lib/definitions';
 import { createProjectSchema, updateProjectSchema } from '@/lib/services/schemas';
 import * as db from '@/lib/store/db';
 

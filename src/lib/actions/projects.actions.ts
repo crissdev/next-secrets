@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { ZodError } from 'zod';
 
-import { type Project, type Secret } from '@/lib/definitions';
+import type { Project, Secret } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';

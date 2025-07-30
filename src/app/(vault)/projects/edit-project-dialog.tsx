@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { startTransition, useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { type z } from 'zod';
+import type { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -19,7 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { createProjectAction, updateProjectAction } from '@/lib/actions/projects.actions';
-import { type Project } from '@/lib/definitions';
+import type { Project } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProjectSchema } from '@/lib/services/schemas';
 

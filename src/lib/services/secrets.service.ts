@@ -1,4 +1,4 @@
-import { type Secret } from '@/lib/definitions';
+import type { Secret } from '@/lib/definitions';
 import { createSecretSchema, updateSecretSchema } from '@/lib/services/schemas';
 import * as db from '@/lib/store/db';
 

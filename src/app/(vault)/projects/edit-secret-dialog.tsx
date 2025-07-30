@@ -3,7 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { startTransition, useActionState, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import type z from 'zod';
+import type { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {

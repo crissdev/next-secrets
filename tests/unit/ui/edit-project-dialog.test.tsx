@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import EditProjectDialog from '@/app/(vault)/projects/edit-project-dialog';
-import { type Project } from '@/lib/definitions';
+import type { Project } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 
 import { useRouterMockFactory } from '../factories';
