@@ -32,7 +32,7 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
       >
         <div className={'flex flex-col'}>
           <h2 className={'font-bold text-xl'} data-testid={'selected-project-title'}>
-            {project?.name}
+            {project.name}
           </h2>
           <span data-testid={'project-secrets-count'} className={'font-normal text-muted-foreground text-sm'}>
             <Suspense fallback={null}>
@@ -46,7 +46,7 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
       </header>
 
       <div className={'flex-1'}>
-        <SecretList projectName={project?.name} secretsPromise={secretsPromise} />
+        <SecretList projectInfo={{ id: project.id, name: project.name }} secretsPromise={secretsPromise} />
       </div>
     </div>
   );

@@ -12,4 +12,10 @@ afterAll(async () => await teardownStore());
 beforeEach(async () => {
   window.HTMLElement.prototype.hasPointerCapture = jest.fn();
   window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
+  global.ResizeObserver = jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+  }));
 });

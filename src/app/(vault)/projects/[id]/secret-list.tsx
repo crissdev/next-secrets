@@ -8,7 +8,10 @@ import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
 import { Input } from '@/components/ui/input';
 import type { Secret } from '@/lib/definitions';
 
-export default function SecretList(props: { secretsPromise: Promise<Secret[]>; projectName?: string }) {
+export default function SecretList(props: {
+  secretsPromise: Promise<Secret[]>;
+  projectInfo: { id: string; name: string };
+}) {
   const secrets = use(props.secretsPromise);
   const [filter, setFilter] = useState('');
 
@@ -24,7 +27,7 @@ export default function SecretList(props: { secretsPromise: Promise<Secret[]>; p
         </h2>
 
         <div className={'text-muted-foreground mb-5'} data-testid="no-secrets-hint">
-          Add your first secret to the &#34;{props.projectName}&#34; project.
+          Add your first secret to the &#34;{props.projectInfo.name}&#34; project.
         </div>
 
         <AddSecretButton testId={'empty-list-add-secret'} />
@@ -43,7 +46,7 @@ export default function SecretList(props: { secretsPromise: Promise<Secret[]>; p
           className="bg-white w-[32ch] pl-8"
         />
       </div>
-      <SecretsTable data={secrets} filter={filter} />
+      <SecretsTable projectId={props.projectInfo.id} data={secrets} filter={filter} />
     </div>
   );
 }

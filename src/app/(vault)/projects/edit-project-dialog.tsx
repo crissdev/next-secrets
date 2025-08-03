@@ -18,7 +18,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { createProjectAction, updateProjectAction } from '@/lib/actions/projects.actions';
+import { createProjectAction, updateProjectAction } from '@/lib/actions';
 import type { Project } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProjectSchema } from '@/lib/services/schemas';

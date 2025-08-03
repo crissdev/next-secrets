@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { deleteSecretAction } from '@/lib/actions/projects.actions';
+import { deleteSecretAction } from '@/lib/actions';
 
 type DeleteSecretDialogProps = {
   open: boolean;

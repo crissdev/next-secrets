@@ -11,16 +11,19 @@ import {
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, EyeOff, PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { startTransition, useActionState, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import SecretTypeIcon from '@/app/(vault)/projects/[id]/secret-type-icon';
 import DeleteSecretDialog from '@/app/(vault)/projects/delete-secret-dialog';
 import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
 import { secretTypeColors } from '@/app/(vault)/projects/secret-color-mapping';
+import { LoadingDots } from '@/components/loading-dots';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { getSecretValueAction } from '@/lib/actions';
 import { DEFAULT_ENVIRONMENTS, type Secret, type SECRET_TYPE } from '@/lib/definitions';
 
 function formatDate(date: Date) {
@@ -84,7 +87,7 @@ function useSortingState() {
         },
       ];
     }
-    setSorting(newSorting);
+    startTransition(() => setSorting(newSorting));
   }, []);
 
   return {
@@ -93,7 +96,7 @@ function useSortingState() {
   };
 }
 
-export default function SecretsTable(props: { data: Secret[]; filter?: string }) {
+export default function SecretsTable(props: { projectId: string; data: Secret[]; filter?: string }) {
   const { sorting, onChangeSorting } = useSortingState();
 
   const columns = useMemo<ColumnDef<Secret>[]>(
@@ -141,7 +144,10 @@ export default function SecretsTable(props: { data: Secret[]; filter?: string })
         cell: ({ row }) => {
           const type: SECRET_TYPE = row.getValue('type');
           return (
-            <span className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}>
+            <span
+              className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}
+              data-testid={`secret-type-${row.index}`}
+            >
               {type}
             </span>
           );
@@ -163,7 +169,7 @@ export default function SecretsTable(props: { data: Secret[]; filter?: string })
           const environmentId = row.getValue<number>('environmentId');
           const environmentName = DEFAULT_ENVIRONMENTS.find((e) => e.id === environmentId)?.name;
           return (
-            <Badge variant={'outline'} className={'rounded-full'}>
+            <Badge variant={'outline'} className={'rounded-full'} data-testid={`secret-environment-${row.index}`}>
               {environmentName ?? '–'}
             </Badge>
           );
@@ -175,37 +181,93 @@ export default function SecretsTable(props: { data: Secret[]; filter?: string })
         cell: function ValueCellRenderer({ row }) {
           const value = row.getValue<string>('value');
           const [showSecret, setShowSecret] = useState(false);
+          const [secretValue, setSecretValue] = useState<string | null>(null);
 
-          const onCopyToClipboard = async (text: string) => {
-            await navigator.clipboard.writeText(text);
+          const [, fetchSecretAction, isFetchSecretPending] = useActionState(async () => {
+            if (!secretValue && !isCopyPending) {
+              const actionResult = await getSecretValueAction(props.projectId, row.original.id);
+              if (actionResult.success) {
+                setSecretValue(actionResult.data);
+                return;
+              } else {
+                toast.error('Failed to fetch secret value', {
+                  description: actionResult.error.message,
+                  position: 'bottom-right',
+                });
+                return;
+              }
+            }
+          }, undefined);
+
+          const [, copySecretAction, isCopyPending] = useActionState(async () => {
+            let valueToCopy = secretValue;
+            if (!valueToCopy) {
+              const actionResult = await getSecretValueAction(props.projectId, row.original.id);
+              if (actionResult.success) {
+                valueToCopy = actionResult.data;
+                setSecretValue(valueToCopy);
+              } else {
+                toast.error('Failed to fetch secret value', {
+                  description: actionResult.error.message,
+                  position: 'bottom-right',
+                });
+                return;
+              }
+            }
+            await navigator.clipboard.writeText(valueToCopy);
             toast.message('Copied to clipboard', {
               description: 'Secret value has been copied to clipboard..',
               invert: true,
               position: 'bottom-right',
             });
+          }, undefined);
+
+          const onCopyToClipboard = () => {
+            startTransition(() => copySecretAction());
+          };
+
+          const onShowSecret = () => {
+            const shouldShowSecret = !showSecret;
+            setShowSecret(shouldShowSecret);
+            if (shouldShowSecret && !secretValue) {
+              startTransition(() => fetchSecretAction());
+            }
           };
 
           return (
             <div className={'flex items-center gap-3'}>
-              <span className={'w-[18ch] overflow-hidden text-ellipsis bg-muted rounded-md py-1 px-3 h-7'}>
-                {showSecret ? value : '•'.repeat(8)}
-              </span>
+              {isFetchSecretPending || isCopyPending ? (
+                <div className={'w-[18ch] bg-muted py-1 px-3 h-7'}>
+                  <LoadingDots delay={200} />
+                </div>
+              ) : (
+                <span
+                  className={'w-[18ch] overflow-hidden text-ellipsis bg-muted rounded-md py-1 px-3 h-7'}
+                  data-testid={`secret-value-${row.index}`}
+                >
+                  {showSecret ? (secretValue ?? value) : '•'.repeat(8)}
+                </span>
+              )}
               <div className={'flex items-center'}>
                 <Button
+                  data-testid={`copy-secret-${row.index}`}
                   aria-label={'Copy secret'}
                   variant={'ghost'}
                   size={'icon'}
                   className={'px-0 size-8'}
-                  onClick={() => onCopyToClipboard(value)}
+                  onClick={onCopyToClipboard}
+                  disabled={isCopyPending}
                 >
                   <Copy />
                 </Button>
                 <Button
+                  data-testid={`show-secret-${row.index}`}
                   aria-label={'Show secret'}
                   variant={'ghost'}
                   size={'icon'}
                   className={'px-0 size-8'}
-                  onClick={() => setShowSecret(!showSecret)}
+                  onClick={onShowSecret}
+                  disabled={isFetchSecretPending}
                 >
                   {showSecret ? <EyeOff /> : <Eye />}
                 </Button>
@@ -240,7 +302,18 @@ export default function SecretsTable(props: { data: Secret[]; filter?: string })
             }
           }, [date]);
 
-          return !lastUpdated ? <div>&ndash;</div> : <div title={localeDate}>{formattedDate}</div>;
+          return (
+            <div data-testid={`secret-updated-${row.index}`}>
+              {lastUpdated ? (
+                <Tooltip delayDuration={400}>
+                  <TooltipTrigger>{formattedDate}</TooltipTrigger>
+                  <TooltipContent>{localeDate}</TooltipContent>
+                </Tooltip>
+              ) : (
+                '–'
+              )}
+            </div>
+          );
         },
       },
       {
@@ -285,7 +358,7 @@ export default function SecretsTable(props: { data: Secret[]; filter?: string })
         },
       },
     ],
-    [onChangeSorting],
+    [onChangeSorting, props.projectId],
   );
 
   const table = useReactTable({

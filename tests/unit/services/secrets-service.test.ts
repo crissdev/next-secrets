@@ -27,19 +27,6 @@ describe('Secret service', () => {
     });
   });
 
-  test('Secret value is required', async () => {
-    const project = await createProject({ name: faker.lorem.words(2), description: '' });
-    await expect(() =>
-      createSecret(project.id, {
-        name: faker.lorem.words(2),
-        description: faker.lorem.sentence(),
-        type: SECRET_TYPE.EnvironmentVariable,
-        value: '',
-        environmentId: 100,
-      }),
-    ).rejects.toThrow('Secret value cannot be empty.');
-  });
-
   test('Retrieve a list of secrets for a project', async () => {
     const project = await createProject({ name: faker.lorem.words(2), description: '' });
 
@@ -55,7 +42,7 @@ describe('Secret service', () => {
       {
         id: expect.any(String),
         name: 'CI Token',
-        value: '12345',
+        value: '[REDACTED]',
         description: 'Token used in CI',
         type: SECRET_TYPE.EnvironmentVariable,
         lastUpdated: expect.any(String),
@@ -78,7 +65,6 @@ describe('Secret service', () => {
     const updatedSecret = await updateSecret(project.id, {
       id: secret.id,
       name: 'Updated CI Token',
-      value: '67890',
       description: 'Updated token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
       environmentId: 200,
@@ -87,7 +73,7 @@ describe('Secret service', () => {
     expect(updatedSecret).toEqual<Secret>({
       id: secret.id,
       name: 'Updated CI Token',
-      value: '67890',
+      value: '[REDACTED]',
       description: 'Updated token used in CI',
       type: SECRET_TYPE.EnvironmentVariable,
       lastUpdated: expect.any(String),
@@ -99,11 +85,10 @@ describe('Secret service', () => {
     expect(secrets).toStrictEqual<Secret[]>([updatedSecret]);
   });
 
-  test('Secret value is required when updating a secret', async () => {
+  test('Secret value is required when creating a secret', async () => {
     const project = await createProject({ name: faker.lorem.words(2), description: '' });
     await expect(() =>
-      updateSecret(project.id, {
-        id: crypto.randomUUID(),
+      createSecret(project.id, {
         name: faker.lorem.words(2),
         description: faker.lorem.sentence(),
         type: SECRET_TYPE.EnvironmentVariable,

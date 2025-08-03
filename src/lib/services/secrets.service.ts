@@ -16,18 +16,28 @@ export async function createSecret(projectId: string, input: Omit<Secret, 'id' |
 
 export async function getSecrets(projectId: string): Promise<Secret[]> {
   const secrets = await db.getSecrets(projectId);
-  return secrets;
+  return secrets.map((secret) => ({
+    ...secret,
+    value: '[REDACTED]',
+  }));
 }
 
-export async function updateSecret(projectId: string, input: Omit<Secret, 'lastUpdated'>): Promise<Secret> {
+export async function getSecretValue(projectId: string, secretId: string): Promise<string> {
+  const secretValue = await db.getSecretValue(projectId, secretId);
+  return secretValue;
+}
+
+export async function updateSecret(projectId: string, input: Omit<Secret, 'lastUpdated' | 'value'>): Promise<Secret> {
   const secretInput = updateSecretSchema.parse(input);
   const updatedSecret = await db.updateSecret(projectId, {
     id: secretInput.id,
     name: secretInput.name,
     description: secretInput.description,
     type: secretInput.type,
-    value: secretInput.value,
     environmentId: secretInput.environmentId,
   });
-  return updatedSecret;
+  return {
+    ...updatedSecret,
+    value: '[REDACTED]',
+  };
 }

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
 import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
-import { createSecret, updateSecret } from '@/lib/store/db';
+import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/db';
 
 jest.mock('@/lib/store/db');
 jest.mock('@/lib/queries');
@@ -42,7 +42,7 @@ describe('Create secret dialog', () => {
     expect(revalidatePath).toHaveBeenCalledWith(`/projects/${projectId}`);
   });
 
-  test('Edit secret via dialog', async () => {
+  test('Update secret via dialog', async () => {
     const projectId = crypto.randomUUID();
     const secret: Secret = {
       id: crypto.randomUUID(),
@@ -61,20 +61,17 @@ describe('Create secret dialog', () => {
     // Verify initial values are populated
     expect(screen.getByRole('textbox', { name: 'Secret name' })).toHaveValue(secret.name);
     expect(screen.getByRole('textbox', { name: 'Description (optional)' })).toHaveValue(secret.description);
-    expect(screen.getByRole('textbox', { name: 'Secret value' })).toHaveValue(secret.value);
+    expect(screen.getByRole('switch', { name: 'Update secret value' })).not.toBeChecked();
+    expect(screen.queryByRole('textbox', { name: 'Secret value' })).not.toBeInTheDocument();
 
     // Update the values
     const updatedName = 'Updated secret name';
     const updatedDescription = 'Updated secret description';
-    const updatedValue = 'updated-secret-value';
 
     await userEvent.clear(screen.getByRole('textbox', { name: 'Secret name' }));
     await userEvent.type(screen.getByRole('textbox', { name: 'Secret name' }), updatedName);
     await userEvent.clear(screen.getByRole('textbox', { name: 'Description (optional)' }));
     await userEvent.type(screen.getByRole('textbox', { name: 'Description (optional)' }), updatedDescription);
-    await userEvent.clear(screen.getByRole('textbox', { name: 'Secret value' }));
-    await userEvent.type(screen.getByRole('textbox', { name: 'Secret value' }), updatedValue);
-
     await userEvent.click(screen.getByRole('button', { name: 'Update secret' }));
 
     // Verify updateSecret was called with correct parameters
@@ -83,13 +80,12 @@ describe('Create secret dialog', () => {
       id: secret.id,
       name: updatedName,
       description: updatedDescription,
-      value: updatedValue,
       type: SECRET_TYPE.EnvironmentVariable,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(onCloseMock).toHaveBeenCalled();
 
-    // Expect cache to be invalidated for selected project
+    // Expect cache to be invalidated for the selected project
     expect(revalidatePath).toHaveBeenCalledTimes(1);
     expect(revalidatePath).toHaveBeenCalledWith(`/projects/${projectId}`);
   });
@@ -109,5 +105,64 @@ describe('Create secret dialog', () => {
         .sort()
         .join(','),
     ).toEqual(Object.values(SECRET_TYPE).sort().join(','));
+  });
+
+  test('All environments are available', async () => {
+    const onCloseMock = jest.fn();
+    const projectId = crypto.randomUUID();
+
+    render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
+    expect(screen.getByRole('dialog')).toBeVisible();
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Environment' }));
+    expect(
+      screen
+        .getAllByRole('option')
+        .map((e) => e.textContent)
+        .sort()
+        .join(','),
+    ).toEqual(
+      Object.values(DEFAULT_ENVIRONMENTS)
+        .map((e) => e.name)
+        .sort()
+        .join(','),
+    );
+  });
+
+  test('Secret value is explicitly updated', async () => {
+    const onCloseMock = jest.fn();
+    const projectId = crypto.randomUUID();
+    const secret: Secret = {
+      id: crypto.randomUUID(),
+      name: faker.lorem.words(2),
+      description: faker.lorem.sentence(3),
+      value: faker.lorem.word(),
+      type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: DEFAULT_ENVIRONMENTS[0].id,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    render(<EditSecretDialog projectId={projectId} secret={secret} open onClose={onCloseMock} />);
+    expect(screen.getByRole('dialog')).toBeVisible();
+
+    const updatedValue = 'updated-secret-value';
+    await userEvent.click(screen.getByRole('switch', { name: 'Update secret value' }));
+    expect(screen.getByRole('switch', { name: 'Update secret value' })).toBeChecked();
+    await userEvent.clear(screen.getByRole('textbox', { name: 'Secret value' }));
+    await userEvent.type(screen.getByRole('textbox', { name: 'Secret value' }), updatedValue);
+    await userEvent.click(screen.getByRole('button', { name: 'Update secret' }));
+
+    // Verify updateSecret was called with correct parameters
+    expect(updateSecret).toHaveBeenCalledTimes(1);
+    expect(updateSecret).toHaveBeenCalledWith(projectId, {
+      id: secret.id,
+      name: secret.name,
+      description: secret.description,
+      type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: DEFAULT_ENVIRONMENTS[0].id,
+    });
+    expect(updateSecretValue).toHaveBeenCalledTimes(1);
+    expect(updateSecretValue).toHaveBeenCalledWith(projectId, secret.id, updatedValue);
+    expect(onCloseMock).toHaveBeenCalled();
   });
 });

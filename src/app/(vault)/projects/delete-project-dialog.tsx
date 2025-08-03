@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { deleteProjectAction } from '@/lib/actions/projects.actions';
+import { deleteProjectAction } from '@/lib/actions';
 
 type DeleteProjectDialogProps = {
   projectId: string;

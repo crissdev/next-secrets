@@ -90,6 +90,21 @@ export async function getSecrets(projectId: string): Promise<Secret[]> {
   return project.secrets;
 }
 
+export async function getSecretValue(projectId: string, secretId: string) {
+  const { projects } = await DataLayer.read();
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) {
+    throw new Error(`Project with id "${projectId}" does not exist.`);
+  }
+
+  const secret = project.secrets.find((s) => s.id === secretId);
+  if (!secret) {
+    throw new Error(`Secret with id "${secretId}" does not exist in project.`);
+  }
+
+  return secret.value;
+}
+
 export async function deleteSecret(projectId: string, secretId: string): Promise<void> {
   const { projects } = await DataLayer.read();
   const project = projects.find((p) => p.id === projectId);
@@ -102,7 +117,7 @@ export async function deleteSecret(projectId: string, secretId: string): Promise
   }
 }
 
-export async function updateSecret(projectId: string, secret: Omit<Secret, 'lastUpdated'>): Promise<Secret> {
+export async function updateSecret(projectId: string, secret: Omit<Secret, 'lastUpdated' | 'value'>): Promise<Secret> {
   const { projects } = await DataLayer.read();
   const project = projects.find((p) => p.id === projectId);
   if (!project) {
@@ -118,12 +133,30 @@ export async function updateSecret(projectId: string, secret: Omit<Secret, 'last
   data.name = secret.name;
   data.description = secret.description;
   data.type = secret.type;
-  data.value = secret.value;
   data.lastUpdated = new Date().toISOString();
   data.environmentId = secret.environmentId;
 
   await DataLayer.write({ projects });
   return data;
+}
+
+export async function updateSecretValue(projectId: string, secretId: string, secretValue: string): Promise<void> {
+  const { projects } = await DataLayer.read();
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) {
+    throw new Error(`Project with id "${projectId}" does not exist.`);
+  }
+
+  const data = project.secrets.find((s) => s.id === secretId);
+  if (!data) {
+    throw new Error(`Secret with id "${secretId}" does not exist in project.`);
+  }
+
+  // Update the secret value and last updated timestamp
+  data.value = secretValue;
+  data.lastUpdated = new Date().toISOString();
+
+  await DataLayer.write({ projects });
 }
 
 //------

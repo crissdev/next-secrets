@@ -19,6 +19,8 @@ export const updateProjectSchema = createProjectSchema.extend({
   id: z.uuid(),
 });
 
-export const updateSecretSchema = createSecretSchema.extend({
-  id: z.uuid(),
-});
+export const updateSecretSchema = createSecretSchema
+  .extend({
+    id: z.uuid(),
+  })
+  .omit({ value: true });
