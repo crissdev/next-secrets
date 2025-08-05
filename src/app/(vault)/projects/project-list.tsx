@@ -18,16 +18,16 @@ import { SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem } fr
 import type { Project } from '@/lib/definitions';
 
 interface ProjectListProps {
-  projects: Promise<Project[]>;
+  projectsPromise: Promise<Project[]>;
 }
 
-export default function ProjectList({ projects }: ProjectListProps) {
+export default function ProjectList({ projectsPromise }: ProjectListProps) {
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
   const [contextMenuProjectId, setContextMenuProjectId] = useState<string | null>(null);
   const { id: selectedProjectId } = useParams<{ id?: string }>();
 
-  const projectsList = use(projects);
+  const projectsList = use(projectsPromise);
   const contextMenuProjectName = projectsList.find((p) => p.id === contextMenuProjectId)?.name ?? 'N/A';
 
   return (
@@ -75,11 +75,16 @@ export default function ProjectList({ projects }: ProjectListProps) {
         <div>
           <div className={'text-muted-foreground font-semibold text-sm tracking-wider pl-2 mb-3'}>PROJECTS</div>
           <SidebarMenu>
-            {projectsList.map((project) => (
+            {projectsList.map((project, index) => (
               <SidebarMenuItem key={project.id} className={`group/actions`}>
                 <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
-                  <Link data-testid={'sidebar-project-item'} prefetch={false} href={`/projects/${project.id}`}>
-                    {project.name}
+                  <Link data-testid={`sidebar-project-name-${index}`} prefetch={false} href={`/projects/${project.id}`}>
+                    <span
+                      data-testid={`sidebar-project-color-${index}`}
+                      className={'rounded-full size-2 inline-block mr-1'}
+                      style={{ backgroundColor: project.color ?? '#2563EBFF' }}
+                    />
+                    <span className={'inline-block'}>{project.name}</span>
                   </Link>
                 </SidebarMenuButton>
 

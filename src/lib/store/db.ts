@@ -31,6 +31,7 @@ export async function createProject(project: Omit<Project, 'id'>): Promise<Proje
     id: crypto.randomUUID(),
     name: project.name,
     description: project.description || '',
+    color: project.color,
     secrets: [],
   };
   const lowerProjectName = newProject.name.toLowerCase();
@@ -59,6 +60,7 @@ export async function updateProject(project: Omit<Project, 'secrets'>): Promise<
 
   data.name = project.name;
   data.description = project.description;
+  data.color = project.color;
   await DataLayer.write({ projects });
   return data;
 }

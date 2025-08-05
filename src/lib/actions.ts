@@ -32,8 +32,8 @@ export async function createProjectAction(
   data: Omit<Project, 'id'>,
 ): Promise<ActionSuccessResult<Project> | ActionErrorResult> {
   try {
-    const { name, description } = data;
-    const newProject = await createProject({ name, description });
+    const { name, description, color } = data;
+    const newProject = await createProject({ name, description, color });
     revalidateProjects();
     return { success: true as const, data: newProject };
   } catch (err) {

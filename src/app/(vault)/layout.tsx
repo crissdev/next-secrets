@@ -20,7 +20,7 @@ export default async function VaultLayout({ children }: { children: ReactNode })
         <SidebarContent>
           <div className={'p-2'}>
             <Suspense fallback={null}>
-              <ProjectList projects={projectsPromise} />
+              <ProjectList projectsPromise={projectsPromise} />
             </Suspense>
           </div>
         </SidebarContent>

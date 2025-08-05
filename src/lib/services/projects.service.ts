@@ -12,6 +12,7 @@ export async function createProject(input: Omit<Project, 'id'>): Promise<Project
   const newProject = await db.createProject({
     name: projectInput.name,
     description: projectInput.description,
+    color: projectInput.color,
   });
   return newProject;
 }
@@ -26,6 +27,7 @@ export async function updateProject(input: Omit<Project, 'secrets'>): Promise<Pr
     id: projectInput.id,
     name: projectInput.name,
     description: projectInput.description,
+    color: projectInput.color,
   });
   return updatedProject;
 }

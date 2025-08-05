@@ -5,8 +5,16 @@ import { createProject } from '@/lib/services/projects.service';
 import { createSecret, getSecrets, updateSecret } from '@/lib/services/secrets.service';
 
 describe('Secret service', () => {
+  async function createTestProject() {
+    return await createProject({
+      name: faker.lorem.words(2),
+      description: faker.lorem.sentence(),
+      color: faker.color.rgb({ format: 'hex' }),
+    });
+  }
+
   test('Create a secret for a project', async () => {
-    const project = await createProject({ name: faker.lorem.words(2), description: '' });
+    const project = await createTestProject();
 
     const secret = await createSecret(project.id, {
       name: 'CI Token',
@@ -28,7 +36,7 @@ describe('Secret service', () => {
   });
 
   test('Retrieve a list of secrets for a project', async () => {
-    const project = await createProject({ name: faker.lorem.words(2), description: '' });
+    const project = await createTestProject();
 
     await createSecret(project.id, {
       name: 'CI Token',
@@ -52,7 +60,7 @@ describe('Secret service', () => {
   });
 
   test('Update a secret for a project', async () => {
-    const project = await createProject({ name: faker.lorem.words(2), description: '' });
+    const project = await createTestProject();
 
     const secret = await createSecret(project.id, {
       name: 'CI Token',
@@ -86,7 +94,7 @@ describe('Secret service', () => {
   });
 
   test('Secret value is required when creating a secret', async () => {
-    const project = await createProject({ name: faker.lorem.words(2), description: '' });
+    const project = await createTestProject();
     await expect(() =>
       createSecret(project.id, {
         name: faker.lorem.words(2),

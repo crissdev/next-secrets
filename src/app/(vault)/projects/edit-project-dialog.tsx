@@ -35,6 +35,7 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
     defaultValues: {
       name: '',
       description: '',
+      color: '#000000',
     },
   });
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
       form.reset({
         name: props.project.name,
         description: props.project.description,
+        color: props.project.color,
       });
     }
   }, [form, props.project]);
@@ -133,6 +135,28 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
                       autoComplete={'off'}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name={'color'}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project color</FormLabel>
+                  <div className={'flex items-center gap-1'}>
+                    <input
+                      type="color"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                      className={'border p-1 h-9 rounded-md w-16'}
+                    />
+                    <FormControl>
+                      <Input {...field} placeholder={'#FFFFFF'} autoComplete={'off'} name={'color'} />
+                    </FormControl>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

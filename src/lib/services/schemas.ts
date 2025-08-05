@@ -5,6 +5,7 @@ import { SECRET_TYPE } from '@/lib/definitions';
 export const createProjectSchema = z.object({
   name: z.string().min(1, 'Project name cannot be empty.'),
   description: z.string(),
+  color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Color must be a valid hex color code.'),
 });
 
 export const createSecretSchema = z.object({
