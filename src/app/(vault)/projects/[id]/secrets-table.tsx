@@ -50,7 +50,7 @@ function formatDate(date: Date) {
 
 function SortIcon(props: { direction: false | SortDirection }) {
   return props.direction === false ? (
-    <ArrowUpDown className="ml-2 h-4 w-4" />
+    <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground opacity-75" />
   ) : props.direction === 'asc' ? (
     <ArrowUp className="ml-2 h-4 w-4" />
   ) : props.direction === 'desc' ? (
