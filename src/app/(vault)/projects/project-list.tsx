@@ -33,14 +33,17 @@ export default function ProjectList({ projects }: ProjectListProps) {
   return (
     <div>
       <div className={'flex flex-col items-stretch gap-5'}>
-        <Button
-          variant={'default'}
-          data-testid={'sidebar-create-project-button'}
-          onClick={() => setCreateProjectDialogOpen(true)}
-        >
-          <PlusIcon size={20} />
-          Create Project
-        </Button>
+        <div className="p-2">
+          <Button
+            className={'w-full'}
+            variant={'default'}
+            data-testid={'sidebar-create-project-button'}
+            onClick={() => setCreateProjectDialogOpen(true)}
+          >
+            <PlusIcon size={20} />
+            Create Project
+          </Button>
+        </div>
 
         <EditProjectDialog
           open={createProjectDialogOpen}
@@ -69,52 +72,55 @@ export default function ProjectList({ projects }: ProjectListProps) {
           </span>
         )}
 
-        <SidebarMenu>
-          {projectsList.map((project) => (
-            <SidebarMenuItem key={project.id} className={`group/actions`}>
-              <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
-                <Link data-testid={'sidebar-project-item'} prefetch={false} href={`/projects/${project.id}`}>
-                  {project.name}
-                </Link>
-              </SidebarMenuButton>
+        <div>
+          <div className={'text-muted-foreground font-semibold text-sm tracking-wider pl-2 mb-3'}>PROJECTS</div>
+          <SidebarMenu>
+            {projectsList.map((project) => (
+              <SidebarMenuItem key={project.id} className={`group/actions`}>
+                <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
+                  <Link data-testid={'sidebar-project-item'} prefetch={false} href={`/projects/${project.id}`}>
+                    {project.name}
+                  </Link>
+                </SidebarMenuButton>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction className={`opacity-0 group-hover/actions:opacity-100 mt-1 cursor-pointer`}>
-                    <MoreVertical />
-                  </SidebarMenuAction>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="start">
-                  <DropdownMenuItem asChild>
-                    <SidebarMenuButton
-                      variant={'outline'}
-                      onClick={() => {
-                        setContextMenuProjectId(project.id);
-                        setCreateProjectDialogOpen(true);
-                      }}
-                    >
-                      <PencilLineIcon />
-                      <span>Edit</span>
-                    </SidebarMenuButton>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <SidebarMenuButton
-                      className={'text-destructive'}
-                      variant={'outline'}
-                      onClick={() => {
-                        setContextMenuProjectId(project.id);
-                        setDeleteProjectDialogOpen(true);
-                      }}
-                    >
-                      <Trash2Icon size={20} className={'text-destructive'} />
-                      <span>Delete</span>
-                    </SidebarMenuButton>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuAction className={`opacity-0 group-hover/actions:opacity-100 mt-1 cursor-pointer`}>
+                      <MoreVertical />
+                    </SidebarMenuAction>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right" align="start">
+                    <DropdownMenuItem asChild>
+                      <SidebarMenuButton
+                        variant={'outline'}
+                        onClick={() => {
+                          setContextMenuProjectId(project.id);
+                          setCreateProjectDialogOpen(true);
+                        }}
+                      >
+                        <PencilLineIcon />
+                        <span>Edit</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <SidebarMenuButton
+                        className={'text-destructive'}
+                        variant={'outline'}
+                        onClick={() => {
+                          setContextMenuProjectId(project.id);
+                          setDeleteProjectDialogOpen(true);
+                        }}
+                      >
+                        <Trash2Icon size={20} className={'text-destructive'} />
+                        <span>Delete</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </div>
       </div>
     </div>
   );
