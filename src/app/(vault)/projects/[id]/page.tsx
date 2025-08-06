@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import SecretCount from '@/app/(vault)/projects/[id]/secret-count';
 import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
 
 export const dynamicParams = true;
@@ -31,9 +32,12 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
         }
       >
         <div className={'flex flex-col'}>
-          <h2 className={'font-bold text-xl'} data-testid={'selected-project-title'}>
-            {project.name}
-          </h2>
+          <div className={'flex items-center'}>
+            <SidebarTrigger className={'md:hidden'} />
+            <h2 className={'font-bold text-xl'} data-testid={'selected-project-title'}>
+              {project.name}
+            </h2>
+          </div>
           <span data-testid={'project-secrets-count'} className={'font-normal text-muted-foreground text-sm'}>
             <Suspense fallback={null}>
               <SecretCount secretsPromise={secretsPromise} />
