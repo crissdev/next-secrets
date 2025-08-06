@@ -1,5 +1,6 @@
 import 'server-only';
 
+import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -74,7 +75,7 @@ export async function createSecret(projectId: string, secret: Omit<Secret, 'id' 
   const newSecret: Secret = {
     id: crypto.randomUUID(),
     name: secret.name,
-    value: secret.value,
+    value: encryptValue(secret.value),
     type: secret.type,
     description: secret.description,
     lastUpdated: new Date().toISOString(),
@@ -104,7 +105,8 @@ export async function getSecretValue(projectId: string, secretId: string) {
     throw new Error(`Secret with id "${secretId}" does not exist in project.`);
   }
 
-  return secret.value;
+  const secretValue = secret.value;
+  return decryptValue(secretValue);
 }
 
 export async function deleteSecret(projectId: string, secretId: string): Promise<void> {
@@ -155,7 +157,7 @@ export async function updateSecretValue(projectId: string, secretId: string, sec
   }
 
   // Update the secret value and last updated timestamp
-  data.value = secretValue;
+  data.value = encryptValue(secretValue);
   data.lastUpdated = new Date().toISOString();
 
   await DataLayer.write({ projects });
@@ -167,6 +169,71 @@ type StoreProject = Project & {
 };
 
 export const dataFilePath = path.resolve(process.env.DATA_FILE_PATH!);
+export const dataFileEncKey = process.env.DATA_FILE_ENC_KEY;
+const dataFileEncAlgorithm = process.env.DATA_FILE_ENC_ALGO || 'aes-256-cbc';
+const dataFileEncSalt = process.env.DATA_FILE_ENC_SALT || 'salt';
+const isEncryptionEnabled = !!dataFileEncKey;
+
+// Encrypt a string value if encryption is enabled
+function encryptValue(text: string): string {
+  try {
+    if (!isEncryptionEnabled) {
+      return text;
+    }
+    // Create a random initialization vector
+    const iv = crypto.randomBytes(16);
+
+    // Create a cipher using the key and iv
+    const cipher = crypto.createCipheriv(
+      dataFileEncAlgorithm,
+      crypto.scryptSync(dataFileEncKey!, dataFileEncSalt, 32),
+      iv,
+    );
+
+    // Encrypt the text
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+
+    // Return iv and encrypted data as a single string
+    return `${iv.toString('hex')}:${encrypted}`;
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    return text; // Return original text if encryption fails
+  }
+}
+
+// Decrypt an encrypted value if encryption is enabled
+function decryptValue(encryptedText: string): string {
+  if (!isEncryptionEnabled) {
+    return encryptedText;
+  }
+
+  try {
+    // Check if the text has the format of our encrypted data
+    if (!encryptedText.includes(':')) {
+      return encryptedText; // Not in the expected format, return as is
+    }
+
+    const [ivHex, encrypted] = encryptedText.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+
+    // Create a decipher using the key and iv
+    const decipher = crypto.createDecipheriv(
+      dataFileEncAlgorithm,
+      crypto.scryptSync(dataFileEncKey!, dataFileEncSalt, 32),
+      iv,
+    );
+
+    // Decrypt the data
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    return encryptedText; // Return encrypted text if decryption fails
+  }
+}
 
 const DataLayer = {
   async write(data: { projects: StoreProject[] }) {
