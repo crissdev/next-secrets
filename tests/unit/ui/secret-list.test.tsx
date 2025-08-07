@@ -278,4 +278,33 @@ describe('Secret list', () => {
     expect(screen.getAllByRole('row')).toHaveLength(2);
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(envName);
   });
+
+  test.each(Object.values(SECRET_TYPE))('Filter secrets by type (%s)', async (type) => {
+    await act(async () => {
+      const secrets = [
+        {
+          id: faker.string.uuid(),
+          name: faker.lorem.words(2),
+          value: '[REDACTED]',
+          description: faker.lorem.sentence(5),
+          type: type,
+          environmentId: DEFAULT_ENVIRONMENTS[0].id,
+          lastUpdated: new Date().toISOString(),
+        },
+      ];
+      const secretsPromise = Promise.resolve(secrets);
+      render(
+        <SecretList
+          projectInfo={{ id: faker.string.uuid(), name: faker.lorem.words(2) }}
+          secretsPromise={secretsPromise}
+        />,
+      );
+    });
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Select secret type' }));
+    await userEvent.click(screen.getByRole('option', { name: type }));
+
+    expect(screen.getAllByRole('row')).toHaveLength(2);
+    expect(screen.getByTestId('secret-type-0')).toHaveTextContent(type);
+  });
 });
