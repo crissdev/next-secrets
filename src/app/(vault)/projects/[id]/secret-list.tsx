@@ -1,12 +1,13 @@
 'use client';
 
-import { LockIcon, Search } from 'lucide-react';
+import { LockIcon, SearchIcon } from 'lucide-react';
 import { use, useState } from 'react';
 
 import SecretsTable from '@/app/(vault)/projects/[id]/secrets-table';
 import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
 import { Input } from '@/components/ui/input';
-import type { Secret } from '@/lib/definitions';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 
 export default function SecretList(props: {
   secretsPromise: Promise<Secret[]>;
@@ -14,6 +15,11 @@ export default function SecretList(props: {
 }) {
   const secrets = use(props.secretsPromise);
   const [filter, setFilter] = useState('');
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<number>(0);
+
+  const filteredSecrets = selectedEnvironmentId
+    ? secrets.filter((secret) => secret.environmentId === selectedEnvironmentId)
+    : secrets;
 
   return secrets.length === 0 ? (
     <div className={'h-full flex items-center'}>
@@ -35,9 +41,9 @@ export default function SecretList(props: {
     </div>
   ) : (
     <div className={'p-5 h-full'}>
-      <div className={'relative  mb-4'}>
+      <div className={'relative  mb-4 flex items-center'}>
         <div className={'absolute left-2 top-1/2 -translate-y-1/2'}>
-          <Search size={18} className={'stroke-muted-foreground'} />
+          <SearchIcon size={16} className={'stroke-muted-foreground'} />
         </div>
         <Input
           value={filter}
@@ -45,8 +51,30 @@ export default function SecretList(props: {
           placeholder="Search secrets..."
           className="bg-white w-[32ch] pl-8"
         />
+        <div className="ml-auto">
+          <Select
+            onValueChange={(value) => setSelectedEnvironmentId(Number(value))}
+            value={String(selectedEnvironmentId)}
+          >
+            <SelectTrigger className={'w-[180px] bg-white'} aria-label={'Select environment'}>
+              <SelectValue placeholder={'All environments'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem aria-label={'All environments'} value={'0'}>
+                  All environments
+                </SelectItem>
+                {DEFAULT_ENVIRONMENTS.map(({ id, name }) => (
+                  <SelectItem value={String(id)} key={id}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      <SecretsTable projectId={props.projectInfo.id} data={secrets} filter={filter} />
+      <SecretsTable projectId={props.projectInfo.id} data={filteredSecrets} filter={filter} />
     </div>
   );
 }

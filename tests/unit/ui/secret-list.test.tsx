@@ -6,6 +6,8 @@ import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
 
 jest.mock('@/lib/store/db');
+import { faker } from '@faker-js/faker';
+
 import { getSecretValue } from '@/lib/store/db';
 
 describe('Secret list', () => {
@@ -70,7 +72,7 @@ describe('Secret list', () => {
     expect(screen.getByTestId('secret-updated-1')).toHaveTextContent('Just now');
   });
 
-  test.each(DEFAULT_ENVIRONMENTS)('Map environment ID to environment name', async (environment) => {
+  test.each(DEFAULT_ENVIRONMENTS)('Map environment ID=$id to environment name', async (environment) => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
         {
@@ -89,7 +91,7 @@ describe('Secret list', () => {
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(environment.name);
   });
 
-  test.each(Object.values(SECRET_TYPE))('Map secret type to human readable name', async (type) => {
+  test.each(Object.values(SECRET_TYPE))('Map secret type (%s) to human readable name', async (type) => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
         {
@@ -210,5 +212,38 @@ describe('Secret list', () => {
     await userEvent.click(screen.getByTestId('show-secret-0'));
     expect(getSecretValueMock).not.toHaveBeenCalled();
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent(secretValue);
+  });
+
+  test.each(DEFAULT_ENVIRONMENTS)('Filter secrets by environment $name', async ({ name: envName }) => {
+    await act(async () => {
+      const secrets = DEFAULT_ENVIRONMENTS.map<Secret>((env) => ({
+        id: crypto.randomUUID(),
+        name: faker.lorem.words(2),
+        value: '[REDACTED]',
+        description: faker.lorem.sentence(5),
+        type: SECRET_TYPE.EnvironmentVariable,
+        environmentId: env.id,
+        lastUpdated: new Date().toISOString(),
+      }));
+      const secretsPromise = Promise.resolve(secrets);
+      render(
+        <SecretList
+          projectInfo={{ id: faker.string.uuid(), name: faker.lorem.words(2) }}
+          secretsPromise={secretsPromise}
+        />,
+      );
+    });
+
+    expect(screen.getAllByRole('row')).toHaveLength(DEFAULT_ENVIRONMENTS.length + 1);
+    expect(screen.getAllByTestId(/^secret-environment-\d/).map((e) => e.textContent)).toStrictEqual(
+      DEFAULT_ENVIRONMENTS.map((env) => env.name),
+    );
+
+    // Filter
+    await userEvent.click(screen.getByRole('combobox', { name: 'Select environment' }));
+    await userEvent.click(screen.getByRole('option', { name: envName }));
+
+    expect(screen.getAllByRole('row')).toHaveLength(2);
+    expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(envName);
   });
 });
