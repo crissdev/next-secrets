@@ -43,22 +43,22 @@ export default function SecretList(props: {
     </div>
   ) : (
     <div className={'p-5 h-full'}>
-      <div className={'relative  mb-4 flex items-center'}>
-        <div className={'absolute left-2 top-1/2 -translate-y-1/2'}>
-          <SearchIcon size={16} className={'stroke-muted-foreground'} />
+      <div className={'flex flex-col gap-2 items-stretch lg:flex-row lg:items-center mb-4 w-full'}>
+        <div className={'relative'}>
+          <SearchIcon size={16} className={'stroke-muted-foreground absolute left-2 top-1/2 -translate-y-1/2'} />
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Search secrets..."
+            className="bg-white lg:w-[32ch] w-full pl-8 mr-2"
+          />
         </div>
-        <Input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Search secrets..."
-          className="bg-white w-[32ch] pl-8"
-        />
-        <div className="ml-auto flex items-center gap-2">
+        <div className="lg:w-full flex lg:justify-end items-center gap-2">
           <Select
             onValueChange={(value) => setSelectedEnvironmentId(Number(value))}
             value={String(selectedEnvironmentId)}
           >
-            <SelectTrigger className={'w-[180px] bg-white'} aria-label={'Select environment'}>
+            <SelectTrigger className={'w-1/2 lg:w-[180px] bg-white'} aria-label={'Select environment'}>
               <SelectValue placeholder={'All environments'} />
             </SelectTrigger>
             <SelectContent>
@@ -78,7 +78,7 @@ export default function SecretList(props: {
             onValueChange={(value) => setSelectedSecretType(value === 'none' ? value : (value as SECRET_TYPE))}
             value={selectedSecretType}
           >
-            <SelectTrigger className={'w-[200px] bg-white'} aria-label={'Select secret type'}>
+            <SelectTrigger className={'w-1/2 lg:w-[200px] bg-white'} aria-label={'Select secret type'}>
               <SelectValue placeholder={'All secret types'} />
             </SelectTrigger>
             <SelectContent>
@@ -96,6 +96,7 @@ export default function SecretList(props: {
           </Select>
         </div>
       </div>
+
       <SecretsTable projectId={props.projectInfo.id} data={filteredSecrets} filter={filter} />
     </div>
   );
