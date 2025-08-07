@@ -27,7 +27,7 @@ describe('Delete project dialog', () => {
   });
 
   test('Delete a project via dialog', async () => {
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const projectName = faker.lorem.words(2);
     const onCloseMock = jest.fn();
     const { pushMock } = useRouterMockFactory();

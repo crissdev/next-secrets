@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { useParams } from 'next/navigation';
 
@@ -29,7 +30,7 @@ describe('Project list', () => {
     await act(async () => {
       const projectsPromise = Promise.resolve<Project[]>([
         {
-          id: crypto.randomUUID(),
+          id: faker.string.uuid(),
           name: 'Project_1',
           description: 'Project_1 description',
           color: '#ff0000',

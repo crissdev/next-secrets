@@ -12,7 +12,7 @@ jest.mock('@/lib/queries');
 
 describe('Create secret dialog', () => {
   test('Create a new secret via dialog', async () => {
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
 
     const onCloseMock = jest.fn();
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
@@ -43,9 +43,9 @@ describe('Create secret dialog', () => {
   });
 
   test('Update secret via dialog', async () => {
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const secret: Secret = {
-      id: crypto.randomUUID(),
+      id: faker.string.uuid(),
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
@@ -92,7 +92,7 @@ describe('Create secret dialog', () => {
 
   test('All secret types are available', async () => {
     const onCloseMock = jest.fn();
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
 
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
     expect(screen.getByRole('dialog')).toBeVisible();
@@ -109,7 +109,7 @@ describe('Create secret dialog', () => {
 
   test('All environments are available', async () => {
     const onCloseMock = jest.fn();
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
 
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
     expect(screen.getByRole('dialog')).toBeVisible();
@@ -131,9 +131,9 @@ describe('Create secret dialog', () => {
 
   test('Secret value is explicitly updated', async () => {
     const onCloseMock = jest.fn();
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const secret: Secret = {
-      id: crypto.randomUUID(),
+      id: faker.string.uuid(),
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),

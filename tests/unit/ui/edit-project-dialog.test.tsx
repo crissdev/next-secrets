@@ -22,7 +22,7 @@ describe('Edit project dialog', () => {
   test('Create a new project via dialog', async () => {
     const { pushMock } = useRouterMockFactory();
 
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const projectName = faker.lorem.word();
     const projectDescription = faker.lorem.sentence(3);
     const projectColor = faker.color.rgb({ format: 'hex' });
@@ -65,7 +65,7 @@ describe('Edit project dialog', () => {
   test('Edit project via dialog', async () => {
     const onCloseMock = jest.fn();
     const project: Project = {
-      id: crypto.randomUUID(),
+      id: faker.string.uuid(),
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(3),
       color: faker.color.rgb({ format: 'hex' }),

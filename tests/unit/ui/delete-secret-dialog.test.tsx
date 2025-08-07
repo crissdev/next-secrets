@@ -13,8 +13,8 @@ describe('Delete secret dialog', () => {
   const deleteSecretMock = deleteSecret as jest.Mock<ReturnType<typeof deleteSecret>, Parameters<typeof deleteSecret>>;
 
   test('Delete a secret via dialog', async () => {
-    const projectId = crypto.randomUUID();
-    const secretId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
+    const secretId = faker.string.uuid();
     const secretName = faker.lorem.slug(3);
     const onCloseMock = jest.fn();
 
