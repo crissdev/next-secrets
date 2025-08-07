@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useParams } from 'next/navigation';
@@ -6,8 +7,6 @@ import SecretList from '@/app/(vault)/projects/[id]/secret-list';
 import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
 
 jest.mock('@/lib/store/db');
-import { faker } from '@faker-js/faker';
-
 import { getSecretValue } from '@/lib/store/db';
 
 describe('Secret list', () => {
@@ -32,7 +31,7 @@ describe('Secret list', () => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
         {
-          id: crypto.randomUUID(),
+          id: faker.string.uuid(),
           name: 'Secret_1',
           value: '1',
           description: 'Secret_1 description',
@@ -41,7 +40,7 @@ describe('Secret list', () => {
           lastUpdated: new Date().toISOString(),
         },
         {
-          id: crypto.randomUUID(),
+          id: faker.string.uuid(),
           name: 'Secret_2',
           value: '2',
           description: 'Secret_2 description',
@@ -76,7 +75,7 @@ describe('Secret list', () => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
         {
-          id: crypto.randomUUID(),
+          id: faker.string.uuid(),
           name: 'Secret_1',
           value: '1',
           description: 'Secret_1 description',
@@ -95,7 +94,7 @@ describe('Secret list', () => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
         {
-          id: crypto.randomUUID(),
+          id: faker.string.uuid(),
           name: 'Secret_1',
           value: '1',
           description: 'Secret_1 description',
@@ -114,9 +113,9 @@ describe('Secret list', () => {
     userEvent.setup({ writeToClipboard: true });
     jest.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => Promise.resolve());
 
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const projectName = 'Test Project';
-    const secretId = crypto.randomUUID();
+    const secretId = faker.string.uuid();
     const secretValue = '12345';
 
     const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [projectId: string, secretId: string]>;
@@ -147,9 +146,9 @@ describe('Secret list', () => {
   });
 
   test('View secret value', async () => {
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const projectName = 'Test Project';
-    const secretId = crypto.randomUUID();
+    const secretId = faker.string.uuid();
     const secretValue = '12345';
 
     const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [projectId: string, secretId: string]>;
@@ -182,9 +181,9 @@ describe('Secret list', () => {
     userEvent.setup({ writeToClipboard: true });
     jest.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => Promise.resolve());
 
-    const projectId = crypto.randomUUID();
+    const projectId = faker.string.uuid();
     const projectName = 'Test Project';
-    const secretId = crypto.randomUUID();
+    const secretId = faker.string.uuid();
     const secretValue = '12345';
 
     const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [projectId: string, secretId: string]>;
@@ -217,7 +216,7 @@ describe('Secret list', () => {
   test.each(DEFAULT_ENVIRONMENTS)('Filter secrets by environment $name', async ({ name: envName }) => {
     await act(async () => {
       const secrets = DEFAULT_ENVIRONMENTS.map<Secret>((env) => ({
-        id: crypto.randomUUID(),
+        id: faker.string.uuid(),
         name: faker.lorem.words(2),
         value: '[REDACTED]',
         description: faker.lorem.sentence(5),
