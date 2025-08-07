@@ -213,6 +213,39 @@ describe('Secret list', () => {
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent(secretValue);
   });
 
+  test('Filter secrets by name', async () => {
+    await act(async () => {
+      const secretsPromise = Promise.resolve<Secret[]>([
+        {
+          id: faker.string.uuid(),
+          name: 'Secret_1',
+          value: '1',
+          description: '_1 Secret_1 description',
+          type: SECRET_TYPE.EnvironmentVariable,
+          environmentId: DEFAULT_ENVIRONMENTS[0].id,
+          lastUpdated: new Date().toISOString(),
+        },
+        {
+          id: faker.string.uuid(),
+          name: 'Secret_2',
+          value: '2',
+          description: '_1 Secret_2 description',
+          type: SECRET_TYPE.Password,
+          environmentId: DEFAULT_ENVIRONMENTS[0].id,
+          lastUpdated: new Date().toISOString(),
+        },
+      ]);
+      const projectInfo = { id: faker.string.uuid(), name: faker.lorem.words(2) };
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} />);
+    });
+
+    expect(screen.getByRole('table')).toHaveProperty('rows.length', 3);
+
+    await userEvent.type(screen.getByPlaceholderText('Search secrets...'), '_1');
+    expect(screen.getAllByRole('row')).toHaveLength(2);
+    expect(screen.getByTestId('secret-name-0')).toHaveTextContent('Secret_1');
+  });
+
   test.each(DEFAULT_ENVIRONMENTS)('Filter secrets by environment $name', async ({ name: envName }) => {
     await act(async () => {
       const secrets = DEFAULT_ENVIRONMENTS.map<Secret>((env) => ({
