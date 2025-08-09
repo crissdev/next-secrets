@@ -24,8 +24,8 @@ const envSchema = z
 nextEnv.loadEnvConfig(process.cwd(), true);
 
 try {
-  const result = envSchema.parse(process.env);
-  console.log(result);
+  envSchema.parse(process.env);
+  console.log('Environment variables are valid.');
 } catch (err) {
   if (!isZodError(err)) throw err;
   console.error(styleText('red', 'Environment variables are not valid.'));

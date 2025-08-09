@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 
-import { type Secret, SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { createProject } from '@/lib/services/projects.service';
-import { createSecret, getSecrets, updateSecret } from '@/lib/services/secrets.service';
+import { createSecret, downloadSecrets, getSecrets, updateSecret } from '@/lib/services/secrets.service';
 
 describe('Secret service', () => {
   async function createTestProject() {
@@ -10,6 +10,17 @@ describe('Secret service', () => {
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(),
       color: faker.color.rgb({ format: 'hex' }),
+    });
+  }
+
+  function createTestSecret(projectId: string, overrides: Partial<Omit<Secret, 'id' | 'lastUpdated'>> = {}) {
+    return createSecret(projectId, {
+      name: faker.lorem.words(2),
+      value: faker.string.alphanumeric(10),
+      description: faker.lorem.sentence(),
+      type: SECRET_TYPE.EnvironmentVariable,
+      environmentId: DEFAULT_ENVIRONMENTS[0].id,
+      ...overrides,
     });
   }
 
@@ -104,5 +115,28 @@ describe('Secret service', () => {
         environmentId: 100,
       }),
     ).rejects.toThrow('Secret value cannot be empty.');
+  });
+
+  test('Download selected secrets for a project', async () => {
+    const project = await createTestProject();
+
+    await createTestSecret(project.id);
+    const secret2 = await createTestSecret(project.id);
+
+    const secrets = await downloadSecrets(project.id, [secret2.id]);
+    expect(secrets).toEqual([{ name: secret2.name, value: secret2.value }]);
+  });
+
+  test('Download all secrets for a project', async () => {
+    const project = await createTestProject();
+
+    const secret1 = await createTestSecret(project.id);
+    const secret2 = await createTestSecret(project.id);
+
+    const secrets = await downloadSecrets(project.id);
+    expect(secrets).toEqual([
+      { name: secret1.name, value: secret1.value },
+      { name: secret2.name, value: secret2.value },
+    ]);
   });
 });

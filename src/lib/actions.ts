@@ -7,7 +7,7 @@ import type { Project, Secret } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
-import { createSecret, getSecretValue, updateSecret } from '@/lib/services/secrets.service';
+import { createSecret, downloadSecrets, getSecretValue, updateSecret } from '@/lib/services/secrets.service';
 import { deleteSecret, updateSecretValue } from '@/lib/store/db';
 
 export type ActionErrorResult = {
@@ -192,6 +192,25 @@ export async function getSecretValueAction(
       error: {
         code: SERVICE_ERROR.INTERNAL_ERROR,
         message: 'Cannot get secret value',
+      },
+    };
+  }
+}
+
+export async function downloadSecretsAction(
+  projectId: string,
+  secretIds?: string[],
+): Promise<ActionSuccessResult<{ name: string; value: string }[]> | ActionErrorResult> {
+  try {
+    const secrets = await downloadSecrets(projectId, secretIds);
+    return { success: true as const, data: secrets };
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false as const,
+      error: {
+        code: SERVICE_ERROR.INTERNAL_ERROR,
+        message: 'Cannot download secrets',
       },
     };
   }

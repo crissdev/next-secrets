@@ -41,3 +41,12 @@ export async function updateSecret(projectId: string, input: Omit<Secret, 'lastU
     value: '[REDACTED]',
   };
 }
+
+export async function downloadSecrets(projectId: string, secretIds?: string[]) {
+  const secrets = await db.getSecrets(projectId);
+  const filteredSecrets = secretIds?.length ? secrets.filter((secret) => secretIds.includes(secret.id)) : secrets;
+  return filteredSecrets.map((secret) => ({
+    name: secret.name,
+    value: secret.value,
+  }));
+}

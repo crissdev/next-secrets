@@ -1,10 +1,10 @@
 'use client';
 
 import { LockIcon, SearchIcon } from 'lucide-react';
-import { use, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 
+import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
 import SecretsTable from '@/app/(vault)/projects/[id]/secrets-table';
-import AddSecretButton from '@/app/(vault)/projects/add-secret-button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DEFAULT_ENVIRONMENTS, type Secret, type SECRET_TYPE } from '@/lib/definitions';
@@ -12,6 +12,7 @@ import { DEFAULT_ENVIRONMENTS, type Secret, type SECRET_TYPE } from '@/lib/defin
 export default function SecretList(props: {
   secretsPromise: Promise<Secret[]>;
   projectInfo: { id: string; name: string };
+  onFilterChanged(value: Secret[]): void;
 }) {
   const secrets = use(props.secretsPromise);
   const [filter, setFilter] = useState('');
@@ -19,9 +20,20 @@ export default function SecretList(props: {
   const [selectedSecretType, setSelectedSecretType] = useState<SECRET_TYPE | 'none'>('none');
   const allSecretTypes = [...new Set(secrets.map((s) => s.type))];
 
-  const filteredSecrets = secrets
-    .filter((secret) => !selectedEnvironmentId || secret.environmentId === selectedEnvironmentId)
-    .filter((secret) => selectedSecretType === 'none' || secret.type === selectedSecretType);
+  const filteredSecrets = useMemo(
+    () =>
+      secrets
+        .filter((secret) => !selectedEnvironmentId || secret.environmentId === selectedEnvironmentId)
+        .filter((secret) => selectedSecretType === 'none' || secret.type === selectedSecretType),
+    [secrets, selectedEnvironmentId, selectedSecretType],
+  );
+
+  const { onFilterChanged } = props;
+  const hasFilters = selectedSecretType !== 'none' || selectedEnvironmentId !== 0 || filter.length > 0;
+
+  useEffect(() => {
+    onFilterChanged(hasFilters ? filteredSecrets : []);
+  }, [filteredSecrets, hasFilters, onFilterChanged]);
 
   return secrets.length === 0 ? (
     <div className={'h-full flex items-center'}>
