@@ -1,9 +1,14 @@
 import { LockIcon } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 import { fetchProjects } from '@/lib/queries';
 
 export default async function Home() {
   const projects = await fetchProjects();
+
+  if (projects.length > 0) {
+    redirect(`/projects/${projects[0].id}`);
+  }
 
   return (
     <div className={'size-full flex items-center justify-center flex-col'}>
