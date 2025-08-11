@@ -1,6 +1,6 @@
 import { redirect, RedirectType } from 'next/navigation';
 
-import PageClient from '@/app/(vault)/projects/[id]/page-client';
+import PageClient from '@/app/projects/[id]/page-client';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
 
 export const dynamicParams = true;

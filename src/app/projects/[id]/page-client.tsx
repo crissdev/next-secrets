@@ -3,10 +3,10 @@
 import { PlusIcon } from 'lucide-react';
 import { Suspense, useCallback, useMemo, useState } from 'react';
 
-import AddSecretButton from '@/app/(vault)/projects/[id]/add-secret-button';
-import DownloadSecretsButton from '@/app/(vault)/projects/[id]/download-secrets-button';
-import SecretCount from '@/app/(vault)/projects/[id]/secret-count';
-import SecretList from '@/app/(vault)/projects/[id]/secret-list';
+import AddSecretButton from '@/app/projects/[id]/add-secret-button';
+import DownloadSecretsButton from '@/app/projects/[id]/download-secrets-button';
+import SecretCount from '@/app/projects/[id]/secret-count';
+import SecretList from '@/app/projects/[id]/secret-list';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type Secret } from '@/lib/definitions';
 

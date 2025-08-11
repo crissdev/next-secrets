@@ -3,7 +3,7 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useParams } from 'next/navigation';
 
-import SecretList from '@/app/(vault)/projects/[id]/secret-list';
+import SecretList from '@/app/projects/[id]/secret-list';
 import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
 
 jest.mock('@/lib/store/db');

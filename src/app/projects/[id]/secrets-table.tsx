@@ -14,10 +14,10 @@ import { useParams } from 'next/navigation';
 import { startTransition, useActionState, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import SecretTypeIcon from '@/app/(vault)/projects/[id]/secret-type-icon';
-import DeleteSecretDialog from '@/app/(vault)/projects/delete-secret-dialog';
-import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
-import { secretTypeColors } from '@/app/(vault)/projects/secret-color-mapping';
+import SecretTypeIcon from '@/app/projects/[id]/secret-type-icon';
+import DeleteSecretDialog from '@/app/projects/delete-secret-dialog';
+import EditSecretDialog from '@/app/projects/edit-secret-dialog';
+import { secretTypeColors } from '@/app/projects/secret-color-mapping';
 import { LoadingDots } from '@/components/loading-dots';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

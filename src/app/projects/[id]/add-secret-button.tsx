@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
 
-import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
+import EditSecretDialog from '@/app/projects/edit-secret-dialog';
 import { Button } from '@/components/ui/button';
 
 export default function AddSecretButton(props: { icon?: ReactNode; testId?: string }) {

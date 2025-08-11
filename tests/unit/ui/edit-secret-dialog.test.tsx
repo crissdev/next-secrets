@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 
-import EditSecretDialog from '@/app/(vault)/projects/edit-secret-dialog';
+import EditSecretDialog from '@/app/projects/edit-secret-dialog';
 import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
 import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/db';
 

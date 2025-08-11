@@ -1,8 +1,14 @@
 import './globals.css';
 
+import { LockIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Suspense } from 'react';
 import { Toaster } from 'sonner';
+
+import ProjectList from '@/app/projects/project-list';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar';
+import { fetchProjects } from '@/lib/queries';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,11 +32,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const projectsPromise = fetchProjects();
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Toaster richColors />
-        {children}
+        <SidebarProvider>
+          <Sidebar>
+            <SidebarHeader>
+              <div data-testid={'app-title'} className={'text-xl font-bold inline-flex gap-2 items-center px-2 pt-2'}>
+                <LockIcon size={'20'} className={'stroke-blue-700'} />
+                Next Secrets
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
+              <div className={'p-2'}>
+                <Suspense fallback={null}>
+                  <ProjectList projectsPromise={projectsPromise} />
+                </Suspense>
+              </div>
+            </SidebarContent>
+          </Sidebar>
+          <main className={'flex flex-1 bg-slate-50 dark:bg-slate-900 overflow-hidden'}>{children}</main>
+        </SidebarProvider>
       </body>
     </html>
   );

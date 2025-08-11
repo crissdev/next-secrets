@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { useParams } from 'next/navigation';
 
-import ProjectList from '@/app/(vault)/projects/project-list';
+import ProjectList from '@/app/projects/project-list';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { type Project } from '@/lib/definitions';
 
