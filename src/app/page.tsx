@@ -1,9 +1,11 @@
 import { LockIcon } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 import { fetchProjects } from '@/lib/queries';
 
 export default async function Home() {
+  await connection();
   const projects = await fetchProjects();
 
   if (projects.length > 0) {
