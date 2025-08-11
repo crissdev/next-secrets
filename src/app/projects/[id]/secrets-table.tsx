@@ -96,7 +96,12 @@ function useSortingState() {
   };
 }
 
-export default function SecretsTable(props: { projectId: string; data: Secret[]; filter?: string }) {
+export default function SecretsTable(props: {
+  projectId: string;
+  data: Secret[];
+  filter?: string;
+  condensedLayout?: boolean;
+}) {
   const { sorting, onChangeSorting } = useSortingState();
 
   const columns = useMemo<ColumnDef<Secret>[]>(
@@ -116,7 +121,7 @@ export default function SecretsTable(props: { projectId: string; data: Secret[];
         cell: ({ row }) => {
           return (
             <div className={'flex items-center gap-4'}>
-              <SecretTypeIcon type={row.getValue('type')} />
+              <SecretTypeIcon size={props.condensedLayout ? 'small' : 'default'} type={row.getValue('type')} />
               <div className={'flex flex-col'}>
                 <span className={'font-medium'} data-testid={`secret-name-${row.index}`}>
                   {row.getValue('name')}
@@ -216,7 +221,7 @@ export default function SecretsTable(props: { projectId: string; data: Secret[];
             }
             await navigator.clipboard.writeText(valueToCopy);
             toast.message('Copied to clipboard', {
-              description: 'Secret value has been copied to clipboard..',
+              description: 'Secret value has been copied to clipboard.',
               invert: true,
               position: 'bottom-right',
             });
@@ -358,7 +363,7 @@ export default function SecretsTable(props: { projectId: string; data: Secret[];
         },
       },
     ],
-    [onChangeSorting, props.projectId],
+    [props.condensedLayout, onChangeSorting, props.projectId],
   );
 
   const table = useReactTable({
@@ -380,7 +385,7 @@ export default function SecretsTable(props: { projectId: string; data: Secret[];
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id} className={'h-12'}>
+                <TableHead key={header.id} className={`h-12 ${props.condensedLayout ? 'px-0' : ''}`}>
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               );
@@ -393,7 +398,7 @@ export default function SecretsTable(props: { projectId: string; data: Secret[];
           table.getRowModel().rows.map((row) => (
             <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
               {row.getVisibleCells().map((cell) => (
-                <TableCell className={'p-4'} key={cell.id}>
+                <TableCell className={`${props.condensedLayout ? 'py-1 px-2' : 'p-4'}`} key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}

@@ -35,6 +35,8 @@ export default function SecretList(props: {
     onFilterChanged(hasFilters ? filteredSecrets : []);
   }, [filteredSecrets, hasFilters, onFilterChanged]);
 
+  const [condensedLayout] = useState(false);
+
   return secrets.length === 0 ? (
     <div className={'h-full flex items-center'}>
       <div className="max-w-md text-center mx-auto">
@@ -109,7 +111,12 @@ export default function SecretList(props: {
         </div>
       </div>
 
-      <SecretsTable projectId={props.projectInfo.id} data={filteredSecrets} filter={filter} />
+      <SecretsTable
+        projectId={props.projectInfo.id}
+        data={filteredSecrets}
+        filter={filter}
+        condensedLayout={condensedLayout}
+      />
     </div>
   );
 }
