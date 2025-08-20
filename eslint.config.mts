@@ -1,4 +1,5 @@
 import { FlatCompat } from '@eslint/eslintrc';
+import { type Linter } from 'eslint';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,7 +10,10 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [
+const eslintConfig: Linter.Config[] = [
+  {
+    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+  },
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   ...compat.config({
     plugins: ['simple-import-sort', 'no-only-tests'],
