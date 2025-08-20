@@ -12,7 +12,15 @@ const compat = new FlatCompat({
 
 const eslintConfig: Linter.Config[] = [
   {
-    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      '.swc/**',
+      'next-env.d.ts',
+      'coverage/**',
+      'tests/.temp/**',
+      'test-results/**',
+    ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   ...compat.config({
