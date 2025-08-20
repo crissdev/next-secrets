@@ -9,7 +9,7 @@ export async function generateStaticParams() {
   return [];
 }
 
-export default async function ProjectPage(props: { params: Promise<{ id: string }> }) {
+export default async function ProjectPage(props: PageProps<'/projects/[id]'>) {
   const params = await props.params;
   const project = await fetchProject(params.id);
 

@@ -27,11 +27,7 @@ export const metadata: Metadata = {
     'different deployment environments (Development, Staging, Production).',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: LayoutProps<'/'>) {
   const projectsPromise = fetchProjects();
 
   return (
