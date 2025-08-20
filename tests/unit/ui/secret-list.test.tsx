@@ -20,7 +20,7 @@ describe('Secret list', () => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
     });
     expect(screen.getByTestId('no-secrets-message')).toHaveTextContent('No secrets yet');
     expect(screen.getByTestId('no-secrets-hint')).toHaveTextContent(`Add your first secret to the "XYZ" project.`);
@@ -50,7 +50,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
     });
 
     expect(screen.getByRole('table')).toHaveProperty('rows.length', 3);
@@ -85,7 +85,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
     });
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(environment.name);
   });
@@ -104,7 +104,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
     });
     expect(screen.getByTestId('secret-type-0')).toHaveTextContent(type);
   });
@@ -133,7 +133,13 @@ describe('Secret list', () => {
           lastUpdated: new Date().toISOString(),
         },
       ]);
-      render(<SecretList projectInfo={{ id: projectId, name: projectName }} secretsPromise={secretsPromise} />);
+      render(
+        <SecretList
+          projectInfo={{ id: projectId, name: projectName }}
+          secretsPromise={secretsPromise}
+          onFilterChanged={jest.fn()}
+        />,
+      );
     });
 
     await userEvent.click(screen.getByTestId('copy-secret-0'));
@@ -166,7 +172,13 @@ describe('Secret list', () => {
           lastUpdated: new Date().toISOString(),
         },
       ]);
-      render(<SecretList projectInfo={{ id: projectId, name: projectName }} secretsPromise={secretsPromise} />);
+      render(
+        <SecretList
+          projectInfo={{ id: projectId, name: projectName }}
+          secretsPromise={secretsPromise}
+          onFilterChanged={jest.fn()}
+        />,
+      );
     });
 
     await userEvent.click(screen.getByTestId('show-secret-0'));
@@ -201,7 +213,13 @@ describe('Secret list', () => {
           lastUpdated: new Date().toISOString(),
         },
       ]);
-      render(<SecretList projectInfo={{ id: projectId, name: projectName }} secretsPromise={secretsPromise} />);
+      render(
+        <SecretList
+          projectInfo={{ id: projectId, name: projectName }}
+          secretsPromise={secretsPromise}
+          onFilterChanged={jest.fn()}
+        />,
+      );
     });
 
     await userEvent.click(screen.getByTestId('copy-secret-0'));
@@ -236,7 +254,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: faker.string.uuid(), name: faker.lorem.words(2) };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
     });
 
     expect(screen.getByRole('table')).toHaveProperty('rows.length', 3);
@@ -262,6 +280,7 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: faker.string.uuid(), name: faker.lorem.words(2) }}
           secretsPromise={secretsPromise}
+          onFilterChanged={jest.fn()}
         />,
       );
     });
@@ -297,6 +316,7 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: faker.string.uuid(), name: faker.lorem.words(2) }}
           secretsPromise={secretsPromise}
+          onFilterChanged={jest.fn()}
         />,
       );
     });
