@@ -72,60 +72,66 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
           </span>
         )}
 
-        <div>
-          <div className={'text-muted-foreground font-semibold text-sm tracking-wider pl-2 mb-3'}>PROJECTS</div>
-          <SidebarMenu>
-            {projectsList.map((project, index) => (
-              <SidebarMenuItem key={project.id} className={`group/actions`}>
-                <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
-                  <Link data-testid={`sidebar-project-name-${index}`} prefetch={false} href={`/projects/${project.id}`}>
-                    <span
-                      data-testid={`sidebar-project-color-${index}`}
-                      className={'rounded-full size-2 inline-block mr-1'}
-                      style={{ backgroundColor: project.color ?? '#2563EBFF' }}
-                    />
-                    <span className={'inline-block'}>{project.name}</span>
-                  </Link>
-                </SidebarMenuButton>
+        {projectsList.length > 0 && (
+          <div>
+            <div className={'text-muted-foreground font-semibold text-sm tracking-wider pl-2 mb-3'}>PROJECTS</div>
+            <SidebarMenu>
+              {projectsList.map((project, index) => (
+                <SidebarMenuItem key={project.id} className={`group/actions`}>
+                  <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
+                    <Link
+                      data-testid={`sidebar-project-name-${index}`}
+                      prefetch={false}
+                      href={`/projects/${project.id}`}
+                    >
+                      <span
+                        data-testid={`sidebar-project-color-${index}`}
+                        className={'rounded-full size-2 inline-block mr-1'}
+                        style={{ backgroundColor: project.color ?? '#2563EBFF' }}
+                      />
+                      <span className={'inline-block'}>{project.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction className={`opacity-0 group-hover/actions:opacity-100 mt-1 cursor-pointer`}>
-                      <MoreVertical />
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right" align="start">
-                    <DropdownMenuItem asChild>
-                      <SidebarMenuButton
-                        variant={'outline'}
-                        onClick={() => {
-                          setContextMenuProjectId(project.id);
-                          setCreateProjectDialogOpen(true);
-                        }}
-                      >
-                        <PencilLineIcon />
-                        <span>Edit</span>
-                      </SidebarMenuButton>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <SidebarMenuButton
-                        className={'text-destructive'}
-                        variant={'outline'}
-                        onClick={() => {
-                          setContextMenuProjectId(project.id);
-                          setDeleteProjectDialogOpen(true);
-                        }}
-                      >
-                        <Trash2Icon size={20} className={'text-destructive'} />
-                        <span>Delete</span>
-                      </SidebarMenuButton>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction className={`opacity-0 group-hover/actions:opacity-100 mt-1 cursor-pointer`}>
+                        <MoreVertical />
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start">
+                      <DropdownMenuItem asChild>
+                        <SidebarMenuButton
+                          variant={'outline'}
+                          onClick={() => {
+                            setContextMenuProjectId(project.id);
+                            setCreateProjectDialogOpen(true);
+                          }}
+                        >
+                          <PencilLineIcon />
+                          <span>Edit</span>
+                        </SidebarMenuButton>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <SidebarMenuButton
+                          className={'text-destructive'}
+                          variant={'outline'}
+                          onClick={() => {
+                            setContextMenuProjectId(project.id);
+                            setDeleteProjectDialogOpen(true);
+                          }}
+                        >
+                          <Trash2Icon size={20} className={'text-destructive'} />
+                          <span>Delete</span>
+                        </SidebarMenuButton>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </div>
+        )}
       </div>
     </div>
   );
