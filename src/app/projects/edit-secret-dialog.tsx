@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { SecretType } from '@prisma/client';
 import { Eye, EyeOff } from 'lucide-react';
 import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -22,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction, updateSecretAction, updateSecretValueAction } from '@/lib/actions';
-import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createSecretSchema } from '@/lib/services/schemas';
 
@@ -34,12 +35,12 @@ type EditSecretDialogProps = {
 };
 
 const SecretTypes = [
-  { label: 'API Key', value: SECRET_TYPE.ApiKey },
-  { label: 'Connection String', value: SECRET_TYPE.ConnectionString },
-  { label: 'Environment Variable', value: SECRET_TYPE.EnvironmentVariable },
-  { label: 'Password', value: SECRET_TYPE.Password },
-  { label: 'Token', value: SECRET_TYPE.Token },
-  { label: 'Other', value: SECRET_TYPE.Other },
+  { label: 'API Key', value: SecretType.API_KEY },
+  { label: 'Connection String', value: SecretType.CONNECTION_STRING },
+  { label: 'Environment Variable', value: SecretType.ENVIRONMENT_VARIABLE },
+  { label: 'Password', value: SecretType.PASSWORD },
+  { label: 'Token', value: SecretType.TOKEN },
+  { label: 'Other', value: SecretType.OTHER },
 ];
 
 export default function EditSecretDialog(props: EditSecretDialogProps) {
@@ -50,12 +51,12 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
       name: '',
       description: '',
       value: '',
-      type: SECRET_TYPE.EnvironmentVariable,
+      type: SecretType.ENVIRONMENT_VARIABLE,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     },
   });
   const [showValue, setShowValue] = useState(true);
-  const htmlId = useId();
+  const idPrefix = useId();
 
   const onCloseDialog = () => {
     form.reset();
@@ -208,19 +209,15 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
               name={'environmentId'}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor={`${htmlId}-secret-environment-id`}>Environment</FormLabel>
+                  <FormLabel htmlFor={`${idPrefix}-secret-environment-id`}>Environment</FormLabel>
                   <FormControl>
-                    <Select
-                      {...field}
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      value={String(field.value)}
-                    >
-                      <SelectTrigger id={`${htmlId}-secret-environment-id`} className={'w-full'}>
+                    <Select {...field} onValueChange={(value) => field.onChange(value)} value={field.value}>
+                      <SelectTrigger id={`${idPrefix}-secret-environment-id`} className={'w-full'}>
                         <SelectValue placeholder="Select an envrionment this secret is defined for" />
                       </SelectTrigger>
                       <SelectContent>
                         {DEFAULT_ENVIRONMENTS.map(({ id, name }) => (
-                          <SelectItem value={String(id)} key={id}>
+                          <SelectItem key={id} value={id}>
                             {name}
                           </SelectItem>
                         ))}
@@ -235,11 +232,11 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
               {props.secret && (
                 <div className="flex items-center gap-2 mb-3">
                   <Switch
-                    id={`${htmlId}-show-secret`}
+                    id={`${idPrefix}-show-secret`}
                     checked={valueFieldVisible}
                     onCheckedChange={(checked) => setValueFieldVisible(checked)}
                   />
-                  <Label htmlFor={`${htmlId}-show-secret`}>Update secret value</Label>
+                  <Label htmlFor={`${idPrefix}-show-secret`}>Update secret value</Label>
                 </div>
               )}
               <FormField

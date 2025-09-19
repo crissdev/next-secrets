@@ -1,10 +1,11 @@
 import { faker } from '@faker-js/faker';
+import { SecretType } from '@prisma/client';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 
 import EditSecretDialog from '@/app/projects/edit-secret-dialog';
-import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/db';
 
 jest.mock('@/lib/store/db');
@@ -32,7 +33,7 @@ describe('Create secret dialog', () => {
       name: secretName,
       description: secretDescription,
       value: secretValue,
-      type: SECRET_TYPE.EnvironmentVariable,
+      type: SecretType.ENVIRONMENT_VARIABLE,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(onCloseMock).toHaveBeenCalled();
@@ -49,9 +50,10 @@ describe('Create secret dialog', () => {
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
-      type: SECRET_TYPE.EnvironmentVariable,
+      type: SecretType.ENVIRONMENT_VARIABLE,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
-      lastUpdated: new Date().toISOString(),
+      updatedAt: new Date(),
+      projectId,
     };
 
     const onCloseMock = jest.fn();
@@ -76,11 +78,11 @@ describe('Create secret dialog', () => {
 
     // Verify updateSecret was called with correct parameters
     expect(updateSecret).toHaveBeenCalledTimes(1);
-    expect(updateSecret).toHaveBeenCalledWith(projectId, {
+    expect(updateSecret).toHaveBeenCalledWith({
       id: secret.id,
       name: updatedName,
       description: updatedDescription,
-      type: SECRET_TYPE.EnvironmentVariable,
+      type: SecretType.ENVIRONMENT_VARIABLE,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(onCloseMock).toHaveBeenCalled();
@@ -98,13 +100,14 @@ describe('Create secret dialog', () => {
     expect(screen.getByRole('dialog')).toBeVisible();
 
     await userEvent.click(screen.getByRole('combobox', { name: 'Secret type' }));
-    expect(
-      screen
-        .getAllByRole('option')
-        .map((e) => e.textContent)
-        .sort()
-        .join(','),
-    ).toEqual(Object.values(SECRET_TYPE).sort().join(','));
+    expect(screen.getAllByRole('option').map((e) => e.textContent)).toEqual([
+      'API Key',
+      'Connection String',
+      'Environment Variable',
+      'Password',
+      'Token',
+      'Other',
+    ]);
   });
 
   test('All environments are available', async () => {
@@ -137,9 +140,10 @@ describe('Create secret dialog', () => {
       name: faker.lorem.words(2),
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
-      type: SECRET_TYPE.EnvironmentVariable,
+      type: SecretType.ENVIRONMENT_VARIABLE,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
-      lastUpdated: new Date().toISOString(),
+      updatedAt: new Date(),
+      projectId,
     };
 
     render(<EditSecretDialog projectId={projectId} secret={secret} open onClose={onCloseMock} />);
@@ -154,15 +158,15 @@ describe('Create secret dialog', () => {
 
     // Verify updateSecret was called with correct parameters
     expect(updateSecret).toHaveBeenCalledTimes(1);
-    expect(updateSecret).toHaveBeenCalledWith(projectId, {
+    expect(updateSecret).toHaveBeenCalledWith({
       id: secret.id,
       name: secret.name,
       description: secret.description,
-      type: SECRET_TYPE.EnvironmentVariable,
+      type: SecretType.ENVIRONMENT_VARIABLE,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(updateSecretValue).toHaveBeenCalledTimes(1);
-    expect(updateSecretValue).toHaveBeenCalledWith(projectId, secret.id, updatedValue);
+    expect(updateSecretValue).toHaveBeenCalledWith(secret.id, updatedValue);
     expect(onCloseMock).toHaveBeenCalled();
   });
 });

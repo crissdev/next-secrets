@@ -5,23 +5,27 @@ import z, { type ZodError } from 'zod';
 
 const envSchema = z
   .object({
-    DATA_FILE_PATH: z.string().min(1, 'DATA_FILE_PATH must be set to a file name'),
+    DATABASE_URL: z.string(),
   })
   .and(
     z
       .object({
-        DATA_FILE_ENC_KEY: z.string().refine((v) => !v?.trim()),
+        DATA_ENC_KEY: z.string().refine((v) => !v?.trim()),
       })
       .or(
         z.object({
-          DATA_FILE_ENC_KEY: z.string().min(1, 'DATA_FILE_ENC_KEY must be set to a valid key'),
-          DATA_FILE_ENC_ALGO: z.string().default('aes-256-cbc'),
-          DATA_FILE_ENC_SALT: z.string().min(16, 'DATA_FILE_ENC_SALT must be at least 16 characters long'),
+          DATA_ENC_KEY: z.string().min(1, 'DATA_ENC_KEY must be set to a valid key'),
+          DATA_ENC_ALGO: z.string().default('aes-256-cbc'),
+          DATA_ENC_SALT: z.string().min(16, 'DATA_ENC_SALT must be at least 16 characters long'),
         }),
       ),
   );
 
-nextEnv.loadEnvConfig(process.cwd(), true);
+const { loadedEnvFiles } = nextEnv.loadEnvConfig(process.cwd(), true);
+console.log(
+  'Loaded env files:',
+  loadedEnvFiles.map((e) => e.path),
+);
 
 try {
   envSchema.parse(process.env);

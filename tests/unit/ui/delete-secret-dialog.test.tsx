@@ -36,7 +36,7 @@ describe('Delete secret dialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Delete secret' }));
 
     expect(deleteSecretMock).toHaveBeenCalledTimes(1);
-    expect(deleteSecretMock).toHaveBeenCalledWith(projectId, secretId);
+    expect(deleteSecretMock).toHaveBeenCalledWith(secretId);
     expect(revalidatePath).toHaveBeenCalledTimes(1);
     expect(revalidatePath).toHaveBeenCalledWith(`/projects/${projectId}`);
     expect(onCloseMock).toHaveBeenCalledTimes(1);

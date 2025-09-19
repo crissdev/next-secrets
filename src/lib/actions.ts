@@ -92,7 +92,7 @@ export async function updateProjectAction(
 // Secrets
 export async function createSecretAction(
   projectId: string,
-  data: Omit<Secret, 'id' | 'lastUpdated'>,
+  data: Omit<Secret, 'id' | 'updatedAt' | 'projectId'>,
 ): Promise<ActionSuccessResult<Secret> | ActionErrorResult> {
   try {
     const { name, description, type, environmentId, value } = data;
@@ -118,7 +118,7 @@ export async function deleteSecretAction(
   secretId: string,
 ): Promise<ActionSuccessResultVoid | ActionErrorResult> {
   try {
-    await deleteSecret(projectId, secretId);
+    await deleteSecret(secretId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true as const };
   } catch (err) {
@@ -135,10 +135,10 @@ export async function deleteSecretAction(
 
 export async function updateSecretAction(
   projectId: string,
-  secret: Omit<Secret, 'lastUpdated' | 'value'>,
+  secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>,
 ): Promise<ActionSuccessResult<Secret> | ActionErrorResult> {
   try {
-    const updatedSecret = await updateSecret(projectId, secret);
+    const updatedSecret = await updateSecret(secret);
     revalidatePath(`/projects/${projectId}`);
     return { success: true as const, data: updatedSecret };
   } catch (err) {
@@ -161,7 +161,7 @@ export async function updateSecretValueAction(
   value: string,
 ): Promise<ActionSuccessResultVoid | ActionErrorResult> {
   try {
-    await updateSecretValue(projectId, secretId, value);
+    await updateSecretValue(secretId, value);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (err) {
@@ -178,12 +178,9 @@ export async function updateSecretValueAction(
   }
 }
 
-export async function getSecretValueAction(
-  projectId: string,
-  secretId: string,
-): Promise<ActionSuccessResult<string> | ActionErrorResult> {
+export async function getSecretValueAction(secretId: string): Promise<ActionSuccessResult<string> | ActionErrorResult> {
   try {
-    const secretValue = await getSecretValue(projectId, secretId);
+    const secretValue = await getSecretValue(secretId);
     return { success: true as const, data: secretValue };
   } catch (err) {
     console.error(err);

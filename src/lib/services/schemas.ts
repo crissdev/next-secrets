@@ -1,6 +1,5 @@
+import { SecretType } from '@prisma/client';
 import { z } from 'zod';
-
-import { SECRET_TYPE } from '@/lib/definitions';
 
 export const createProjectSchema = z.object({
   name: z.string().min(1, 'Project name cannot be empty.'),
@@ -12,8 +11,8 @@ export const createSecretSchema = z.object({
   name: z.string().min(1, 'Secret name cannot be empty.'),
   value: z.string().min(1, 'Secret value cannot be empty.'),
   description: z.string(),
-  type: z.enum(SECRET_TYPE),
-  environmentId: z.coerce.number<number>(),
+  type: z.enum(SecretType),
+  environmentId: z.string(),
 });
 
 export const updateProjectSchema = createProjectSchema.extend({

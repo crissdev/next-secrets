@@ -2,7 +2,10 @@ import type { Secret } from '@/lib/definitions';
 import { createSecretSchema, updateSecretSchema } from '@/lib/services/schemas';
 import * as db from '@/lib/store/db';
 
-export async function createSecret(projectId: string, input: Omit<Secret, 'id' | 'lastUpdated'>): Promise<Secret> {
+export async function createSecret(
+  projectId: string,
+  input: Omit<Secret, 'id' | 'updatedAt' | 'projectId'>,
+): Promise<Secret> {
   const secretInput = createSecretSchema.parse(input);
   const newSecret = await db.createSecret(projectId, {
     name: secretInput.name,
@@ -22,14 +25,14 @@ export async function getSecrets(projectId: string): Promise<Secret[]> {
   }));
 }
 
-export async function getSecretValue(projectId: string, secretId: string): Promise<string> {
-  const secretValue = await db.getSecretValue(projectId, secretId);
+export async function getSecretValue(secretId: string): Promise<string> {
+  const secretValue = await db.getSecretValue(secretId);
   return secretValue;
 }
 
-export async function updateSecret(projectId: string, input: Omit<Secret, 'lastUpdated' | 'value'>): Promise<Secret> {
+export async function updateSecret(input: Omit<Secret, 'value' | 'projectId' | 'updatedAt'>): Promise<Secret> {
   const secretInput = updateSecretSchema.parse(input);
-  const updatedSecret = await db.updateSecret(projectId, {
+  const updatedSecret = await db.updateSecret({
     id: secretInput.id,
     name: secretInput.name,
     description: secretInput.description,

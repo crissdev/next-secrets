@@ -1,3 +1,4 @@
+import { type SecretType } from '@prisma/client';
 import {
   type Column,
   type ColumnDef,
@@ -24,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getSecretValueAction } from '@/lib/actions';
-import { DEFAULT_ENVIRONMENTS, type Secret, type SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 
 function formatDate(date: Date) {
   const now = new Date();
@@ -147,7 +148,7 @@ export default function SecretsTable(props: {
         ),
         accessorKey: 'type',
         cell: ({ row }) => {
-          const type: SECRET_TYPE = row.getValue('type');
+          const type: SecretType = row.getValue<Secret['type']>('type');
           return (
             <span
               className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}
@@ -171,7 +172,7 @@ export default function SecretsTable(props: {
         ),
         accessorKey: 'environmentId',
         cell: ({ row }) => {
-          const environmentId = row.getValue<number>('environmentId');
+          const environmentId = row.getValue<(typeof DEFAULT_ENVIRONMENTS)[number]['id']>('environmentId');
           const environmentName = DEFAULT_ENVIRONMENTS.find((e) => e.id === environmentId)?.name;
           return (
             <Badge variant={'outline'} className={'rounded-full'} data-testid={`secret-environment-${row.index}`}>
@@ -190,7 +191,7 @@ export default function SecretsTable(props: {
 
           const [, fetchSecretAction, isFetchSecretPending] = useActionState(async () => {
             if (!secretValue && !isCopyPending) {
-              const actionResult = await getSecretValueAction(props.projectId, row.original.id);
+              const actionResult = await getSecretValueAction(row.original.id);
               if (actionResult.success) {
                 setSecretValue(actionResult.data);
                 return;
@@ -207,7 +208,7 @@ export default function SecretsTable(props: {
           const [, copySecretAction, isCopyPending] = useActionState(async () => {
             let valueToCopy = secretValue;
             if (!valueToCopy) {
-              const actionResult = await getSecretValueAction(props.projectId, row.original.id);
+              const actionResult = await getSecretValueAction(row.original.id);
               if (actionResult.success) {
                 valueToCopy = actionResult.data;
                 setSecretValue(valueToCopy);
@@ -293,17 +294,18 @@ export default function SecretsTable(props: {
           </Button>
         ),
         sortDescFirst: true,
-        accessorKey: 'lastUpdated',
+        accessorKey: 'updatedAt',
         cell: function LastUpdatedCellRenderer({ row }) {
-          const lastUpdated = row.getValue<string>('lastUpdated');
-          const [localeDate, setLocaleDate] = useState(lastUpdated);
+          // SecretsTable is renders on the client, hence the updatedAt is serialized as a string.
+          const lastUpdated = row.getValue<Secret['updatedAt']>('updatedAt');
+          const [localeDate, setLocaleDate] = useState(new Date(lastUpdated));
 
-          const date = useMemo(() => (lastUpdated ? new Date(lastUpdated) : null), [lastUpdated]);
+          const date = useMemo(() => (lastUpdated ? lastUpdated : null), [lastUpdated]);
           const formattedDate = date ? formatDate(date) : null;
 
           useEffect(() => {
             if (date) {
-              setLocaleDate(date.toLocaleString());
+              setLocaleDate(date);
             }
           }, [date]);
 
@@ -312,7 +314,7 @@ export default function SecretsTable(props: {
               {lastUpdated ? (
                 <Tooltip delayDuration={400}>
                   <TooltipTrigger>{formattedDate}</TooltipTrigger>
-                  <TooltipContent>{localeDate}</TooltipContent>
+                  <TooltipContent>{localeDate.toLocaleString()}</TooltipContent>
                 </Tooltip>
               ) : (
                 '–'
@@ -363,7 +365,7 @@ export default function SecretsTable(props: {
         },
       },
     ],
-    [props.condensedLayout, onChangeSorting, props.projectId],
+    [props.condensedLayout, onChangeSorting],
   );
 
   const table = useReactTable({

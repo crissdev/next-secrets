@@ -1,5 +1,6 @@
 'use client';
 
+import { type SecretType } from '@prisma/client';
 import { LockIcon, SearchIcon } from 'lucide-react';
 import { use, useEffect, useMemo, useState } from 'react';
 
@@ -7,7 +8,7 @@ import AddSecretButton from '@/app/projects/[id]/add-secret-button';
 import SecretsTable from '@/app/projects/[id]/secrets-table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DEFAULT_ENVIRONMENTS, type Secret, type SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 
 export default function SecretList(props: {
   secretsPromise: Promise<Secret[]>;
@@ -16,8 +17,8 @@ export default function SecretList(props: {
 }) {
   const secrets = use(props.secretsPromise);
   const [filter, setFilter] = useState('');
-  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<number>(0);
-  const [selectedSecretType, setSelectedSecretType] = useState<SECRET_TYPE | 'none'>('none');
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>('');
+  const [selectedSecretType, setSelectedSecretType] = useState<SecretType | 'none'>('none');
   const allSecretTypes = [...new Set(secrets.map((s) => s.type))];
 
   const filteredSecrets = useMemo(
@@ -29,7 +30,7 @@ export default function SecretList(props: {
   );
 
   const { onFilterChanged } = props;
-  const hasFilters = selectedSecretType !== 'none' || selectedEnvironmentId !== 0 || filter.length > 0;
+  const hasFilters = selectedSecretType !== 'none' || selectedEnvironmentId !== '' || filter.length > 0;
 
   useEffect(() => {
     onFilterChanged(hasFilters ? filteredSecrets : []);
@@ -68,10 +69,7 @@ export default function SecretList(props: {
           />
         </div>
         <div className="lg:w-full flex lg:justify-end items-center gap-2">
-          <Select
-            onValueChange={(value) => setSelectedEnvironmentId(Number(value))}
-            value={String(selectedEnvironmentId)}
-          >
+          <Select onValueChange={(value) => setSelectedEnvironmentId(value)} value={String(selectedEnvironmentId)}>
             <SelectTrigger className={'w-1/2 lg:w-[180px] bg-white'} aria-label={'Select environment'}>
               <SelectValue placeholder={'All environments'} />
             </SelectTrigger>
@@ -89,7 +87,7 @@ export default function SecretList(props: {
             </SelectContent>
           </Select>
           <Select
-            onValueChange={(value) => setSelectedSecretType(value === 'none' ? value : (value as SECRET_TYPE))}
+            onValueChange={(value) => setSelectedSecretType(value === 'none' ? value : (value as SecretType))}
             value={selectedSecretType}
           >
             <SelectTrigger className={'w-1/2 lg:w-[200px] bg-white'} aria-label={'Select secret type'}>

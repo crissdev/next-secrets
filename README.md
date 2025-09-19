@@ -26,7 +26,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ### Data Storage
 
-The application stores data in a JSON file. The file location must be configured using the `DATA_FILE_PATH` environment variable.
+The application stores data in a PostgreSQL database. The database connection must be configured using the `DATABASE_URL` environment variable.
 
 ### Optional Encryption
 
@@ -34,12 +34,12 @@ Secrets can be optionally encrypted for enhanced security. To enable encryption,
 
 #### Required
 
-- `DATA_FILE_ENC_KEY` - The encryption key (required to enable encryption)
+- `DATA_ENC_KEY` - The encryption key (required to enable encryption)
 
 #### Optional
 
-- `DATA_FILE_ENC_ALGO` - The encryption algorithm (default: `aes-256-cbc`)
-- `DATA_FILE_ENC_SALT` - The encryption salt (recommended for improved security)
+- `DATA_ENC_ALGO` - The encryption algorithm (default: `aes-256-cbc`)
+- `DATA_ENC_SALT` - The encryption salt (recommended for improved security)
 
 For optimal security, the salt should be random and at least 16 bytes long. The encryption is performed using Node.js's built-in `scrypt` function.
 
@@ -48,11 +48,8 @@ For optimal security, the salt should be random and at least 16 bytes long. The 
 Create a `.env.local` file in the project root with the following variables:
 
 ```env
-# Data file configuration
-DATA_FILE_PATH="data.json"
-
 # Encryption configuration (optional)
-DATA_FILE_ENC_KEY="your-encryption-key-here"
-DATA_FILE_ENC_ALGO="aes-256-cbc"
-DATA_FILE_ENC_SALT="your-random-salt-here"
+DATA_ENC_KEY="your-encryption-key-here"
+DATA_ENC_ALGO="aes-256-cbc"
+DATA_ENC_SALT="your-random-salt-here"
 ```

@@ -4,9 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { useParams } from 'next/navigation';
 
 import SecretList from '@/app/projects/[id]/secret-list';
-import { DEFAULT_ENVIRONMENTS, type Secret, SECRET_TYPE } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 
 jest.mock('@/lib/store/db');
+import { SecretType } from '@prisma/client';
+
 import { getSecretValue } from '@/lib/store/db';
 
 describe('Secret list', () => {
@@ -35,18 +37,20 @@ describe('Secret list', () => {
           name: 'Secret_1',
           value: '1',
           description: 'Secret_1 description',
-          type: SECRET_TYPE.EnvironmentVariable,
+          type: SecretType.ENVIRONMENT_VARIABLE,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
         {
           id: faker.string.uuid(),
           name: 'Secret_2',
           value: '2',
           description: 'Secret_2 description',
-          type: SECRET_TYPE.Password,
+          type: SecretType.PASSWORD,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
@@ -57,14 +61,14 @@ describe('Secret list', () => {
 
     expect(screen.getByTestId('secret-name-0')).toHaveTextContent('Secret_1');
     expect(screen.getByTestId('secret-description-0')).toHaveTextContent('Secret_1 description');
-    expect(screen.getByTestId('secret-type-0')).toHaveTextContent('Environment Variable');
+    expect(screen.getByTestId('secret-type-0')).toHaveTextContent('ENVIRONMENT_VARIABLE');
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(DEFAULT_ENVIRONMENTS[0].name);
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent('••••••••');
     expect(screen.getByTestId('secret-updated-0')).toHaveTextContent('Just now');
 
     expect(screen.getByTestId('secret-name-1')).toHaveTextContent('Secret_2');
     expect(screen.getByTestId('secret-description-1')).toHaveTextContent('Secret_2 description');
-    expect(screen.getByTestId('secret-type-1')).toHaveTextContent('Password');
+    expect(screen.getByTestId('secret-type-1')).toHaveTextContent('PASSWORD');
     expect(screen.getByTestId('secret-environment-1')).toHaveTextContent(DEFAULT_ENVIRONMENTS[0].name);
     expect(screen.getByTestId('secret-value-1')).toHaveTextContent('••••••••');
     expect(screen.getByTestId('secret-value-1')).toHaveTextContent('••••••••');
@@ -79,9 +83,10 @@ describe('Secret list', () => {
           name: 'Secret_1',
           value: '1',
           description: 'Secret_1 description',
-          type: SECRET_TYPE.EnvironmentVariable,
+          type: SecretType.ENVIRONMENT_VARIABLE,
           environmentId: environment.id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
@@ -90,7 +95,7 @@ describe('Secret list', () => {
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(environment.name);
   });
 
-  test.each(Object.values(SECRET_TYPE))('Map secret type (%s) to human readable name', async (type) => {
+  test.each(Object.values(SecretType))('Map secret type (%s) to human readable name', async (type) => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
         {
@@ -100,7 +105,8 @@ describe('Secret list', () => {
           description: 'Secret_1 description',
           type: type,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
@@ -118,7 +124,7 @@ describe('Secret list', () => {
     const secretId = faker.string.uuid();
     const secretValue = '12345';
 
-    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [projectId: string, secretId: string]>;
+    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [secretId: string]>;
     getSecretValueMock.mockResolvedValueOnce(secretValue);
 
     await act(async () => {
@@ -128,9 +134,10 @@ describe('Secret list', () => {
           name: 'Secret_1',
           value: '[REDACTED]',
           description: 'Secret_1 description',
-          type: SECRET_TYPE.EnvironmentVariable,
+          type: SecretType.ENVIRONMENT_VARIABLE,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       render(
@@ -145,7 +152,7 @@ describe('Secret list', () => {
     await userEvent.click(screen.getByTestId('copy-secret-0'));
 
     expect(getSecretValueMock).toHaveBeenCalledTimes(1);
-    expect(getSecretValueMock).toHaveBeenCalledWith(projectId, secretId);
+    expect(getSecretValueMock).toHaveBeenCalledWith(secretId);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(secretValue);
@@ -157,7 +164,7 @@ describe('Secret list', () => {
     const secretId = faker.string.uuid();
     const secretValue = '12345';
 
-    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [projectId: string, secretId: string]>;
+    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [secretId: string]>;
     getSecretValueMock.mockResolvedValueOnce(secretValue);
 
     await act(async () => {
@@ -167,9 +174,10 @@ describe('Secret list', () => {
           name: 'Secret_1',
           value: '[REDACTED]',
           description: 'Secret_1 description',
-          type: SECRET_TYPE.EnvironmentVariable,
+          type: SecretType.ENVIRONMENT_VARIABLE,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       render(
@@ -184,7 +192,7 @@ describe('Secret list', () => {
     await userEvent.click(screen.getByTestId('show-secret-0'));
 
     expect(getSecretValueMock).toHaveBeenCalledTimes(1);
-    expect(getSecretValueMock).toHaveBeenCalledWith(projectId, secretId);
+    expect(getSecretValueMock).toHaveBeenCalledWith(secretId);
 
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent(secretValue);
   });
@@ -198,7 +206,7 @@ describe('Secret list', () => {
     const secretId = faker.string.uuid();
     const secretValue = '12345';
 
-    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [projectId: string, secretId: string]>;
+    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [secretId: string]>;
     getSecretValueMock.mockResolvedValueOnce(secretValue);
 
     await act(async () => {
@@ -208,9 +216,10 @@ describe('Secret list', () => {
           name: 'Secret_1',
           value: '[REDACTED]',
           description: 'Secret_1 description',
-          type: SECRET_TYPE.EnvironmentVariable,
+          type: SecretType.ENVIRONMENT_VARIABLE,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       render(
@@ -239,18 +248,20 @@ describe('Secret list', () => {
           name: 'Secret_1',
           value: '1',
           description: '_1 Secret_1 description',
-          type: SECRET_TYPE.EnvironmentVariable,
+          type: SecretType.ENVIRONMENT_VARIABLE,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
         {
           id: faker.string.uuid(),
           name: 'Secret_2',
           value: '2',
           description: '_1 Secret_2 description',
-          type: SECRET_TYPE.Password,
+          type: SecretType.PASSWORD,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ]);
       const projectInfo = { id: faker.string.uuid(), name: faker.lorem.words(2) };
@@ -271,9 +282,10 @@ describe('Secret list', () => {
         name: faker.lorem.words(2),
         value: '[REDACTED]',
         description: faker.lorem.sentence(5),
-        type: SECRET_TYPE.EnvironmentVariable,
+        type: SecretType.ENVIRONMENT_VARIABLE,
         environmentId: env.id,
-        lastUpdated: new Date().toISOString(),
+        updatedAt: new Date(),
+        projectId: faker.string.uuid(),
       }));
       const secretsPromise = Promise.resolve(secrets);
       render(
@@ -298,9 +310,9 @@ describe('Secret list', () => {
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(envName);
   });
 
-  test.each(Object.values(SECRET_TYPE))('Filter secrets by type (%s)', async (type) => {
+  test.each(Object.values(SecretType))('Filter secrets by type (%s)', async (type) => {
     await act(async () => {
-      const secrets = [
+      const secrets: Secret[] = [
         {
           id: faker.string.uuid(),
           name: faker.lorem.words(2),
@@ -308,7 +320,8 @@ describe('Secret list', () => {
           description: faker.lorem.sentence(5),
           type: type,
           environmentId: DEFAULT_ENVIRONMENTS[0].id,
-          lastUpdated: new Date().toISOString(),
+          updatedAt: new Date(),
+          projectId: faker.string.uuid(),
         },
       ];
       const secretsPromise = Promise.resolve(secrets);

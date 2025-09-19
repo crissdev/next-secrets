@@ -1,178 +1,82 @@
 import 'server-only';
 
 import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 
-import { DEFAULT_ENVIRONMENTS, type Project, type Secret } from '@/lib/definitions';
+import { type Project, type Secret } from '@/lib/definitions';
+import * as storage from '@/lib/store/storage';
 
 // Projects
 
-function toProject(project: StoreProject) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { secrets, ...data } = project;
-  return data;
-}
-
 export async function getProjects(): Promise<Project[]> {
-  const { projects } = await DataLayer.read();
-  return projects.map((p) => toProject(p));
+  return await storage.getProjects();
 }
 
-export async function getProject(id: string): Promise<Project | undefined> {
-  const { projects } = await DataLayer.read();
-  const project = projects.find((p) => p.id === id);
-  return project ? toProject(project) : undefined;
+export async function getProject(id: string): Promise<Project | null> {
+  return await storage.getProject(id);
 }
 
 export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
-  const { projects: allProjects } = await DataLayer.read();
-
-  const newProject: StoreProject = {
+  const newProject: Project = {
     id: crypto.randomUUID(),
     name: project.name,
     description: project.description || '',
     color: project.color,
-    secrets: [],
   };
-  const lowerProjectName = newProject.name.toLowerCase();
-  if (allProjects.find((p) => p.name.toLowerCase() === lowerProjectName)) {
-    throw new Error(`Project with name "${newProject.name}" already exists.`);
-  }
-  await DataLayer.write({ projects: [...allProjects, newProject] });
-  return toProject(newProject);
+  return await storage.addProject(newProject);
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const { projects } = await DataLayer.read();
-  const index = projects.findIndex((p) => p.id === id);
-  if (index > -1) {
-    projects.splice(index, 1);
-    await DataLayer.write({ projects });
-  }
+  return await storage.deleteProject(id);
 }
 
 export async function updateProject(project: Omit<Project, 'secrets'>): Promise<Project> {
-  const { projects } = await DataLayer.read();
-  const data = projects.find((p) => p.id === project.id);
-  if (!data) {
-    throw new Error('Project not found');
-  }
-
-  data.name = project.name;
-  data.description = project.description;
-  data.color = project.color;
-  await DataLayer.write({ projects });
-  return data;
+  return await storage.updateProject(project.id, project);
 }
 
 // Secrets
-export async function createSecret(projectId: string, secret: Omit<Secret, 'id' | 'lastUpdated'>): Promise<Secret> {
-  const { projects: allProjects } = await DataLayer.read();
-  const project = allProjects.find((p) => p.id === projectId);
-  if (!project) throw new Error(`Project with name "${projectId}" does not exist.`);
-
+export async function createSecret(
+  projectId: string,
+  secret: Omit<Secret, 'id' | 'updatedAt' | 'projectId'>,
+): Promise<Secret> {
   const newSecret: Secret = {
     id: crypto.randomUUID(),
     name: secret.name,
     value: encryptValue(secret.value),
     type: secret.type,
     description: secret.description,
-    lastUpdated: new Date().toISOString(),
+    updatedAt: new Date(),
     environmentId: secret.environmentId,
+    projectId,
   };
-  project.secrets.push(newSecret);
-  await DataLayer.write({ projects: allProjects });
-  return newSecret;
+  return await storage.createSecret(newSecret);
 }
 
 export async function getSecrets(projectId: string): Promise<Secret[]> {
-  const { projects } = await DataLayer.read();
-  const project = projects.find((p) => p.id === projectId);
-  if (!project) throw new Error(`Project with name "${projectId}" does not exist.`);
-  return project.secrets;
+  return await storage.getSecrets(projectId);
 }
 
-export async function getSecretValue(projectId: string, secretId: string) {
-  const { projects } = await DataLayer.read();
-  const project = projects.find((p) => p.id === projectId);
-  if (!project) {
-    throw new Error(`Project with id "${projectId}" does not exist.`);
-  }
-
-  const secret = project.secrets.find((s) => s.id === secretId);
-  if (!secret) {
-    throw new Error(`Secret with id "${secretId}" does not exist in project.`);
-  }
-
-  const secretValue = secret.value;
-  return decryptValue(secretValue);
+export async function getSecretValue(secretId: string) {
+  const value = await storage.getSecretValue(secretId);
+  return decryptValue(value);
 }
 
-export async function deleteSecret(projectId: string, secretId: string): Promise<void> {
-  const { projects } = await DataLayer.read();
-  const project = projects.find((p) => p.id === projectId);
-  if (project) {
-    const index = project.secrets.findIndex((p) => p.id === secretId);
-    if (index > -1) {
-      project.secrets.splice(index, 1);
-      await DataLayer.write({ projects });
-    }
-  }
+export async function deleteSecret(secretId: string): Promise<void> {
+  return await storage.deleteSecret(secretId);
 }
 
-export async function updateSecret(projectId: string, secret: Omit<Secret, 'lastUpdated' | 'value'>): Promise<Secret> {
-  const { projects } = await DataLayer.read();
-  const project = projects.find((p) => p.id === projectId);
-  if (!project) {
-    throw new Error(`Project with id "${projectId}" does not exist.`);
-  }
-
-  const data = project.secrets.find((s) => s.id === secret.id);
-  if (!data) {
-    throw new Error(`Secret with id "${secret.id}" does not exist in project.`);
-  }
-
-  // Update the secret properties directly
-  data.name = secret.name;
-  data.description = secret.description;
-  data.type = secret.type;
-  data.lastUpdated = new Date().toISOString();
-  data.environmentId = secret.environmentId;
-
-  await DataLayer.write({ projects });
-  return data;
+export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>): Promise<Secret> {
+  return await storage.updateSecret(secret);
 }
 
-export async function updateSecretValue(projectId: string, secretId: string, secretValue: string): Promise<void> {
-  const { projects } = await DataLayer.read();
-  const project = projects.find((p) => p.id === projectId);
-  if (!project) {
-    throw new Error(`Project with id "${projectId}" does not exist.`);
-  }
-
-  const data = project.secrets.find((s) => s.id === secretId);
-  if (!data) {
-    throw new Error(`Secret with id "${secretId}" does not exist in project.`);
-  }
-
-  // Update the secret value and last updated timestamp
-  data.value = encryptValue(secretValue);
-  data.lastUpdated = new Date().toISOString();
-
-  await DataLayer.write({ projects });
+export async function updateSecretValue(secretId: string, secretValue: string): Promise<void> {
+  return await storage.updateSecretValue(secretId, encryptValue(secretValue));
 }
 
 //------
-type StoreProject = Project & {
-  secrets: Secret[];
-};
-
-export const dataFilePath = path.resolve(process.env.DATA_FILE_PATH!);
-export const dataFileEncKey = process.env.DATA_FILE_ENC_KEY;
-const dataFileEncAlgorithm = process.env.DATA_FILE_ENC_ALGO || 'aes-256-cbc';
-const dataFileEncSalt = process.env.DATA_FILE_ENC_SALT || 'salt';
-const isEncryptionEnabled = !!dataFileEncKey;
+export const dataEncKey = process.env.DATA_ENC_KEY;
+const dataEncAlgorithm = process.env.DATA_ENC_ALGO || 'aes-256-cbc';
+const dataEncSalt = process.env.DATA_ENC_SALT || 'salt';
+const isEncryptionEnabled = !!dataEncKey;
 
 // Encrypt a string value if encryption is enabled
 function encryptValue(text: string): string {
@@ -184,11 +88,7 @@ function encryptValue(text: string): string {
     const iv = crypto.randomBytes(16);
 
     // Create a cipher using the key and iv
-    const cipher = crypto.createCipheriv(
-      dataFileEncAlgorithm,
-      crypto.scryptSync(dataFileEncKey!, dataFileEncSalt, 32),
-      iv,
-    );
+    const cipher = crypto.createCipheriv(dataEncAlgorithm, crypto.scryptSync(dataEncKey!, dataEncSalt, 32), iv);
 
     // Encrypt the text
     let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -218,11 +118,7 @@ function decryptValue(encryptedText: string): string {
     const iv = Buffer.from(ivHex, 'hex');
 
     // Create a decipher using the key and iv
-    const decipher = crypto.createDecipheriv(
-      dataFileEncAlgorithm,
-      crypto.scryptSync(dataFileEncKey!, dataFileEncSalt, 32),
-      iv,
-    );
+    const decipher = crypto.createDecipheriv(dataEncAlgorithm, crypto.scryptSync(dataEncKey!, dataEncSalt, 32), iv);
 
     // Decrypt the data
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -233,27 +129,4 @@ function decryptValue(encryptedText: string): string {
     console.error('Decryption failed:', error);
     return encryptedText; // Return encrypted text if decryption fails
   }
-}
-
-const DataLayer = {
-  async write(data: { projects: StoreProject[] }) {
-    await fs.writeFile(dataFilePath, JSON.stringify({ ...data, environments: DEFAULT_ENVIRONMENTS }, null, 2), 'utf-8');
-  },
-  async read(): Promise<{ projects: StoreProject[] }> {
-    try {
-      const data = await fs.readFile(dataFilePath, 'utf-8');
-      return JSON.parse(data);
-    } catch (err) {
-      if (isErrnoException(err) && err.code === 'ENOENT') {
-        return {
-          projects: [],
-        };
-      }
-      throw err;
-    }
-  },
-};
-
-function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
-  return error != null && typeof error === 'object' && 'errno' in error;
 }
