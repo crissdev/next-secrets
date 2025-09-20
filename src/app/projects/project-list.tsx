@@ -67,7 +67,7 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
         )}
 
         {projectsList.length === 0 && (
-          <span className={'text-muted-foreground'} data-testid={'sidebar-empty-vault-message'}>
+          <span className={'text-muted-foreground text-sm px-3'} data-testid={'sidebar-empty-vault-message'}>
             No projects found. Create a new project to get started.
           </span>
         )}
