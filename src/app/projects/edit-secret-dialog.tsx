@@ -76,9 +76,10 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
         value: props.secret.value,
         environmentId: props.secret.environmentId,
       });
-    } else {
-      form.reset();
     }
+    return () => {
+      form.reset();
+    };
   }, [form, props.secret]);
 
   const handleActionError = (error: { code: SERVICE_ERROR; message: string }) => {

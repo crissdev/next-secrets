@@ -52,9 +52,10 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
         description: props.project.description,
         color: props.project.color,
       });
-    } else {
-      form.reset();
     }
+    return () => {
+      form.reset();
+    };
   }, [form, props.project]);
 
   const [, action, isPending] = useActionState(async () => {
