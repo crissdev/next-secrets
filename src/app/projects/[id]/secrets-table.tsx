@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   type SortDirection,
   type SortingState,
-  useReactTable
+  useReactTable,
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, EyeOff, PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';

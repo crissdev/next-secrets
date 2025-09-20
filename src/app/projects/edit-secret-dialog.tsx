@@ -76,6 +76,8 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
         value: props.secret.value,
         environmentId: props.secret.environmentId,
       });
+    } else {
+      form.reset();
     }
   }, [form, props.secret]);
 
