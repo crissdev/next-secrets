@@ -20,7 +20,16 @@
     "test:e2e:ci": "NODE_ENV=test start-server-and-test 'npm run build && npm run start' http://localhost:3000 'playwright test'",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:docker": "docker compose up",
+    "dev:docker:detached": "docker compose up -d",
+    "dev:docker:down": "docker compose down",
+    "dev:docker:down:volumes": "docker compose down -v",
+    "dev:docker:logs": "docker compose logs -f app",
+    "dev:docker:sh": "docker compose exec app sh",
+    "dev:docker:prisma:migrate": "docker compose exec app pnpm prisma migrate dev",
+    "dev:docker:prisma:seed": "docker compose exec app pnpm prisma db seed",
+    "dev:docker:prisma:studio": "docker compose exec app pnpm prisma studio"
   },
   "prisma": {
     "seed": "node ./prisma/seed.mts"

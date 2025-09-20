@@ -45,6 +45,14 @@ For optimal security, the salt should be random and at least 16 bytes long. The 
 
 ## Environment Variables
 
+Copy the example environment file to create your own local configuration:
+
+```sh
+cp .env.example .env
+```
+
+Then edit `.env` as needed for your environment.
+
 Create a `.env.local` file in the project root with the following variables:
 
 ```env
@@ -53,3 +61,63 @@ DATA_ENC_KEY="your-encryption-key-here"
 DATA_ENC_ALGO="aes-256-cbc"
 DATA_ENC_SALT="your-random-salt-here"
 ```
+
+## Running with Docker
+
+You can run the application and its PostgreSQL database using Docker Compose. This is the recommended way to ensure a consistent development environment.
+
+### Prerequisites
+
+- [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/) installed on your machine.
+
+### Steps
+
+1. Copy the example environment variables to a `.env` file:
+
+   ```sh
+   cp .env.example .env
+   # Edit .env as needed for your Docker setup
+   ```
+
+   Make sure your `.env` file contains the required database variables:
+
+   ```env
+   POSTGRES_USER=your_db_user
+   POSTGRES_PASSWORD=your_db_password
+   POSTGRES_DB=your_db_name
+   POSTGRES_PORT=5432
+   # Any other required variables
+   ```
+
+2. Start the services:
+
+   ```sh
+   pnpm dev:docker
+   # or
+   npm run dev:docker
+   # or
+   yarn dev:docker
+   ```
+
+   This will:
+
+   - Start the PostgreSQL database
+   - Run database migrations and seed the database
+   - Start the Next.js development server on [http://localhost:3000](http://localhost:3000)
+
+3. To stop and remove containers, networks, and volumes:
+
+   ```sh
+   pnpm dev:docker:down:volumes
+   # or
+   npm run dev:docker:down:volumes
+   # or
+   yarn dev:docker:down:volumes
+   ```
+
+### Notes
+
+- The app will be available at [http://localhost:3000](http://localhost:3000).
+- The database will be available on the host at the port specified by `POSTGRES_PORT` (default: 5432).
+- Any code changes will be reflected automatically thanks to volume mounting.
+- Migrations and seed scripts are run automatically on container startup.

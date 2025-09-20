@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: node:22-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /app
+    env_file:
+      - ./.env
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the whole project for hot reload
+      - ./:/app
+      # Keep node_modules inside the container
+      - app-node-modules:/app/node_modules
+    command: >
+      sh -c "
+      corepack enable &&
+      pnpm install &&
+      pnpm prisma generate &&
+      pnpm prisma migrate deploy &&
+      pnpm prisma db seed &&
+      pnpm dev
+      "
+
+volumes:
+  db-data:
+  app-node-modules:
