@@ -4,16 +4,24 @@ A secure secrets management application built with Next.js and TypeScript.
 
 ## Getting Started
 
-First, run the development server:
+This project uses [pnpm](https://pnpm.io/) as its package manager. To ensure you use the correct version, make sure you have Node.js 16.10 or newer, then enable corepack (included with Node.js):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+corepack enable
+```
+
+corepack will automatically use the correct pnpm version as specified in the project's `package.json`.
+
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+Run the development server:
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
