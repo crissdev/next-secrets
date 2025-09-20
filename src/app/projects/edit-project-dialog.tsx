@@ -52,6 +52,8 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
         description: props.project.description,
         color: props.project.color,
       });
+    } else {
+      form.reset();
     }
   }, [form, props.project]);
 
