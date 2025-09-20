@@ -6,9 +6,9 @@ import { revalidatePath } from 'next/cache';
 
 import EditSecretDialog from '@/app/projects/edit-secret-dialog';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
-import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/db';
+import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/storage';
 
-jest.mock('@/lib/store/db');
+jest.mock('@/lib/store/storage');
 jest.mock('@/lib/queries');
 
 describe('Create secret dialog', () => {

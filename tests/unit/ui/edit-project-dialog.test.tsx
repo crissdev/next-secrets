@@ -5,11 +5,11 @@ import userEvent from '@testing-library/user-event';
 import EditProjectDialog from '@/app/projects/edit-project-dialog';
 import type { Project } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
-
-jest.mock('@/lib/store/db');
-import { createProject, updateProject } from '@/lib/store/db';
+import { createProject, updateProject } from '@/lib/store/storage';
 
 import { useRouterMockFactory } from '../factories';
+
+jest.mock('@/lib/store/storage');
 
 jest.mock('@/lib/queries');
 

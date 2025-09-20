@@ -1,13 +1,12 @@
+import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 
 import DeleteSecretDialog from '@/app/projects/delete-secret-dialog';
+import { deleteSecret } from '@/lib/store/storage';
 
-jest.mock('@/lib/store/db');
-import { faker } from '@faker-js/faker';
-
-import { deleteSecret } from '@/lib/store/db';
+jest.mock('@/lib/store/storage');
 
 describe('Delete secret dialog', () => {
   const deleteSecretMock = deleteSecret as jest.Mock<ReturnType<typeof deleteSecret>, Parameters<typeof deleteSecret>>;

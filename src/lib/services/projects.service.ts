@@ -1,25 +1,24 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
 import type { Project } from '@/lib/definitions';
 import { createProjectSchema, updateProjectSchema } from '@/lib/services/schemas';
-import * as db from '@/lib/store/db';
+import { UniqueConstraintError } from '@/lib/store/db';
+import * as storage from '@/lib/store/storage';
 
 export async function getProjects() {
-  return await db.getProjects();
+  return await storage.getProjects();
 }
 
 export async function createProject(input: Omit<Project, 'id'>): Promise<Project> {
   const projectInput = createProjectSchema.parse(input);
 
   try {
-    const newProject = await db.createProject({
+    const newProject = await storage.createProject({
       name: projectInput.name,
       description: projectInput.description,
       color: projectInput.color,
     });
     return newProject;
   } catch (err) {
-    if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof UniqueConstraintError && err.fields?.includes('name')) {
       throw new Error(`Project with name "${projectInput.name}" already exists`);
     }
     throw err;
@@ -27,12 +26,12 @@ export async function createProject(input: Omit<Project, 'id'>): Promise<Project
 }
 
 export function getProject(id: string): Promise<Project | null> {
-  return db.getProject(id);
+  return storage.getProject(id);
 }
 
 export async function updateProject(input: Omit<Project, 'secrets'>): Promise<Project> {
   const projectInput = updateProjectSchema.parse(input);
-  const updatedProject = await db.updateProject({
+  const updatedProject = await storage.updateProject({
     id: projectInput.id,
     name: projectInput.name,
     description: projectInput.description,
@@ -42,5 +41,5 @@ export async function updateProject(input: Omit<Project, 'secrets'>): Promise<Pr
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  await db.deleteProject(id);
+  await storage.deleteProject(id);
 }

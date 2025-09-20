@@ -1,15 +1,14 @@
 import { faker } from '@faker-js/faker';
+import { SecretType } from '@prisma/client';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useParams } from 'next/navigation';
 
 import SecretList from '@/app/projects/[id]/secret-list';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { getSecretValue } from '@/lib/store/storage';
 
-jest.mock('@/lib/store/db');
-import { SecretType } from '@prisma/client';
-
-import { getSecretValue } from '@/lib/store/db';
+jest.mock('@/lib/store/storage');
 
 describe('Secret list', () => {
   const useParamsMock = useParams as jest.Mock;

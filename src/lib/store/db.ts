@@ -1,132 +1,196 @@
-import 'server-only';
-
 import crypto from 'node:crypto';
 
-import { type Project, type Secret } from '@/lib/definitions';
-import * as storage from '@/lib/store/storage';
+import { type PrismaClient } from '@prisma/client';
+import { type PrismaClientInitializationError } from '@prisma/client/runtime/edge';
+import { type PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-// Projects
+import { getPrismaClient } from '@/lib/db/prisma';
+import { type Project, type Secret } from '@/lib/definitions';
+
+export async function addProject(input: Omit<Project, 'id'>) {
+  return performDatabaseAction((prisma) =>
+    prisma.project.create({
+      data: {
+        ...input,
+        id: crypto.randomUUID(),
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    }),
+  );
+}
 
 export async function getProjects(): Promise<Project[]> {
-  return await storage.getProjects();
+  return await performDatabaseAction((prisma) => prisma.project.findMany());
 }
 
 export async function getProject(id: string): Promise<Project | null> {
-  return await storage.getProject(id);
-}
-
-export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
-  const newProject: Project = {
-    id: crypto.randomUUID(),
-    name: project.name,
-    description: project.description || '',
-    color: project.color,
-  };
-  return await storage.addProject(newProject);
+  return await performDatabaseAction((prisma) =>
+    prisma.project.findUnique({
+      where: {
+        id,
+      },
+    }),
+  );
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  return await storage.deleteProject(id);
+  await performDatabaseAction(async (prisma) => {
+    await prisma.project.delete({
+      where: {
+        id,
+      },
+    });
+  });
 }
 
-export async function updateProject(project: Omit<Project, 'secrets'>): Promise<Project> {
-  return await storage.updateProject(project.id, project);
+export async function updateProject(id: string, input: Omit<Project, 'id' | 'secrets'>) {
+  return await performDatabaseAction((prisma) =>
+    prisma.project.update({
+      where: {
+        id,
+      },
+      data: {
+        // Update each field individually
+        name: input.name,
+        description: input.description,
+        color: input.color,
+        updatedAt: new Date(),
+      },
+    }),
+  );
 }
 
-// Secrets
-export async function createSecret(
-  projectId: string,
-  secret: Omit<Secret, 'id' | 'updatedAt' | 'projectId'>,
-): Promise<Secret> {
-  const newSecret: Secret = {
-    id: crypto.randomUUID(),
-    name: secret.name,
-    value: encryptValue(secret.value),
-    type: secret.type,
-    description: secret.description,
-    updatedAt: new Date(),
-    environmentId: secret.environmentId,
-    projectId,
-  };
-  return await storage.createSecret(newSecret);
+export async function createSecret(input: Omit<Secret, 'id' | 'updatedAt'>): Promise<Secret> {
+  return await performDatabaseAction((prisma) =>
+    prisma.secret.create({
+      data: {
+        ...input,
+      },
+    }),
+  );
 }
 
 export async function getSecrets(projectId: string): Promise<Secret[]> {
-  return await storage.getSecrets(projectId);
+  return await performDatabaseAction((prisma) =>
+    prisma.secret.findMany({
+      where: {
+        projectId,
+      },
+    }),
+  );
 }
 
 export async function getSecretValue(secretId: string) {
-  const value = await storage.getSecretValue(secretId);
-  return decryptValue(value);
+  return await performDatabaseAction(async (prisma) => {
+    const { value } = await prisma.secret.findUniqueOrThrow({
+      where: {
+        id: secretId,
+      },
+      select: {
+        value: true,
+      },
+    });
+    return value;
+  });
 }
 
 export async function deleteSecret(secretId: string): Promise<void> {
-  return await storage.deleteSecret(secretId);
+  await performDatabaseAction(async (prisma) => {
+    await prisma.secret.delete({
+      where: {
+        id: secretId,
+      },
+    });
+  });
 }
 
-export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>): Promise<Secret> {
-  return await storage.updateSecret(secret);
+export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>) {
+  return await performDatabaseAction((prisma) =>
+    prisma.secret.update({
+      where: {
+        id: secret.id,
+      },
+      data: {
+        name: secret.name,
+        description: secret.description,
+        type: secret.type,
+        environmentId: secret.environmentId,
+        updatedAt: new Date(),
+      },
+    }),
+  );
 }
 
 export async function updateSecretValue(secretId: string, secretValue: string): Promise<void> {
-  return await storage.updateSecretValue(secretId, encryptValue(secretValue));
+  await performDatabaseAction(async (prisma) => {
+    await prisma.secret.update({
+      where: {
+        id: secretId,
+      },
+      data: {
+        value: secretValue,
+        updatedAt: new Date(),
+      },
+    });
+  });
 }
 
-//------
-export const dataEncKey = process.env.DATA_ENC_KEY;
-const dataEncAlgorithm = process.env.DATA_ENC_ALGO || 'aes-256-cbc';
-const dataEncSalt = process.env.DATA_ENC_SALT || 'salt';
-const isEncryptionEnabled = !!dataEncKey;
-
-// Encrypt a string value if encryption is enabled
-function encryptValue(text: string): string {
+// Helper function to handle database errors
+async function performDatabaseAction<T = unknown>(action: (client: PrismaClient) => Promise<T>) {
   try {
-    if (!isEncryptionEnabled) {
-      return text;
-    }
-    // Create a random initialization vector
-    const iv = crypto.randomBytes(16);
-
-    // Create a cipher using the key and iv
-    const cipher = crypto.createCipheriv(dataEncAlgorithm, crypto.scryptSync(dataEncKey!, dataEncSalt, 32), iv);
-
-    // Encrypt the text
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-
-    // Return iv and encrypted data as a single string
-    return `${iv.toString('hex')}:${encrypted}`;
+    const prisma = getPrismaClient();
+    return await action(prisma);
   } catch (error) {
-    console.error('Encryption failed:', error);
-    return text; // Return original text if encryption fails
+    console.error('Error in Prisma ORM data handling:', error);
+
+    if (isPrismaClientInitializationError(error)) {
+      if (error.message.includes("Can't reach database server")) {
+        throw new DatabaseConnectionError(error.message, { cause: error });
+      }
+    }
+    if (isPrismaClientKnownRequestError(error)) {
+      if (error.code === 'P2002')
+        throw new UniqueConstraintError(error.message, {
+          cause: error,
+          fields: error.meta?.target as string[] | undefined,
+        });
+    }
+    throw new DatabaseError('A database error occurred', { cause: error as Error });
   }
 }
 
-// Decrypt an encrypted value if encryption is enabled
-function decryptValue(encryptedText: string): string {
-  if (!isEncryptionEnabled) {
-    return encryptedText;
+// Custom error classes for database operations
+export class DatabaseError extends Error {
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
+    this.name = 'DataAccessError';
   }
+}
 
-  try {
-    // Check if the text has the format of our encrypted data
-    if (!encryptedText.includes(':')) {
-      return encryptedText; // Not in the expected format, return as is
-    }
-
-    const [ivHex, encrypted] = encryptedText.split(':');
-    const iv = Buffer.from(ivHex, 'hex');
-
-    // Create a decipher using the key and iv
-    const decipher = crypto.createDecipheriv(dataEncAlgorithm, crypto.scryptSync(dataEncKey!, dataEncSalt, 32), iv);
-
-    // Decrypt the data
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-
-    return decrypted;
-  } catch (error) {
-    console.error('Decryption failed:', error);
-    return encryptedText; // Return encrypted text if decryption fails
+export class DatabaseConnectionError extends DatabaseError {
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
+    this.name = 'DatabaseConnectionError';
   }
+}
+
+export class UniqueConstraintError extends DatabaseError {
+  public readonly fields: string[];
+
+  constructor(message: string, options?: { fields?: string[]; cause?: Error }) {
+    super(message, options);
+    this.name = 'UniqueConstraintError';
+    this.fields = options?.fields ?? [];
+  }
+}
+
+// Type guards for error types
+function isPrismaClientInitializationError(error: unknown): error is PrismaClientInitializationError {
+  return error instanceof Error && error.name === 'PrismaClientInitializationError';
+}
+
+function isPrismaClientKnownRequestError(error: unknown): error is PrismaClientKnownRequestError {
+  return error instanceof Error && error.name === 'PrismaClientKnownRequestError';
 }

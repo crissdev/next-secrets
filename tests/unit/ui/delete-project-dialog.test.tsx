@@ -2,18 +2,17 @@ import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
-
-import DeleteProjectDialog from '@/app/projects/delete-project-dialog';
-
-jest.mock('@/lib/queries');
-import { revalidateProjects } from '@/lib/queries';
-
-jest.mock('@/lib/store/db');
 import { useParams } from 'next/navigation';
 
-import { deleteProject } from '@/lib/store/db';
+import DeleteProjectDialog from '@/app/projects/delete-project-dialog';
+import { revalidateProjects } from '@/lib/queries';
+import { deleteProject } from '@/lib/store/storage';
 
 import { useRouterMockFactory } from '../factories';
+
+jest.mock('@/lib/queries');
+
+jest.mock('@/lib/store/storage');
 
 describe('Delete project dialog', () => {
   const deleteProjectMock = deleteProject as jest.Mock<

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   typedRoutes: true,
   eslint: {
-    dirs: ['src', 'tests'],
+    dirs: ['./'],
   },
 };
 

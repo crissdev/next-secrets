@@ -8,7 +8,7 @@ import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecretValue, updateSecret } from '@/lib/services/secrets.service';
-import { deleteSecret, updateSecretValue } from '@/lib/store/db';
+import { deleteSecret, updateSecretValue } from '@/lib/store/storage';
 
 export type ActionErrorResult = {
   success: false;

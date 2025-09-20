@@ -1,125 +1,132 @@
+import 'server-only';
+
 import crypto from 'node:crypto';
 
-import { getPrismaClient } from '@/lib/db/prisma';
 import { type Project, type Secret } from '@/lib/definitions';
+import * as db from '@/lib/store/db';
 
-export async function addProject(input: Omit<Project, 'id'>) {
-  const prisma = getPrismaClient();
-  return await prisma.project.create({
-    data: {
-      ...input,
-      id: crypto.randomUUID(),
-      userId: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
-}
+// Projects
 
 export async function getProjects(): Promise<Project[]> {
-  const prisma = getPrismaClient();
-  return await prisma.project.findMany();
+  return await db.getProjects();
 }
 
 export async function getProject(id: string): Promise<Project | null> {
-  const prisma = getPrismaClient();
-  return await prisma.project.findUnique({
-    where: {
-      id,
-    },
-  });
+  return await db.getProject(id);
+}
+
+export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
+  const newProject: Project = {
+    id: crypto.randomUUID(),
+    name: project.name,
+    description: project.description || '',
+    color: project.color,
+  };
+  return await db.addProject(newProject);
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  const prisma = getPrismaClient();
-  await prisma.project.delete({
-    where: {
-      id,
-    },
-  });
+  return await db.deleteProject(id);
 }
 
-export async function updateProject(id: string, input: Omit<Project, 'id' | 'secrets'>) {
-  const prisma = getPrismaClient();
-  return await prisma.project.update({
-    where: {
-      id,
-    },
-    data: {
-      // Update each field individually
-      name: input.name,
-      description: input.description,
-      color: input.color,
-      updatedAt: new Date(),
-    },
-  });
+export async function updateProject(project: Omit<Project, 'secrets'>): Promise<Project> {
+  return await db.updateProject(project.id, project);
 }
 
-export async function createSecret(input: Omit<Secret, 'id' | 'updatedAt'>): Promise<Secret> {
-  const prisma = getPrismaClient();
-  return await prisma.secret.create({
-    data: {
-      ...input,
-    },
-  });
+// Secrets
+export async function createSecret(
+  projectId: string,
+  secret: Omit<Secret, 'id' | 'updatedAt' | 'projectId'>,
+): Promise<Secret> {
+  const newSecret: Secret = {
+    id: crypto.randomUUID(),
+    name: secret.name,
+    value: encryptValue(secret.value),
+    type: secret.type,
+    description: secret.description,
+    updatedAt: new Date(),
+    environmentId: secret.environmentId,
+    projectId,
+  };
+  return await db.createSecret(newSecret);
 }
 
 export async function getSecrets(projectId: string): Promise<Secret[]> {
-  const prisma = getPrismaClient();
-  return await prisma.secret.findMany({
-    where: {
-      projectId,
-    },
-  });
+  return await db.getSecrets(projectId);
 }
 
 export async function getSecretValue(secretId: string) {
-  const prisma = getPrismaClient();
-  const { value } = await prisma.secret.findUniqueOrThrow({
-    where: {
-      id: secretId,
-    },
-    select: {
-      value: true,
-    },
-  });
-  return value;
+  const value = await db.getSecretValue(secretId);
+  return decryptValue(value);
 }
 
 export async function deleteSecret(secretId: string): Promise<void> {
-  const prisma = getPrismaClient();
-  await prisma.secret.delete({
-    where: {
-      id: secretId,
-    },
-  });
+  return await db.deleteSecret(secretId);
 }
 
-export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>) {
-  const prisma = getPrismaClient();
-  return await prisma.secret.update({
-    where: {
-      id: secret.id,
-    },
-    data: {
-      name: secret.name,
-      description: secret.description,
-      type: secret.type,
-      environmentId: secret.environmentId,
-      updatedAt: new Date(),
-    },
-  });
+export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>): Promise<Secret> {
+  return await db.updateSecret(secret);
 }
 
 export async function updateSecretValue(secretId: string, secretValue: string): Promise<void> {
-  const prisma = getPrismaClient();
-  await prisma.secret.update({
-    where: {
-      id: secretId,
-    },
-    data: {
-      value: secretValue,
-      updatedAt: new Date(),
-    },
-  });
+  return await db.updateSecretValue(secretId, encryptValue(secretValue));
+}
+
+//------
+export const dataEncKey = process.env.DATA_ENC_KEY;
+const dataEncAlgorithm = process.env.DATA_ENC_ALGO || 'aes-256-cbc';
+const dataEncSalt = process.env.DATA_ENC_SALT || 'salt';
+const isEncryptionEnabled = !!dataEncKey;
+
+// Encrypt a string value if encryption is enabled
+function encryptValue(text: string): string {
+  try {
+    if (!isEncryptionEnabled) {
+      return text;
+    }
+    // Create a random initialization vector
+    const iv = crypto.randomBytes(16);
+
+    // Create a cipher using the key and iv
+    const cipher = crypto.createCipheriv(dataEncAlgorithm, crypto.scryptSync(dataEncKey!, dataEncSalt, 32), iv);
+
+    // Encrypt the text
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+
+    // Return iv and encrypted data as a single string
+    return `${iv.toString('hex')}:${encrypted}`;
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    return text; // Return original text if encryption fails
+  }
+}
+
+// Decrypt an encrypted value if encryption is enabled
+function decryptValue(encryptedText: string): string {
+  if (!isEncryptionEnabled) {
+    return encryptedText;
+  }
+
+  try {
+    // Check if the text has the format of our encrypted data
+    if (!encryptedText.includes(':')) {
+      return encryptedText; // Not in the expected format, return as is
+    }
+
+    const [ivHex, encrypted] = encryptedText.split(':');
+    const iv = Buffer.from(ivHex, 'hex');
+
+    // Create a decipher using the key and iv
+    const decipher = crypto.createDecipheriv(dataEncAlgorithm, crypto.scryptSync(dataEncKey!, dataEncSalt, 32), iv);
+
+    // Decrypt the data
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    return encryptedText; // Return encrypted text if decryption fails
+  }
 }
