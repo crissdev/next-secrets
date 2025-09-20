@@ -1,4 +1,3 @@
-import { type SecretType } from '@prisma/client';
 import {
   type Column,
   type ColumnDef,
@@ -8,7 +7,7 @@ import {
   getSortedRowModel,
   type SortDirection,
   type SortingState,
-  useReactTable,
+  useReactTable
 } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown, Copy, Eye, EyeOff, PencilLineIcon, Trash2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
@@ -68,7 +67,7 @@ function useSortingState() {
       newSorting = [
         {
           id: column.id,
-          desc: !!column.columnDef.sortDescFirst,
+          desc: column.columnDef.sortDescFirst ?? false,
         },
       ];
     } else if (column.columnDef.sortDescFirst) {
@@ -122,10 +121,13 @@ export default function SecretsTable(props: {
         cell: ({ row }) => {
           return (
             <div className={'flex items-center gap-4'}>
-              <SecretTypeIcon size={props.condensedLayout ? 'small' : 'default'} type={row.getValue('type')} />
+              <SecretTypeIcon
+                size={props.condensedLayout ? 'small' : 'default'}
+                type={row.getValue<Secret['type']>('type')}
+              />
               <div className={'flex flex-col'}>
                 <span className={'font-medium'} data-testid={`secret-name-${row.index}`}>
-                  {row.getValue('name')}
+                  {row.getValue<Secret['name']>('name')}
                 </span>
                 <span data-testid={`secret-description-${row.index}`} className={'text-sm text-muted-foreground'}>
                   {row.original.description}
@@ -148,7 +150,7 @@ export default function SecretsTable(props: {
         ),
         accessorKey: 'type',
         cell: ({ row }) => {
-          const type: SecretType = row.getValue<Secret['type']>('type');
+          const type = row.getValue<Secret['type']>('type');
           return (
             <span
               className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}
@@ -172,7 +174,7 @@ export default function SecretsTable(props: {
         ),
         accessorKey: 'environmentId',
         cell: ({ row }) => {
-          const environmentId = row.getValue<(typeof DEFAULT_ENVIRONMENTS)[number]['id']>('environmentId');
+          const environmentId = row.getValue<Secret['environmentId']>('environmentId');
           const environmentName = DEFAULT_ENVIRONMENTS.find((e) => e.id === environmentId)?.name;
           return (
             <Badge variant={'outline'} className={'rounded-full'} data-testid={`secret-environment-${row.index}`}>
@@ -185,7 +187,7 @@ export default function SecretsTable(props: {
         header: () => <div className={'pl-2'}>Value</div>,
         accessorKey: 'value',
         cell: function ValueCellRenderer({ row }) {
-          const value = row.getValue<string>('value');
+          const value = row.getValue<Secret['value']>('value');
           const [showSecret, setShowSecret] = useState(false);
           const [secretValue, setSecretValue] = useState<string | null>(null);
 
