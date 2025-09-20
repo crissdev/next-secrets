@@ -26,8 +26,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { getSecretValueAction } from '@/lib/actions';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 
-function formatDate(date: Date) {
+function formatDate(date: Date | string) {
   const now = new Date();
+  if (typeof date === 'string') date = new Date(date);
   const diffMs = now.getTime() - date.getTime();
   const diffSecs = Math.floor(diffMs / 1000);
   const diffMins = Math.floor(diffSecs / 60);
@@ -298,9 +299,8 @@ export default function SecretsTable(props: {
         sortDescFirst: true,
         accessorKey: 'updatedAt',
         cell: function LastUpdatedCellRenderer({ row }) {
-          // SecretsTable is renders on the client, hence the updatedAt is serialized as a string.
           const lastUpdated = row.getValue<Secret['updatedAt']>('updatedAt');
-          const [localeDate, setLocaleDate] = useState(new Date(lastUpdated));
+          const [localeDate, setLocaleDate] = useState(lastUpdated);
 
           const date = useMemo(() => (lastUpdated ? lastUpdated : null), [lastUpdated]);
           const formattedDate = date ? formatDate(date) : null;
