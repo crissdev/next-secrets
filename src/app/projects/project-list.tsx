@@ -33,7 +33,25 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
   useEffect(() => {
     if (selectedProjectId) {
       const element = document.querySelector(`[data-project-id="${selectedProjectId}"]`);
-      element?.scrollIntoView({ behavior: 'smooth' });
+      const sidebarContent = element?.closest('[data-slot="sidebar-content"]');
+
+      // Scroll into view only if the element is not already visible
+      if (sidebarContent && element) {
+        const sidebarContentRect = sidebarContent.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+
+        if (elementRect.top < sidebarContentRect.top) {
+          sidebarContent.scrollTo({
+            top: sidebarContent.scrollTop + elementRect.top - sidebarContentRect.top,
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+          });
+        } else if (elementRect.bottom > sidebarContentRect.bottom) {
+          sidebarContent.scrollTo({
+            top: sidebarContent.scrollTop + elementRect.bottom - sidebarContentRect.bottom,
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+          });
+        }
+      }
     }
   }, [selectedProjectId]);
 
