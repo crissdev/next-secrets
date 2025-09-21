@@ -3,7 +3,7 @@
 import { MoreVertical, PencilLineIcon, PlusIcon, Trash2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 import DeleteProjectDialog from '@/app/projects/delete-project-dialog';
 import EditProjectDialog from '@/app/projects/edit-project-dialog';
@@ -29,6 +29,13 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
 
   const projectsList = use(projectsPromise);
   const contextMenuProjectName = projectsList.find((p) => p.id === contextMenuProjectId)?.name ?? 'N/A';
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      const element = document.querySelector(`[data-project-id="${selectedProjectId}"]`);
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedProjectId]);
 
   return (
     <div>
@@ -77,7 +84,7 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
             <div className={'text-muted-foreground font-semibold text-sm tracking-wider pl-2 mb-3'}>PROJECTS</div>
             <SidebarMenu>
               {projectsList.map((project, index) => (
-                <SidebarMenuItem key={project.id} className={`group/actions`}>
+                <SidebarMenuItem key={project.id} className={`group/actions`} data-project-id={project.id}>
                   <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
                     <Link
                       data-testid={`sidebar-project-name-${index}`}
