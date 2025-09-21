@@ -22,7 +22,7 @@ export async function addProject(input: Omit<Project, 'id'>) {
 }
 
 export async function getProjects(): Promise<Project[]> {
-  return await performDatabaseAction((prisma) => prisma.project.findMany());
+  return await performDatabaseAction((prisma) => prisma.project.findMany({ orderBy: { name: 'asc' } }));
 }
 
 export async function getProject(id: string): Promise<Project | null> {
