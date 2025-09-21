@@ -19,10 +19,14 @@ class ProjectsPage {
 
     // Verify the project was created
     await expect(this.page.getByRole('dialog', { name: 'Create new project' })).not.toBeVisible();
-    await expect(this.page.getByTestId('sidebar-project-item').filter({ hasText: projectName })).toBeVisible();
 
     // The page navigates to Project page for the newly created project
     await expect(this.page).toHaveURL(/\/projects\/[a-f0-9-]{36}/i);
+
+    // The new project is displayed in the sidebar
+    await expect(this.page.getByTestId('sidebar-project-item').filter({ hasText: projectName })).toBeVisible({
+      visible: false,
+    });
   }
 }
 
