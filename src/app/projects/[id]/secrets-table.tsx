@@ -25,6 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getSecretValueAction } from '@/lib/actions';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { toTitleCase } from '@/lib/string-util';
 
 export function formatDate(date: Date | string) {
   const now = new Date();
@@ -157,7 +158,7 @@ export default function SecretsTable(props: {
               className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}
               data-testid={`secret-type-${row.index}`}
             >
-              {type}
+              {toTitleCase(type)}
             </span>
           );
         },

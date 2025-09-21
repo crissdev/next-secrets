@@ -9,6 +9,7 @@ import SecretsTable from '@/app/projects/[id]/secrets-table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { toTitleCase } from '@/lib/string-util';
 
 export default function SecretList(props: {
   secretsPromise: Promise<Secret[]>;
@@ -100,7 +101,7 @@ export default function SecretList(props: {
                 </SelectItem>
                 {allSecretTypes.map((type) => (
                   <SelectItem value={type} key={type}>
-                    {type}
+                    {toTitleCase(type)}
                   </SelectItem>
                 ))}
               </SelectGroup>

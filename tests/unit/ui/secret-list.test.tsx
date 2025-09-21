@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import SecretList from '@/app/projects/[id]/secret-list';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { getSecretValue } from '@/lib/store/storage';
+import { toTitleCase } from '@/lib/string-util';
 
 jest.mock('@/lib/store/storage');
 
@@ -60,14 +61,14 @@ describe('Secret list', () => {
 
     expect(screen.getByTestId('secret-name-0')).toHaveTextContent('Secret_1');
     expect(screen.getByTestId('secret-description-0')).toHaveTextContent('Secret_1 description');
-    expect(screen.getByTestId('secret-type-0')).toHaveTextContent('ENVIRONMENT_VARIABLE');
+    expect(screen.getByTestId('secret-type-0')).toHaveTextContent('Environment Variable');
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(DEFAULT_ENVIRONMENTS[0].name);
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent('••••••••');
     expect(screen.getByTestId('secret-updated-0')).toHaveTextContent('Just now');
 
     expect(screen.getByTestId('secret-name-1')).toHaveTextContent('Secret_2');
     expect(screen.getByTestId('secret-description-1')).toHaveTextContent('Secret_2 description');
-    expect(screen.getByTestId('secret-type-1')).toHaveTextContent('PASSWORD');
+    expect(screen.getByTestId('secret-type-1')).toHaveTextContent('Password');
     expect(screen.getByTestId('secret-environment-1')).toHaveTextContent(DEFAULT_ENVIRONMENTS[0].name);
     expect(screen.getByTestId('secret-value-1')).toHaveTextContent('••••••••');
     expect(screen.getByTestId('secret-value-1')).toHaveTextContent('••••••••');
@@ -111,7 +112,8 @@ describe('Secret list', () => {
       const projectInfo = { id: '123', name: 'XYZ' };
       render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
     });
-    expect(screen.getByTestId('secret-type-0')).toHaveTextContent(type);
+    const prettyName = toTitleCase(type);
+    expect(screen.getByTestId('secret-type-0')).toHaveTextContent(prettyName);
   });
 
   test('Copy secret value to clipboard', async () => {
@@ -333,10 +335,12 @@ describe('Secret list', () => {
       );
     });
 
+    const prettyOptionName = toTitleCase(type);
+
     await userEvent.click(screen.getByRole('combobox', { name: 'Select secret type' }));
-    await userEvent.click(screen.getByRole('option', { name: type }));
+    await userEvent.click(screen.getByRole('option', { name: prettyOptionName }));
 
     expect(screen.getAllByRole('row')).toHaveLength(2);
-    expect(screen.getByTestId('secret-type-0')).toHaveTextContent(type);
+    expect(screen.getByTestId('secret-type-0')).toHaveTextContent(prettyOptionName);
   });
 });
