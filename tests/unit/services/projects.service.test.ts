@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import { createProject, getProject } from '@/lib/services/projects.service';
 
-describe.skip('Projects service', () => {
+describe('Projects service', () => {
   test('Create project and save it to store', async () => {
     const name = faker.lorem.word();
     const description = faker.lorem.words(3);
@@ -13,6 +13,7 @@ describe.skip('Projects service', () => {
       name,
       description,
       color,
+      userId: '',
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
@@ -46,6 +47,7 @@ describe.skip('Projects service', () => {
       name,
       description,
       color,
+      userId: '',
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
