@@ -1,4 +1,4 @@
-import { redirect, RedirectType } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
 import PageClient from '@/app/projects/[id]/page-client';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
@@ -14,7 +14,7 @@ export default async function ProjectPage(props: PageProps<'/projects/[id]'>) {
   const project = await fetchProject(params.id);
 
   if (!project) {
-    redirect('/404', RedirectType.replace);
+    notFound();
   }
 
   const secretsPromise = fetchSecrets(project.id);

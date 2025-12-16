@@ -1,4 +1,4 @@
-import * as nextEnv from '@next/env';
+import nextEnv from '@next/env';
 import { defineConfig, devices } from '@playwright/test';
 
 const { loadedEnvFiles } = nextEnv.loadEnvConfig(process.cwd(), false);

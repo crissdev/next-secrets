@@ -4,7 +4,7 @@ import { type PrismaClient } from '@prisma/client';
 import { type PrismaClientInitializationError } from '@prisma/client/runtime/edge';
 import { type PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-import { getPrismaClient } from '@/lib/db/prisma';
+import { prisma } from '@/lib/db/prisma';
 import { type Project, type Secret } from '@/lib/definitions';
 
 export async function addProject(input: Omit<Project, 'id'>) {
@@ -140,7 +140,6 @@ export async function updateSecretValue(secretId: string, secretValue: string): 
 // Helper function to handle database errors
 async function performDatabaseAction<T = unknown>(action: (client: PrismaClient) => Promise<T>) {
   try {
-    const prisma = getPrismaClient();
     return await action(prisma);
   } catch (error) {
     console.error('Error in Prisma ORM data handling:', error);

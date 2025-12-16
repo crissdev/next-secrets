@@ -14,10 +14,10 @@ beforeEach(async () => {
   container = await new PostgreSqlContainer('postgres:16').start();
   const client = new PrismaClient({ datasourceUrl: container.getConnectionUri() });
   setPrismaClient(client);
+  initDatabase(container.getConnectionUri());
+});
 
-  // Set the DATABASE_URL environment variable for Prisma CLI
-  const databaseUrl = container.getConnectionUri();
-
+function initDatabase(databaseUrl: string) {
   // Apply migrations using Prisma CLI
   execSync('npx prisma migrate deploy', {
     stdio: 'inherit',
@@ -29,7 +29,7 @@ beforeEach(async () => {
     stdio: 'inherit',
     env: { ...process.env, DATABASE_URL: databaseUrl },
   });
-});
+}
 
 afterEach(async () => {
   await container.stop();

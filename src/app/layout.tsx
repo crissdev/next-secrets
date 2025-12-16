@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 
 import ProjectList from '@/app/projects/project-list';
+import { ThemeProvider } from '@/components/theme-provider';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar';
 import { fetchProjects } from '@/lib/queries';
 
@@ -31,27 +32,35 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   const projectsPromise = fetchProjects();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Toaster richColors />
-        <SidebarProvider>
-          <Sidebar>
-            <SidebarHeader>
-              <div data-testid={'app-title'} className={'text-xl font-bold inline-flex gap-2 items-center px-2 pt-2'}>
-                <LockIcon size={'20'} className={'stroke-blue-700'} />
-                Next Secrets
-              </div>
-            </SidebarHeader>
-            <SidebarContent>
-              <div className={'p-2'}>
-                <Suspense fallback={null}>
-                  <ProjectList projectsPromise={projectsPromise} />
-                </Suspense>
-              </div>
-            </SidebarContent>
-          </Sidebar>
-          <main className={'flex flex-1 bg-slate-50 dark:bg-slate-900 overflow-hidden'}>{children}</main>
-        </SidebarProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey={'next-secrets-theme'}
+        >
+          <Toaster richColors />
+          <SidebarProvider>
+            <Sidebar>
+              <SidebarHeader>
+                <div data-testid={'app-title'} className={'text-xl font-bold inline-flex gap-2 items-center px-2 pt-2'}>
+                  <LockIcon size={'20'} className={'stroke-blue-700'} />
+                  Next Secrets
+                </div>
+              </SidebarHeader>
+              <SidebarContent>
+                <div className={'p-2'}>
+                  <Suspense fallback={null}>
+                    <ProjectList projectsPromise={projectsPromise} />
+                  </Suspense>
+                </div>
+              </SidebarContent>
+            </Sidebar>
+            <main className={'flex flex-1 bg-slate-50 dark:bg-slate-900 overflow-hidden'}>{children}</main>
+          </SidebarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
