@@ -1,21 +1,22 @@
 import { faker } from '@faker-js/faker';
-import { SecretType } from '@prisma/client';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
+import { describe, expect, test, vi } from 'vitest';
 
 import EditSecretDialog from '@/app/projects/edit-secret-dialog';
+import { SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/storage';
 
-jest.mock('@/lib/store/storage');
-jest.mock('@/lib/queries');
+vi.mock('@/lib/store/storage');
+vi.mock('@/lib/queries');
 
 describe('Create secret dialog', () => {
   test('Create a new secret via dialog', async () => {
     const projectId = faker.string.uuid();
 
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
     expect(screen.getByRole('dialog')).toBeVisible();
 
@@ -56,7 +57,7 @@ describe('Create secret dialog', () => {
       projectId,
     };
 
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} secret={secret} />);
     expect(screen.getByRole('dialog')).toBeVisible();
 
@@ -93,7 +94,7 @@ describe('Create secret dialog', () => {
   });
 
   test('All secret types are available', async () => {
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     const projectId = faker.string.uuid();
 
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
@@ -111,7 +112,7 @@ describe('Create secret dialog', () => {
   });
 
   test('All environments are available', async () => {
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     const projectId = faker.string.uuid();
 
     render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
@@ -133,7 +134,7 @@ describe('Create secret dialog', () => {
   });
 
   test('Secret value is explicitly updated', async () => {
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     const projectId = faker.string.uuid();
     const secret: Secret = {
       id: faker.string.uuid(),

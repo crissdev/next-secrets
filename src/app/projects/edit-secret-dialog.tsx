@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SecretType } from '@prisma/client';
 import { Eye, EyeOff } from 'lucide-react';
 import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -23,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction, updateSecretAction, updateSecretValueAction } from '@/lib/actions';
+import { SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createSecretSchema } from '@/lib/services/schemas';

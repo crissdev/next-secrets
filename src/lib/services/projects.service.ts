@@ -18,6 +18,7 @@ export async function createProject(input: Omit<Project, 'id'>): Promise<Project
     });
     return newProject;
   } catch (err) {
+    console.error('Error creating project:', err);
     if (err instanceof UniqueConstraintError && err.fields?.includes('name')) {
       throw new Error(`Project with name "${projectInput.name}" already exists`);
     }

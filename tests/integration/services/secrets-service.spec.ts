@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { SecretType } from '@prisma/client';
+import { describe, expect, test } from 'vitest';
 
+import { SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecrets, updateSecret } from '@/lib/services/secrets.service';

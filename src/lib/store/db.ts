@@ -1,10 +1,11 @@
 import crypto from 'node:crypto';
 
-import { type PrismaClient } from '@prisma/client';
-import { type PrismaClientInitializationError } from '@prisma/client/runtime/edge';
-import { type PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-
 import { prisma } from '@/lib/db/prisma';
+import { type PrismaClient } from '@/lib/db/prisma-client/client';
+import {
+  type PrismaClientInitializationError,
+  type PrismaClientKnownRequestError,
+} from '@/lib/db/prisma-client/internal/prismaNamespace';
 import { type Project, type Secret } from '@/lib/definitions';
 
 export async function addProject(input: Omit<Project, 'id'>) {
@@ -153,7 +154,8 @@ async function performDatabaseAction<T = unknown>(action: (client: PrismaClient)
       if (error.code === 'P2002')
         throw new UniqueConstraintError(error.message, {
           cause: error,
-          fields: error.meta?.target as string[] | undefined,
+          fields: (error.meta?.driverAdapterError as { cause?: { constraint?: { fields?: string[] } } } | undefined)
+            ?.cause?.constraint?.fields,
         });
     }
     throw new DatabaseError('A database error occurred', { cause: error as Error });

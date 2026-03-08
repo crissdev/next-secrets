@@ -1,28 +1,27 @@
 import { faker } from '@faker-js/faker';
-import { SecretType } from '@prisma/client';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useParams } from 'next/navigation';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import SecretList from '@/app/projects/[id]/secret-list';
+import { SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { getSecretValue } from '@/lib/store/storage';
 import { toTitleCase } from '@/lib/string-util';
 
-jest.mock('@/lib/store/storage');
+vi.mock('@/lib/store/storage');
 
 describe('Secret list', () => {
-  const useParamsMock = useParams as jest.Mock;
-
   beforeEach(() => {
-    useParamsMock.mockReturnValue({});
+    vi.mocked(useParams).mockReturnValue({});
   });
 
   test('Display no secrets message', async () => {
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={vi.fn()} />);
     });
     expect(screen.getByTestId('no-secrets-message')).toHaveTextContent('No secrets yet');
     expect(screen.getByTestId('no-secrets-hint')).toHaveTextContent(`Add your first secret to the "XYZ" project.`);
@@ -54,7 +53,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={vi.fn()} />);
     });
 
     expect(screen.getByRole('table')).toHaveProperty('rows.length', 3);
@@ -90,7 +89,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={vi.fn()} />);
     });
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(environment.name);
   });
@@ -110,7 +109,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: '123', name: 'XYZ' };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={vi.fn()} />);
     });
     const prettyName = toTitleCase(type);
     expect(screen.getByTestId('secret-type-0')).toHaveTextContent(prettyName);
@@ -118,15 +117,14 @@ describe('Secret list', () => {
 
   test('Copy secret value to clipboard', async () => {
     userEvent.setup({ writeToClipboard: true });
-    jest.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => Promise.resolve());
+    vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => Promise.resolve());
 
     const projectId = faker.string.uuid();
     const projectName = 'Test Project';
     const secretId = faker.string.uuid();
     const secretValue = '12345';
 
-    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [secretId: string]>;
-    getSecretValueMock.mockResolvedValueOnce(secretValue);
+    vi.mocked(getSecretValue).mockResolvedValueOnce(secretValue);
 
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
@@ -145,15 +143,15 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: projectId, name: projectName }}
           secretsPromise={secretsPromise}
-          onFilterChanged={jest.fn()}
+          onFilterChanged={vi.fn()}
         />,
       );
     });
 
     await userEvent.click(screen.getByTestId('copy-secret-0'));
 
-    expect(getSecretValueMock).toHaveBeenCalledTimes(1);
-    expect(getSecretValueMock).toHaveBeenCalledWith(secretId);
+    expect(getSecretValue).toHaveBeenCalledTimes(1);
+    expect(getSecretValue).toHaveBeenCalledWith(secretId);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(secretValue);
@@ -165,8 +163,7 @@ describe('Secret list', () => {
     const secretId = faker.string.uuid();
     const secretValue = '12345';
 
-    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [secretId: string]>;
-    getSecretValueMock.mockResolvedValueOnce(secretValue);
+    vi.mocked(getSecretValue).mockResolvedValueOnce(secretValue);
 
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
@@ -185,30 +182,29 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: projectId, name: projectName }}
           secretsPromise={secretsPromise}
-          onFilterChanged={jest.fn()}
+          onFilterChanged={vi.fn()}
         />,
       );
     });
 
     await userEvent.click(screen.getByTestId('show-secret-0'));
 
-    expect(getSecretValueMock).toHaveBeenCalledTimes(1);
-    expect(getSecretValueMock).toHaveBeenCalledWith(secretId);
+    expect(getSecretValue).toHaveBeenCalledTimes(1);
+    expect(getSecretValue).toHaveBeenCalledWith(secretId);
 
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent(secretValue);
   });
 
   test('View secret does not fetch the secret if Copy is clicked first', async () => {
     userEvent.setup({ writeToClipboard: true });
-    jest.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => Promise.resolve());
+    vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(() => Promise.resolve());
 
     const projectId = faker.string.uuid();
     const projectName = 'Test Project';
     const secretId = faker.string.uuid();
     const secretValue = '12345';
 
-    const getSecretValueMock = getSecretValue as jest.Mock<Promise<string>, [secretId: string]>;
-    getSecretValueMock.mockResolvedValueOnce(secretValue);
+    vi.mocked(getSecretValue).mockResolvedValueOnce(secretValue);
 
     await act(async () => {
       const secretsPromise = Promise.resolve<Secret[]>([
@@ -227,7 +223,7 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: projectId, name: projectName }}
           secretsPromise={secretsPromise}
-          onFilterChanged={jest.fn()}
+          onFilterChanged={vi.fn()}
         />,
       );
     });
@@ -235,9 +231,9 @@ describe('Secret list', () => {
     await userEvent.click(screen.getByTestId('copy-secret-0'));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(secretValue);
 
-    getSecretValueMock.mockClear();
+    vi.mocked(getSecretValue).mockClear();
     await userEvent.click(screen.getByTestId('show-secret-0'));
-    expect(getSecretValueMock).not.toHaveBeenCalled();
+    expect(getSecretValue).not.toHaveBeenCalled();
     expect(screen.getByTestId('secret-value-0')).toHaveTextContent(secretValue);
   });
 
@@ -266,7 +262,7 @@ describe('Secret list', () => {
         },
       ]);
       const projectInfo = { id: faker.string.uuid(), name: faker.lorem.words(2) };
-      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={jest.fn()} />);
+      render(<SecretList projectInfo={projectInfo} secretsPromise={secretsPromise} onFilterChanged={vi.fn()} />);
     });
 
     expect(screen.getByRole('table')).toHaveProperty('rows.length', 3);
@@ -293,7 +289,7 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: faker.string.uuid(), name: faker.lorem.words(2) }}
           secretsPromise={secretsPromise}
-          onFilterChanged={jest.fn()}
+          onFilterChanged={vi.fn()}
         />,
       );
     });
@@ -311,7 +307,7 @@ describe('Secret list', () => {
     expect(screen.getByTestId('secret-environment-0')).toHaveTextContent(envName);
   });
 
-  test.each(Object.values(SecretType))('Filter secrets by type (%s)', async (type) => {
+  test.each(Object.values<SecretType>(SecretType))('Filter secrets by type (%s)', async (type) => {
     await act(async () => {
       const secrets: Secret[] = [
         {
@@ -330,7 +326,7 @@ describe('Secret list', () => {
         <SecretList
           projectInfo={{ id: faker.string.uuid(), name: faker.lorem.words(2) }}
           secretsPromise={secretsPromise}
-          onFilterChanged={jest.fn()}
+          onFilterChanged={vi.fn()}
         />,
       );
     });

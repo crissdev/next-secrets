@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     'different deployment environments (Development, Staging, Production).',
 };
 
-export default function RootLayout({ children }: LayoutProps<'/'>) {
+export default async function RootLayout({ children }: LayoutProps<'/'>) {
   const projectsPromise = fetchProjects();
 
   return (

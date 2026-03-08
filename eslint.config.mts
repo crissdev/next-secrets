@@ -1,31 +1,38 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import { type Linter } from 'eslint';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import prettierConfig from 'eslint-config-prettier';
+import noOnlyTests from 'eslint-plugin-no-only-tests';
+import sortImports from 'eslint-plugin-simple-import-sort';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig: Linter.Config[] = [
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    'node_modules/**',
+    '.next/**',
+    '.swc/**',
+    'out/**',
+    'build/**',
+    'coverage/**',
+    'playwright-report/**',
+    'test-results/**',
+    'tests/.temp/**',
+    'next-env.d.ts',
+    '.*/**',
+    'src/lib/db/prisma-client/**',
+  ]),
+  prettierConfig,
   {
-    ignores: [
-      'node_modules/**',
-      '.next/**',
-      '.swc/**',
-      'next-env.d.ts',
-      'coverage/**',
-      'tests/.temp/**',
-      'test-results/**',
-    ],
-  },
-  ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
-  ...compat.config({
-    plugins: ['simple-import-sort', 'no-only-tests'],
+    plugins: {
+      'simple-import-sort': sortImports,
+      'no-only-tests': noOnlyTests,
+    },
     rules: {
+      // @next
+      '@next/next/no-img-element': 'off',
+
       // @typescript-eslint
       '@typescript-eslint/consistent-type-imports': [
         'error',
@@ -50,7 +57,7 @@ const eslintConfig: Linter.Config[] = [
       // no-only-tests
       'no-only-tests/no-only-tests': 'error',
     },
-  }),
-];
+  },
+]);
 
 export default eslintConfig;

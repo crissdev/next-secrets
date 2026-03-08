@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+
+import { PrismaClient } from '@/lib/db/prisma-client/client';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 export let prisma: PrismaClient = getPrismaClient();
@@ -12,9 +14,13 @@ export function setPrismaClient(client: PrismaClient) {
 
 function getPrismaClient() {
   if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma ??= new PrismaClient();
+    globalForPrisma.prisma ??= new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+    });
     return globalForPrisma.prisma;
   } else {
-    return new PrismaClient();
+    return new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+    });
   }
 }

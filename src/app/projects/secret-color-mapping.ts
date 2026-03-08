@@ -1,4 +1,4 @@
-import { SecretType } from '@prisma/client';
+import { SecretType } from '@/lib/db/prisma-client/enums';
 
 export const secretTypeColors: Record<SecretType, string> = {
   [SecretType.API_KEY]: 'bg-blue-100 text-blue-800',

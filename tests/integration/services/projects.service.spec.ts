@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { describe, expect, test } from 'vitest';
 
 import { createProject, getProject } from '@/lib/services/projects.service';
 

@@ -1,16 +1,15 @@
 import { faker } from '@faker-js/faker';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { useParams } from 'next/navigation';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import ProjectList from '@/app/projects/project-list';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { type Project } from '@/lib/definitions';
 
 describe('Project list', () => {
-  const useParamsMock = useParams as jest.Mock<{ id?: string }, []>;
-
   beforeEach(() => {
-    useParamsMock.mockReturnValue({});
+    vi.mocked(useParams).mockReturnValue({});
   });
 
   test('Display empty vault message', async () => {

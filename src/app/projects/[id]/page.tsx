@@ -1,17 +1,20 @@
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 import PageClient from '@/app/projects/[id]/page-client';
 import { fetchProject, fetchSecrets } from '@/lib/queries';
 
-export const dynamicParams = true;
-
-export async function generateStaticParams() {
-  return [];
+export default function ProjectPage(props: PageProps<'/projects/[id]'>) {
+  return (
+    <Suspense>
+      <ProjectPageContent params={props.params} />
+    </Suspense>
+  );
 }
 
-export default async function ProjectPage(props: PageProps<'/projects/[id]'>) {
-  const params = await props.params;
-  const project = await fetchProject(params.id);
+async function ProjectPageContent({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const project = await fetchProject(id);
 
   if (!project) {
     notFound();

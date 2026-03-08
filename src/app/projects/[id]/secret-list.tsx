@@ -1,6 +1,5 @@
 'use client';
 
-import { type SecretType } from '@prisma/client';
 import { LockIcon, SearchIcon } from 'lucide-react';
 import { use, useEffect, useMemo, useState } from 'react';
 
@@ -8,6 +7,7 @@ import AddSecretButton from '@/app/projects/[id]/add-secret-button';
 import SecretsTable from '@/app/projects/[id]/secrets-table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { type SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { toTitleCase } from '@/lib/string-util';
 
@@ -91,7 +91,7 @@ export default function SecretList(props: {
             onValueChange={(value) => setSelectedSecretType(value === 'none' ? value : (value as SecretType))}
             value={selectedSecretType}
           >
-            <SelectTrigger className={'w-1/2 lg:w-[200px] bg-white'} aria-label={'Select secret type'}>
+            <SelectTrigger className={'w-1/2 lg:w-50 bg-white'} aria-label={'Select secret type'}>
               <SelectValue placeholder={'All secret types'} />
             </SelectTrigger>
             <SelectContent>

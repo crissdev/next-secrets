@@ -1,4 +1,4 @@
-import { type SecretType } from '@prisma/client';
+import { type SecretType } from '@/lib/db/prisma-client/enums';
 
 export interface Project {
   id: string;

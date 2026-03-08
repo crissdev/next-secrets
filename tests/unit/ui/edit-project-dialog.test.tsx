@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
 
 import EditProjectDialog from '@/app/projects/edit-project-dialog';
 import type { Project } from '@/lib/definitions';
@@ -9,16 +10,10 @@ import { createProject, updateProject } from '@/lib/store/storage';
 
 import { useRouterMockFactory } from '../factories';
 
-jest.mock('@/lib/store/storage');
-
-jest.mock('@/lib/queries');
+vi.mock('@/lib/store/storage');
+vi.mock('@/lib/queries');
 
 describe('Edit project dialog', () => {
-  const createProjectMock = createProject as jest.Mock<
-    ReturnType<typeof createProject>,
-    Parameters<typeof createProject>
-  >;
-
   test('Create a new project via dialog', async () => {
     const { pushMock } = useRouterMockFactory();
 
@@ -28,14 +23,14 @@ describe('Edit project dialog', () => {
     const projectColor = faker.color.rgb({ format: 'hex' });
     const defaultProjectColor = '#000000';
 
-    createProjectMock.mockResolvedValueOnce({
+    vi.mocked(createProject).mockResolvedValueOnce({
       id: projectId,
       name: projectName,
       description: projectDescription,
       color: projectColor,
     });
 
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     render(<EditProjectDialog open={true} onClose={onCloseMock} />);
     expect(screen.getByRole('dialog')).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Project color' })).toHaveValue(defaultProjectColor);
@@ -46,8 +41,8 @@ describe('Edit project dialog', () => {
     await userEvent.type(screen.getByRole('textbox', { name: 'Project color' }), projectColor);
     await userEvent.click(screen.getByRole('button', { name: 'Create project' }));
 
-    expect(createProjectMock).toHaveBeenCalledTimes(1);
-    expect(createProjectMock).toHaveBeenCalledWith({
+    expect(createProject).toHaveBeenCalledTimes(1);
+    expect(createProject).toHaveBeenCalledWith({
       name: projectName,
       description: projectDescription,
       color: projectColor,
@@ -63,7 +58,7 @@ describe('Edit project dialog', () => {
   });
 
   test('Edit project via dialog', async () => {
-    const onCloseMock = jest.fn();
+    const onCloseMock = vi.fn();
     const project: Project = {
       id: faker.string.uuid(),
       name: faker.lorem.words(2),
