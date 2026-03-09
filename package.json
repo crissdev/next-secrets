@@ -31,9 +31,6 @@
     "dev:docker:prisma:seed": "docker compose exec app pnpm prisma db seed",
     "dev:docker:prisma:studio": "docker compose exec app pnpm prisma studio"
   },
-  "prisma": {
-    "seed": "node ./prisma/seed.mts"
-  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.4.2",
