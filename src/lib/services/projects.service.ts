@@ -3,19 +3,22 @@ import { createProjectSchema, updateProjectSchema } from '@/lib/services/schemas
 import { UniqueConstraintError } from '@/lib/store/db';
 import * as storage from '@/lib/store/storage';
 
-export async function getProjects() {
-  return await storage.getProjects();
+export async function getProjects(userId: string) {
+  return await storage.getProjects(userId);
 }
 
-export async function createProject(input: Omit<Project, 'id'>): Promise<Project> {
+export async function createProject(input: Omit<Project, 'id'>, userId: string): Promise<Project> {
   const projectInput = createProjectSchema.parse(input);
 
   try {
-    const newProject = await storage.createProject({
-      name: projectInput.name,
-      description: projectInput.description,
-      color: projectInput.color,
-    });
+    const newProject = await storage.createProject(
+      {
+        name: projectInput.name,
+        description: projectInput.description,
+        color: projectInput.color,
+      },
+      userId,
+    );
     return newProject;
   } catch (err) {
     console.error('Error creating project:', err);
@@ -26,8 +29,8 @@ export async function createProject(input: Omit<Project, 'id'>): Promise<Project
   }
 }
 
-export function getProject(id: string): Promise<Project | null> {
-  return storage.getProject(id);
+export function getProject(id: string, userId: string): Promise<Project | null> {
+  return storage.getProject(id, userId);
 }
 
 export async function updateProject(input: Omit<Project, 'secrets'>): Promise<Project> {

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { useParams } from 'next/navigation';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import SecretList from '@/app/projects/[id]/secret-list';
+import SecretList from '@/app/(app)/projects/[id]/secret-list';
 import { SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { getSecretValue } from '@/lib/store/storage';

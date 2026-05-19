@@ -4,6 +4,7 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { fetchProjects } from '@/lib/queries';
+import { requireSession } from '@/lib/session';
 
 export default function Home() {
   return (
@@ -15,7 +16,8 @@ export default function Home() {
 
 async function HomeContent() {
   await connection();
-  const projects = await fetchProjects();
+  const { user } = await requireSession();
+  const projects = await fetchProjects(user.id);
 
   if (projects.length > 0) {
     redirect(`/projects/${projects[0].id}`);

@@ -7,22 +7,22 @@ import * as db from '@/lib/store/db';
 
 // Projects
 
-export async function getProjects(): Promise<Project[]> {
-  return await db.getProjects();
+export async function getProjects(userId: string): Promise<Project[]> {
+  return await db.getProjects(userId);
 }
 
-export async function getProject(id: string): Promise<Project | null> {
-  return await db.getProject(id);
+export async function getProject(id: string, userId: string): Promise<Project | null> {
+  return await db.getProject(id, userId);
 }
 
-export async function createProject(project: Omit<Project, 'id'>): Promise<Project> {
+export async function createProject(project: Omit<Project, 'id'>, userId: string): Promise<Project> {
   const newProject: Project = {
     id: crypto.randomUUID(),
     name: project.name,
     description: project.description || '',
     color: project.color,
   };
-  return await db.addProject(newProject);
+  return await db.addProject(newProject, userId);
 }
 
 export async function deleteProject(id: string): Promise<void> {

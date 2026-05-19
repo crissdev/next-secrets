@@ -8,6 +8,7 @@ import { revalidateProjects } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecretValue, updateSecret } from '@/lib/services/secrets.service';
+import { requireSession } from '@/lib/session';
 import { deleteSecret, updateSecretValue } from '@/lib/store/storage';
 
 export type ActionErrorResult = {
@@ -32,9 +33,10 @@ export async function createProjectAction(
   data: Omit<Project, 'id'>,
 ): Promise<ActionSuccessResult<Project> | ActionErrorResult> {
   try {
+    const { user } = await requireSession();
     const { name, description, color } = data;
-    const newProject = await createProject({ name, description, color });
-    revalidateProjects();
+    const newProject = await createProject({ name, description, color }, user.id);
+    revalidateProjects(user.id);
     return { success: true as const, data: newProject };
   } catch (err) {
     if (err instanceof ZodError) {
@@ -52,8 +54,9 @@ export async function createProjectAction(
 
 export async function deleteProjectAction(projectId: string): Promise<ActionSuccessResultVoid | ActionErrorResult> {
   try {
+    const { user } = await requireSession();
     await deleteProject(projectId);
-    revalidateProjects();
+    revalidateProjects(user.id);
     revalidatePath(`/projects/${projectId}`);
     return { success: true as const };
   } catch (err) {
@@ -72,8 +75,9 @@ export async function updateProjectAction(
   project: Omit<Project, 'secrets'>,
 ): Promise<ActionSuccessResult<Project> | ActionErrorResult> {
   try {
+    const { user } = await requireSession();
     const updatedProject = await updateProject(project);
-    revalidateProjects();
+    revalidateProjects(user.id);
     return { success: true as const, data: updatedProject };
   } catch (err) {
     if (err instanceof ZodError) {

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 import { describe, expect, test, vi } from 'vitest';
 
-import EditSecretDialog from '@/app/projects/edit-secret-dialog';
+import EditSecretDialog from '@/app/(app)/projects/edit-secret-dialog';
 import { SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/storage';

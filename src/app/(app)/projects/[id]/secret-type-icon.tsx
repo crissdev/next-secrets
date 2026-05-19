@@ -1,6 +1,6 @@
 import { Code, Database, FileText, Key, Lock } from 'lucide-react';
 
-import { secretTypeColors } from '@/app/projects/secret-color-mapping';
+import { secretTypeColors } from '@/app/(app)/projects/secret-color-mapping';
 import { SecretType } from '@/lib/db/prisma-client/enums';
 
 export default function SecretTypeIcon(props: { type: SecretType; size: 'default' | 'small' }) {

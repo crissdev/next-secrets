@@ -8,20 +8,24 @@ import { getProject, getProjects } from './services/projects.service';
 const FETCH_PROJECTS_TAG = 'projects';
 
 // React cache for deduplication within a request
-const cachedGetProject = cache(getProject);
 const cachedGetSecrets = cache(getSecrets);
 
-export async function fetchProjects() {
+export async function fetchProjects(userId: string) {
   'use cache';
-  cacheTag(FETCH_PROJECTS_TAG);
+  cacheTag(`${FETCH_PROJECTS_TAG}-${userId}`);
   cacheLife('minutes');
-  return getProjects();
+  return getProjects(userId);
 }
 
-export const fetchProject = async (id: string) => await cachedGetProject(id);
+export async function fetchProject(id: string, userId: string) {
+  'use cache';
+  cacheTag(`project-${id}`);
+  cacheLife('minutes');
+  return getProject(id, userId);
+}
 
-export function revalidateProjects() {
-  revalidateTag(FETCH_PROJECTS_TAG, 'max');
+export function revalidateProjects(userId: string) {
+  revalidateTag(`${FETCH_PROJECTS_TAG}-${userId}`, 'max');
 }
 
 export async function fetchSecrets(projectId: string) {

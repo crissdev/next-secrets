@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { revalidatePath } from 'next/cache';
 import { describe, expect, test, vi } from 'vitest';
 
-import DeleteSecretDialog from '@/app/projects/delete-secret-dialog';
+import DeleteSecretDialog from '@/app/(app)/projects/delete-secret-dialog';
 import { deleteSecret } from '@/lib/store/storage';
 
 vi.mock('@/lib/store/storage');

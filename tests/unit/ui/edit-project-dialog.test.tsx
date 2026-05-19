@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
 
-import EditProjectDialog from '@/app/projects/edit-project-dialog';
+import EditProjectDialog from '@/app/(app)/projects/edit-project-dialog';
 import type { Project } from '@/lib/definitions';
 import { revalidateProjects } from '@/lib/queries';
 import { createProject, updateProject } from '@/lib/store/storage';
@@ -42,11 +42,10 @@ describe('Edit project dialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Create project' }));
 
     expect(createProject).toHaveBeenCalledTimes(1);
-    expect(createProject).toHaveBeenCalledWith({
-      name: projectName,
-      description: projectDescription,
-      color: projectColor,
-    });
+    expect(createProject).toHaveBeenCalledWith(
+      { name: projectName, description: projectDescription, color: projectColor },
+      'test-user-id',
+    );
     expect(onCloseMock).toHaveBeenCalledTimes(1);
 
     // Expect cache to be invalidated

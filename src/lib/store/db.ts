@@ -8,13 +8,13 @@ import {
 } from '@/lib/db/prisma-client/internal/prismaNamespace';
 import { type Project, type Secret } from '@/lib/definitions';
 
-export async function addProject(input: Omit<Project, 'id'>) {
+export async function addProject(input: Omit<Project, 'id'>, userId: string) {
   return performDatabaseAction((prisma) =>
     prisma.project.create({
       data: {
         ...input,
         id: crypto.randomUUID(),
-        userId: '',
+        userId,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -22,16 +22,16 @@ export async function addProject(input: Omit<Project, 'id'>) {
   );
 }
 
-export async function getProjects(): Promise<Project[]> {
-  return await performDatabaseAction((prisma) => prisma.project.findMany({ orderBy: { name: 'asc' } }));
+export async function getProjects(userId: string): Promise<Project[]> {
+  return await performDatabaseAction((prisma) =>
+    prisma.project.findMany({ where: { userId }, orderBy: { name: 'asc' } }),
+  );
 }
 
-export async function getProject(id: string): Promise<Project | null> {
+export async function getProject(id: string, userId: string): Promise<Project | null> {
   return await performDatabaseAction((prisma) =>
     prisma.project.findUnique({
-      where: {
-        id,
-      },
+      where: { id, userId },
     }),
   );
 }

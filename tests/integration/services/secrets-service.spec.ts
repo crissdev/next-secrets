@@ -8,11 +8,14 @@ import { createSecret, downloadSecrets, getSecrets, updateSecret } from '@/lib/s
 
 describe('Secret service', () => {
   async function createTestProject() {
-    return await createProject({
-      name: faker.lorem.words(2),
-      description: faker.lorem.sentence(),
-      color: faker.color.rgb({ format: 'hex' }),
-    });
+    return await createProject(
+      {
+        name: faker.lorem.words(2),
+        description: faker.lorem.sentence(),
+        color: faker.color.rgb({ format: 'hex' }),
+      },
+      'test-user-id',
+    );
   }
 
   function createTestSecret(projectId: string, overrides: Partial<Omit<Secret, 'id'>> = {}) {

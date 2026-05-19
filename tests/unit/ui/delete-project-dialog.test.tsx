@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { useParams } from 'next/navigation';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import DeleteProjectDialog from '@/app/projects/delete-project-dialog';
+import DeleteProjectDialog from '@/app/(app)/projects/delete-project-dialog';
 import { revalidateProjects } from '@/lib/queries';
 import { deleteProject } from '@/lib/store/storage';
 

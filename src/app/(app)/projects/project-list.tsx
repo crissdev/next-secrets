@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 
-import DeleteProjectDialog from '@/app/projects/delete-project-dialog';
-import EditProjectDialog from '@/app/projects/edit-project-dialog';
+import DeleteProjectDialog from '@/app/(app)/projects/delete-project-dialog';
+import EditProjectDialog from '@/app/(app)/projects/edit-project-dialog';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

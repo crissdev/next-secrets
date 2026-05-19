@@ -3,8 +3,8 @@
 import { LockIcon, SearchIcon } from 'lucide-react';
 import { use, useEffect, useMemo, useState } from 'react';
 
-import AddSecretButton from '@/app/projects/[id]/add-secret-button';
-import SecretsTable from '@/app/projects/[id]/secrets-table';
+import AddSecretButton from '@/app/(app)/projects/[id]/add-secret-button';
+import SecretsTable from '@/app/(app)/projects/[id]/secrets-table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type SecretType } from '@/lib/db/prisma-client/enums';

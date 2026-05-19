@@ -6,6 +6,10 @@ import { afterEach, beforeEach, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 vi.mock('next/cache');
 vi.mock('next/navigation');
+vi.mock('@/lib/session', () => ({
+  getSession: vi.fn().mockResolvedValue({ user: { id: 'test-user-id', email: 'test@example.com' } }),
+  requireSession: vi.fn().mockResolvedValue({ user: { id: 'test-user-id', email: 'test@example.com' } }),
+}));
 
 afterEach(() => {
   cleanup();
