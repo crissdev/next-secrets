@@ -58,7 +58,7 @@ export default function SecretList(props: {
       </div>
     </div>
   ) : (
-    <div className={'p-5 h-full'}>
+    <div className={'p-3 sm:p-5 h-full'}>
       <div className={'flex flex-col gap-2 items-stretch lg:flex-row lg:items-center mb-4 w-full'}>
         <div className={'relative'}>
           <SearchIcon size={16} className={'stroke-muted-foreground absolute left-2 top-1/2 -translate-y-1/2'} />

@@ -40,7 +40,7 @@ export default function DownloadSecretsButton(props: { secretIds?: string[] }) {
   return (
     <Button variant={'outline'} onClick={onDownloadSecrets} disabled={isPending}>
       <DownloadIcon />
-      <span>Download secrets</span>
+      <span className="hidden sm:inline">Download secrets</span>
     </Button>
   );
 }

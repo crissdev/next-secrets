@@ -98,6 +98,22 @@ function useSortingState() {
   };
 }
 
+// Columns hidden below certain breakpoints
+const colClasses: Record<string, string> = {
+  type: 'hidden sm:table-cell',
+  environmentId: 'hidden sm:table-cell',
+  updatedAt: 'hidden lg:table-cell',
+};
+
+// Pinned column widths — Name column gets the remainder via table-fixed
+const colWidth: Record<string, string> = {
+  type: 'sm:w-28 lg:w-44',
+  environmentId: 'sm:w-24 lg:w-32',
+  value: 'w-20 lg:w-52',
+  updatedAt: 'lg:w-32',
+  actions: 'w-20',
+};
+
 export default function SecretsTable(props: {
   projectId: string;
   data: Secret[];
@@ -122,16 +138,21 @@ export default function SecretsTable(props: {
         accessorKey: 'name',
         cell: ({ row }) => {
           return (
-            <div className={'flex items-center gap-4'}>
-              <SecretTypeIcon
-                size={props.condensedLayout ? 'small' : 'default'}
-                type={row.getValue<Secret['type']>('type')}
-              />
-              <div className={'flex flex-col'}>
-                <span className={'font-medium'} data-testid={`secret-name-${row.index}`}>
+            <div className={'flex items-center gap-4 min-w-0'}>
+              <div className="hidden lg:block shrink-0">
+                <SecretTypeIcon
+                  size={props.condensedLayout ? 'small' : 'default'}
+                  type={row.getValue<Secret['type']>('type')}
+                />
+              </div>
+              <div className={'flex flex-col min-w-0'}>
+                <span className={'font-medium truncate'} data-testid={`secret-name-${row.index}`}>
                   {row.getValue<Secret['name']>('name')}
                 </span>
-                <span data-testid={`secret-description-${row.index}`} className={'text-sm text-muted-foreground'}>
+                <span
+                  data-testid={`secret-description-${row.index}`}
+                  className={'text-sm text-muted-foreground truncate'}
+                >
                   {row.original.description}
                 </span>
               </div>
@@ -155,7 +176,7 @@ export default function SecretsTable(props: {
           const type = row.getValue<Secret['type']>('type');
           return (
             <span
-              className={`font-medium px-2 rounded-full text-xs inline-block leading-5 ${secretTypeColors[type]}`}
+              className={`font-medium px-2 rounded-full text-xs block leading-5 truncate ${secretTypeColors[type]}`}
               data-testid={`secret-type-${row.index}`}
             >
               {toTitleCase(type)}
@@ -245,14 +266,16 @@ export default function SecretsTable(props: {
           };
 
           return (
-            <div className={'flex items-center gap-3'}>
+            <div className={'flex items-center gap-1 lg:gap-3'}>
               {isFetchSecretPending || isCopyPending ? (
-                <div className={'w-[18ch] bg-muted py-1 px-3 h-7'}>
+                <div className={'hidden lg:block w-[18ch] bg-muted py-1 px-3 h-7'}>
                   <LoadingDots delay={200} />
                 </div>
               ) : (
                 <span
-                  className={'w-[18ch] overflow-hidden text-ellipsis bg-muted rounded-md py-1 px-3 h-7'}
+                  className={
+                    'hidden lg:inline-block w-[18ch] overflow-hidden text-ellipsis bg-muted rounded-md py-1 px-3 h-7'
+                  }
                   data-testid={`secret-value-${row.index}`}
                 >
                   {showSecret ? (secretValue ?? value) : '•'.repeat(8)}
@@ -384,39 +407,45 @@ export default function SecretsTable(props: {
   });
 
   return (
-    <Table>
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              return (
-                <TableHead key={header.id} className={`h-12 ${props.condensedLayout ? 'px-0' : ''}`}>
+    <div className="overflow-x-auto">
+      <Table className="table-fixed w-full">
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead
+                  key={header.id}
+                  className={`h-12 ${colClasses[header.column.id] ?? ''} ${colWidth[header.column.id] ?? ''} ${props.condensedLayout ? 'px-0' : ''}`}
+                >
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell className={`${props.condensedLayout ? 'py-1 px-2' : 'p-4'}`} key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
               ))}
             </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center">
-              No results.
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    className={`p-2 lg:p-4 overflow-hidden ${colClasses[cell.column.id] ?? ''} ${props.condensedLayout ? 'py-1 px-2' : ''}`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

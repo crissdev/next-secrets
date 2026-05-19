@@ -14,7 +14,7 @@ export default function AddSecretButton(props: { icon?: ReactNode; testId?: stri
     <>
       <Button variant={'default'} onClick={() => setCreateSecretDialogOpen(true)} data-testid={props.testId}>
         {props.icon}
-        Add secret
+        <span className="hidden sm:inline">Add secret</span>
       </Button>
       <EditSecretDialog
         projectId={selectedProjectId}

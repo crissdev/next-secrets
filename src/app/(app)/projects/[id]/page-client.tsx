@@ -32,7 +32,10 @@ export default function ProjectClient(props: {
         <div className={'flex flex-col'}>
           <div className={'flex items-center'}>
             <SidebarTrigger className={'md:hidden'} />
-            <h2 className={'font-bold text-xl'} data-testid={'selected-project-title'}>
+            <h2
+              className={'font-bold text-xl truncate max-w-[40vw] sm:max-w-none'}
+              data-testid={'selected-project-title'}
+            >
               {props.project.name}
             </h2>
           </div>

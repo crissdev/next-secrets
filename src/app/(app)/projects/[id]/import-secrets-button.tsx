@@ -15,7 +15,7 @@ export default function ImportSecretsButton() {
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
         <UploadIcon size={16} />
-        Import
+        <span className="hidden sm:inline">Import</span>
       </Button>
       <ImportSecretsDialog projectId={projectId} open={open} onClose={() => setOpen(false)} />
     </>
