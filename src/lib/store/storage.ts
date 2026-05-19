@@ -72,6 +72,41 @@ export async function updateSecretValue(secretId: string, secretValue: string): 
   return await db.updateSecretValue(secretId, encryptValue(secretValue));
 }
 
+export async function importSecrets(
+  projectId: string,
+  entries: Array<{ name: string; value: string; environmentId: string }>,
+  mode: 'skip' | 'overwrite',
+): Promise<{ imported: number; skipped: number }> {
+  let imported = 0;
+  let skipped = 0;
+
+  const base = (entry: { name: string; value: string; environmentId: string }): Omit<Secret, 'id' | 'updatedAt'> => ({
+    name: entry.name,
+    value: encryptValue(entry.value),
+    type: 'ENVIRONMENT_VARIABLE' as Secret['type'],
+    description: '',
+    environmentId: entry.environmentId,
+    projectId,
+  });
+
+  for (const entry of entries) {
+    if (mode === 'skip') {
+      try {
+        await db.createSecret(base(entry));
+        imported++;
+      } catch {
+        skipped++;
+      }
+    } else {
+      const result = await db.upsertSecret(base(entry));
+      if (result.created) imported++;
+      else skipped++;
+    }
+  }
+
+  return { imported, skipped };
+}
+
 //------
 export const dataEncKey = process.env.DATA_ENC_KEY;
 const dataEncAlgorithm = process.env.DATA_ENC_ALGO || 'aes-256-cbc';

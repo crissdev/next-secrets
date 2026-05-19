@@ -5,6 +5,7 @@ import { Suspense, useCallback, useMemo, useState } from 'react';
 
 import AddSecretButton from '@/app/(app)/projects/[id]/add-secret-button';
 import DownloadSecretsButton from '@/app/(app)/projects/[id]/download-secrets-button';
+import ImportSecretsButton from '@/app/(app)/projects/[id]/import-secrets-button';
 import SecretCount from '@/app/(app)/projects/[id]/secret-count';
 import SecretList from '@/app/(app)/projects/[id]/secret-list';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -43,6 +44,7 @@ export default function ProjectClient(props: {
         </div>
         <div className={'ml-auto flex items-center gap-2'}>
           <DownloadSecretsButton secretIds={filteredSecrets} />
+          <ImportSecretsButton />
           <AddSecretButton icon={<PlusIcon size={20} />} testId={'topbar-add-secret'} />
         </div>
       </header>

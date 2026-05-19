@@ -4,12 +4,12 @@ import { revalidatePath } from 'next/cache';
 import { ZodError } from 'zod';
 
 import type { Project, Secret } from '@/lib/definitions';
-import { revalidateProjects } from '@/lib/queries';
+import { revalidateProjects, revalidateSecrets } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecretValue, updateSecret } from '@/lib/services/secrets.service';
 import { requireSession } from '@/lib/session';
-import { deleteSecret, updateSecretValue } from '@/lib/store/storage';
+import { deleteSecret, importSecrets, updateSecretValue } from '@/lib/store/storage';
 
 export type ActionErrorResult = {
   success: false;
@@ -194,6 +194,29 @@ export async function getSecretValueAction(secretId: string): Promise<ActionSucc
         code: SERVICE_ERROR.INTERNAL_ERROR,
         message: 'Cannot get secret value',
       },
+    };
+  }
+}
+
+export async function importSecretsAction(
+  projectId: string,
+  entries: Array<{ name: string; value: string }>,
+  environmentId: string,
+  mode: 'skip' | 'overwrite',
+): Promise<ActionSuccessResult<{ imported: number; skipped: number }> | ActionErrorResult> {
+  try {
+    const result = await importSecrets(
+      projectId,
+      entries.map((e) => ({ ...e, environmentId })),
+      mode,
+    );
+    revalidateSecrets(projectId);
+    return { success: true as const, data: result };
+  } catch (err) {
+    console.error(err);
+    return {
+      success: false as const,
+      error: { code: SERVICE_ERROR.INTERNAL_ERROR, message: 'Failed to import secrets' },
     };
   }
 }

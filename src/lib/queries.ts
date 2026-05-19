@@ -28,6 +28,10 @@ export function revalidateProjects(userId: string) {
   revalidateTag(`${FETCH_PROJECTS_TAG}-${userId}`, 'max');
 }
 
+export function revalidateSecrets(projectId: string) {
+  revalidateTag(`secrets-${projectId}`, 'max');
+}
+
 export async function fetchSecrets(projectId: string) {
   'use cache';
   cacheTag(`secrets-${projectId}`);

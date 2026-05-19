@@ -138,6 +138,24 @@ export async function updateSecretValue(secretId: string, secretValue: string): 
   });
 }
 
+export async function upsertSecret(input: Omit<Secret, 'id' | 'updatedAt'>): Promise<{ created: boolean }> {
+  return await performDatabaseAction(async (prisma) => {
+    const existing = await prisma.secret.findFirst({
+      where: { name: input.name, projectId: input.projectId, environmentId: input.environmentId },
+      select: { id: true },
+    });
+    if (existing) {
+      await prisma.secret.update({
+        where: { id: existing.id },
+        data: { value: input.value, type: input.type },
+      });
+      return { created: false };
+    }
+    await prisma.secret.create({ data: input });
+    return { created: true };
+  });
+}
+
 // Helper function to handle database errors
 async function performDatabaseAction<T = unknown>(action: (client: PrismaClient) => Promise<T>) {
   try {
