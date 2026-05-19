@@ -19,7 +19,7 @@ test.describe('Home page', () => {
     projectName = faker.lorem.words(3);
     await projectsPage.createProjectViaModal({ name: projectName });
 
-    await expect(page.getByTestId('selected-project-title')).toHaveText(projectName);
+    await expect(page.getByRole('heading', { name: projectName, exact: true })).toBeVisible();
   });
 
   test('Display list of secrets for the selected project', async ({ page, projectsPage }) => {

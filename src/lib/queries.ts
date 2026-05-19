@@ -1,4 +1,4 @@
-import { cacheLife, cacheTag, revalidateTag } from 'next/cache';
+import { cacheLife, cacheTag, updateTag } from 'next/cache';
 import { cache } from 'react';
 
 import { getSecrets } from '@/lib/services/secrets.service';
@@ -25,11 +25,15 @@ export async function fetchProject(id: string, userId: string) {
 }
 
 export function revalidateProjects(userId: string) {
-  revalidateTag(`${FETCH_PROJECTS_TAG}-${userId}`, 'max');
+  updateTag(`${FETCH_PROJECTS_TAG}-${userId}`);
+}
+
+export function revalidateProject(projectId: string) {
+  updateTag(`project-${projectId}`);
 }
 
 export function revalidateSecrets(projectId: string) {
-  revalidateTag(`secrets-${projectId}`, 'max');
+  updateTag(`secrets-${projectId}`);
 }
 
 export async function fetchSecrets(projectId: string) {

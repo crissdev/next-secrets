@@ -1,10 +1,10 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { refresh, revalidatePath } from 'next/cache';
 import { ZodError } from 'zod';
 
 import type { Project, Secret } from '@/lib/definitions';
-import { revalidateProjects, revalidateSecrets } from '@/lib/queries';
+import { revalidateProject, revalidateProjects, revalidateSecrets } from '@/lib/queries';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createProject, deleteProject, updateProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecretValue, updateSecret } from '@/lib/services/secrets.service';
@@ -58,6 +58,7 @@ export async function deleteProjectAction(projectId: string): Promise<ActionSucc
     await deleteProject(projectId);
     revalidateProjects(user.id);
     revalidatePath(`/projects/${projectId}`);
+    refresh();
     return { success: true as const };
   } catch (err) {
     console.error(err);
@@ -78,6 +79,8 @@ export async function updateProjectAction(
     const { user } = await requireSession();
     const updatedProject = await updateProject(project);
     revalidateProjects(user.id);
+    revalidateProject(project.id);
+    refresh();
     return { success: true as const, data: updatedProject };
   } catch (err) {
     if (err instanceof ZodError) {
@@ -101,7 +104,9 @@ export async function createSecretAction(
   try {
     const { name, description, type, environmentId, value } = data;
     const newSecret = await createSecret(projectId, { name, description, type, environmentId, value });
+    revalidateSecrets(projectId);
     revalidatePath(`/projects/${projectId}`);
+    refresh();
     return { success: true as const, data: newSecret };
   } catch (err) {
     if (err instanceof ZodError) {
@@ -123,7 +128,9 @@ export async function deleteSecretAction(
 ): Promise<ActionSuccessResultVoid | ActionErrorResult> {
   try {
     await deleteSecret(secretId);
+    revalidateSecrets(projectId);
     revalidatePath(`/projects/${projectId}`);
+    refresh();
     return { success: true as const };
   } catch (err) {
     console.error(err);
@@ -143,7 +150,9 @@ export async function updateSecretAction(
 ): Promise<ActionSuccessResult<Secret> | ActionErrorResult> {
   try {
     const updatedSecret = await updateSecret(secret);
+    revalidateSecrets(projectId);
     revalidatePath(`/projects/${projectId}`);
+    refresh();
     return { success: true as const, data: updatedSecret };
   } catch (err) {
     if (err instanceof ZodError) {
@@ -166,7 +175,9 @@ export async function updateSecretValueAction(
 ): Promise<ActionSuccessResultVoid | ActionErrorResult> {
   try {
     await updateSecretValue(secretId, value);
+    revalidateSecrets(projectId);
     revalidatePath(`/projects/${projectId}`);
+    refresh();
     return { success: true };
   } catch (err) {
     if (err instanceof ZodError) {
@@ -211,6 +222,7 @@ export async function importSecretsAction(
       mode,
     );
     revalidateSecrets(projectId);
+    refresh();
     return { success: true as const, data: result };
   } catch (err) {
     console.error(err);

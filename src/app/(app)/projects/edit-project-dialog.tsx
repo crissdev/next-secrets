@@ -27,6 +27,7 @@ type EditProjectDialogProps = {
   project?: Project;
   open: boolean;
   onClose: () => void;
+  onSaved?: (project: Project) => void;
 };
 
 export default function EditProjectDialog(props: EditProjectDialogProps) {
@@ -65,6 +66,7 @@ export default function EditProjectDialog(props: EditProjectDialogProps) {
       : await createProjectAction(form.getValues());
 
     if (result.success) {
+      props.onSaved?.(result.data);
       onCloseDialog();
 
       startTransition(() => {

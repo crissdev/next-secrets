@@ -59,9 +59,6 @@ CREATE TABLE "public"."verification" (
 -- DropIndex
 DROP INDEX "public"."projects_name_key";
 
--- AlterTable
-ALTER TABLE "public"."projects" ADD COLUMN "userId" TEXT NOT NULL;
-
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "public"."user"("email");
 

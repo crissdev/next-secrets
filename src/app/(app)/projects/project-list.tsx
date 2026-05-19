@@ -21,13 +21,18 @@ interface ProjectListProps {
   projectsPromise: Promise<Project[]>;
 }
 
+function sortProjects(projects: Project[]) {
+  return [...projects].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export default function ProjectList({ projectsPromise }: ProjectListProps) {
   const [createProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
   const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
   const [contextMenuProjectId, setContextMenuProjectId] = useState<string | null>(null);
   const { id: selectedProjectId } = useParams<{ id?: string }>();
 
-  const projectsList = use(projectsPromise);
+  const initialProjectsList = use(projectsPromise);
+  const [projectsList, setProjectsList] = useState(initialProjectsList);
   const contextMenuProjectName = projectsList.find((p) => p.id === contextMenuProjectId)?.name ?? 'N/A';
 
   useEffect(() => {
@@ -72,6 +77,15 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
 
         <EditProjectDialog
           open={createProjectDialogOpen}
+          onSaved={(project) => {
+            setProjectsList((currentProjects) => {
+              const nextProjects = contextMenuProjectId
+                ? currentProjects.map((currentProject) => (currentProject.id === project.id ? project : currentProject))
+                : [...currentProjects, project];
+
+              return sortProjects(nextProjects);
+            });
+          }}
           onClose={() => {
             setCreateProjectDialogOpen(false);
             setContextMenuProjectId(null);
@@ -102,7 +116,12 @@ export default function ProjectList({ projectsPromise }: ProjectListProps) {
             <div className={'text-muted-foreground font-semibold text-sm tracking-wider pl-2 mb-3'}>PROJECTS</div>
             <SidebarMenu>
               {projectsList.map((project, index) => (
-                <SidebarMenuItem key={project.id} className={`group/actions`} data-project-id={project.id}>
+                <SidebarMenuItem
+                  key={project.id}
+                  className={`group/actions`}
+                  data-project-id={project.id}
+                  data-testid="sidebar-project-item"
+                >
                   <SidebarMenuButton size={'lg'} asChild isActive={project.id === selectedProjectId}>
                     <Link
                       data-testid={`sidebar-project-name-${index}`}
