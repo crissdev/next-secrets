@@ -164,7 +164,7 @@ export default function ImportSecretsDialog({
                   setError('');
                 }}
                 rows={6}
-                className="font-mono text-xs resize-none whitespace-pre"
+                className="font-mono text-xs resize-none whitespace-pre max-h-80"
               />
             </div>
 
