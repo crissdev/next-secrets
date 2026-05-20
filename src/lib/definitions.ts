@@ -1,4 +1,4 @@
-import { type SecretType } from '@/lib/db/prisma-client/enums';
+import { SecretGroup, type SecretType } from '@/lib/db/prisma-client/enums';
 
 export interface Project {
   id: string;
@@ -12,6 +12,7 @@ export interface Secret {
   name: string;
   description: string;
   type: SecretType;
+  group: SecretGroup;
   value: string;
   environmentId: string;
   projectId: string;
@@ -23,9 +24,23 @@ export interface Environment {
   name: string;
 }
 
+export interface SecretGroupOption {
+  id: SecretGroup;
+  name: string;
+}
+
 // Update prisma/seed.ts if you change this
 export const DEFAULT_ENVIRONMENTS: Environment[] = [
   { id: 'bbfd5e06-d229-4df2-8816-0702352ee62d', name: 'Development' },
   { id: 'e0244050-597a-4fe2-a201-af0ed54906bc', name: 'Staging' },
   { id: 'a777c2bf-1900-447f-bd8b-3403dc865cc4', name: 'Production' },
+];
+
+export const DEFAULT_SECRET_GROUPS: SecretGroupOption[] = [
+  { id: SecretGroup.RUNTIME_APPLICATION, name: 'Runtime app' },
+  { id: SecretGroup.GITHUB_ACTIONS, name: 'GitHub Actions' },
+  { id: SecretGroup.LOCAL_DEVELOPMENT, name: 'Local development' },
+  { id: SecretGroup.DEPLOYMENT_PLATFORM, name: 'Deployment platform' },
+  { id: SecretGroup.INFRASTRUCTURE, name: 'Infrastructure' },
+  { id: SecretGroup.OTHER, name: 'Other' },
 ];

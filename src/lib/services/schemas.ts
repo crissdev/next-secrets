@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { SecretType } from '@/lib/db/prisma-client/enums';
+import { SecretGroup, SecretType } from '@/lib/db/prisma-client/enums';
 
 export const createProjectSchema = z.object({
   name: z.string().min(1, 'Project name cannot be empty.'),
@@ -13,6 +13,7 @@ export const createSecretSchema = z.object({
   value: z.string().min(1, 'Secret value cannot be empty.'),
   description: z.string(),
   type: z.enum(SecretType),
+  group: z.enum(SecretGroup),
   environmentId: z.string(),
 });
 

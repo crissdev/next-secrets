@@ -5,8 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { describe, expect, test, vi } from 'vitest';
 
 import EditSecretDialog from '@/app/(app)/projects/edit-secret-dialog';
-import { SecretType } from '@/lib/db/prisma-client/enums';
-import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { SecretGroup, SecretType } from '@/lib/db/prisma-client/enums';
+import { DEFAULT_ENVIRONMENTS, DEFAULT_SECRET_GROUPS, type Secret } from '@/lib/definitions';
 import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/storage';
 
 vi.mock('@/lib/store/storage');
@@ -35,6 +35,7 @@ describe('Create secret dialog', () => {
       description: secretDescription,
       value: secretValue,
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.RUNTIME_APPLICATION,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(onCloseMock).toHaveBeenCalled();
@@ -52,6 +53,7 @@ describe('Create secret dialog', () => {
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
       updatedAt: new Date(),
       projectId,
@@ -84,6 +86,7 @@ describe('Create secret dialog', () => {
       name: updatedName,
       description: updatedDescription,
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(onCloseMock).toHaveBeenCalled();
@@ -133,6 +136,19 @@ describe('Create secret dialog', () => {
     );
   });
 
+  test('All secret groups are available', async () => {
+    const onCloseMock = vi.fn();
+    const projectId = faker.string.uuid();
+
+    render(<EditSecretDialog projectId={projectId} open onClose={onCloseMock} />);
+    expect(screen.getByRole('dialog')).toBeVisible();
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Secret group' }));
+    expect(screen.getAllByRole('option').map((e) => e.textContent)).toEqual(
+      DEFAULT_SECRET_GROUPS.map((group) => group.name),
+    );
+  });
+
   test('Secret value is explicitly updated', async () => {
     const onCloseMock = vi.fn();
     const projectId = faker.string.uuid();
@@ -142,6 +158,7 @@ describe('Create secret dialog', () => {
       description: faker.lorem.sentence(3),
       value: faker.lorem.word(),
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
       updatedAt: new Date(),
       projectId,
@@ -164,6 +181,7 @@ describe('Create secret dialog', () => {
       name: secret.name,
       description: secret.description,
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
     expect(updateSecretValue).toHaveBeenCalledTimes(1);

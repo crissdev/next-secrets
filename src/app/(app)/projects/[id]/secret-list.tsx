@@ -7,9 +7,13 @@ import AddSecretButton from '@/app/(app)/projects/[id]/add-secret-button';
 import SecretsTable from '@/app/(app)/projects/[id]/secrets-table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type SecretType } from '@/lib/db/prisma-client/enums';
-import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { SecretGroup, type SecretType } from '@/lib/db/prisma-client/enums';
+import { DEFAULT_ENVIRONMENTS, DEFAULT_SECRET_GROUPS, type Secret } from '@/lib/definitions';
 import { toTitleCase } from '@/lib/string-util';
+
+const ALL_ENVIRONMENTS = 'all';
+const ALL_GROUPS = 'all';
+const ALL_SECRET_TYPES = 'none';
 
 export default function SecretList(props: {
   secretsPromise: Promise<Secret[]>;
@@ -18,24 +22,33 @@ export default function SecretList(props: {
 }) {
   const secrets = use(props.secretsPromise);
   const [filter, setFilter] = useState('');
-  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>('');
-  const [selectedSecretType, setSelectedSecretType] = useState<SecretType | 'none'>('none');
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(ALL_ENVIRONMENTS);
+  const [selectedGroup, setSelectedGroup] = useState<SecretGroup | typeof ALL_GROUPS>(SecretGroup.RUNTIME_APPLICATION);
+  const [selectedSecretType, setSelectedSecretType] = useState<SecretType | typeof ALL_SECRET_TYPES>(ALL_SECRET_TYPES);
   const allSecretTypes = [...new Set(secrets.map((s) => s.type))];
+  const normalizedFilter = filter.trim().toLowerCase();
 
   const filteredSecrets = useMemo(
     () =>
       secrets
-        .filter((secret) => !selectedEnvironmentId || secret.environmentId === selectedEnvironmentId)
-        .filter((secret) => selectedSecretType === 'none' || secret.type === selectedSecretType),
-    [secrets, selectedEnvironmentId, selectedSecretType],
+        .filter(
+          (secret) => selectedEnvironmentId === ALL_ENVIRONMENTS || secret.environmentId === selectedEnvironmentId,
+        )
+        .filter((secret) => selectedGroup === ALL_GROUPS || secret.group === selectedGroup)
+        .filter((secret) => selectedSecretType === ALL_SECRET_TYPES || secret.type === selectedSecretType)
+        .filter(
+          (secret) =>
+            !normalizedFilter ||
+            secret.name.toLowerCase().includes(normalizedFilter) ||
+            secret.description.toLowerCase().includes(normalizedFilter),
+        ),
+    [secrets, selectedEnvironmentId, selectedGroup, selectedSecretType, normalizedFilter],
   );
 
   const { onFilterChanged } = props;
-  const hasFilters = selectedSecretType !== 'none' || selectedEnvironmentId !== '' || filter.length > 0;
-
   useEffect(() => {
-    onFilterChanged(hasFilters ? filteredSecrets : []);
-  }, [filteredSecrets, hasFilters, onFilterChanged]);
+    onFilterChanged(filteredSecrets);
+  }, [filteredSecrets, onFilterChanged]);
 
   const [condensedLayout] = useState(false);
 
@@ -69,14 +82,34 @@ export default function SecretList(props: {
             className="bg-white lg:w-[32ch] w-full pl-8 mr-2"
           />
         </div>
-        <div className="lg:w-full flex lg:justify-end items-center gap-2">
+        <div className="lg:w-full grid grid-cols-2 lg:flex lg:justify-end items-center gap-2">
+          <Select
+            onValueChange={(value) => setSelectedGroup(value === ALL_GROUPS ? value : (value as SecretGroup))}
+            value={selectedGroup}
+          >
+            <SelectTrigger className={'w-full lg:w-44 bg-white'} aria-label={'Select secret group'}>
+              <SelectValue placeholder={'Runtime app'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem aria-label={'All groups'} value={ALL_GROUPS}>
+                  All groups
+                </SelectItem>
+                {DEFAULT_SECRET_GROUPS.map(({ id, name }) => (
+                  <SelectItem value={id} key={id}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <Select onValueChange={(value) => setSelectedEnvironmentId(value)} value={String(selectedEnvironmentId)}>
-            <SelectTrigger className={'w-1/2 lg:w-[180px] bg-white'} aria-label={'Select environment'}>
+            <SelectTrigger className={'w-full lg:w-[180px] bg-white'} aria-label={'Select environment'}>
               <SelectValue placeholder={'All environments'} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem aria-label={'All environments'} value={'0'}>
+                <SelectItem aria-label={'All environments'} value={ALL_ENVIRONMENTS}>
                   All environments
                 </SelectItem>
                 {DEFAULT_ENVIRONMENTS.map(({ id, name }) => (
@@ -88,15 +121,15 @@ export default function SecretList(props: {
             </SelectContent>
           </Select>
           <Select
-            onValueChange={(value) => setSelectedSecretType(value === 'none' ? value : (value as SecretType))}
+            onValueChange={(value) => setSelectedSecretType(value === ALL_SECRET_TYPES ? value : (value as SecretType))}
             value={selectedSecretType}
           >
-            <SelectTrigger className={'w-1/2 lg:w-50 bg-white'} aria-label={'Select secret type'}>
+            <SelectTrigger className={'w-full lg:w-50 bg-white'} aria-label={'Select secret type'}>
               <SelectValue placeholder={'All secret types'} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem aria-label={'All secret types'} value={'none'}>
+                <SelectItem aria-label={'All secret types'} value={ALL_SECRET_TYPES}>
                   All secret types
                 </SelectItem>
                 {allSecretTypes.map((type) => (
@@ -110,12 +143,7 @@ export default function SecretList(props: {
         </div>
       </div>
 
-      <SecretsTable
-        projectId={props.projectInfo.id}
-        data={filteredSecrets}
-        filter={filter}
-        condensedLayout={condensedLayout}
-      />
+      <SecretsTable projectId={props.projectInfo.id} data={filteredSecrets} condensedLayout={condensedLayout} />
     </div>
   );
 }

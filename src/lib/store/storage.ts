@@ -43,6 +43,7 @@ export async function createSecret(
     name: secret.name,
     value: encryptValue(secret.value),
     type: secret.type,
+    group: secret.group,
     description: secret.description,
     updatedAt: new Date(),
     environmentId: secret.environmentId,
@@ -74,16 +75,22 @@ export async function updateSecretValue(secretId: string, secretValue: string): 
 
 export async function importSecrets(
   projectId: string,
-  entries: Array<{ name: string; value: string; environmentId: string }>,
+  entries: Array<{ name: string; value: string; environmentId: string; group: Secret['group'] }>,
   mode: 'skip' | 'overwrite',
 ): Promise<{ imported: number; skipped: number }> {
   let imported = 0;
   let skipped = 0;
 
-  const base = (entry: { name: string; value: string; environmentId: string }): Omit<Secret, 'id' | 'updatedAt'> => ({
+  const base = (entry: {
+    name: string;
+    value: string;
+    environmentId: string;
+    group: Secret['group'];
+  }): Omit<Secret, 'id' | 'updatedAt'> => ({
     name: entry.name,
     value: encryptValue(entry.value),
     type: 'ENVIRONMENT_VARIABLE' as Secret['type'],
+    group: entry.group,
     description: '',
     environmentId: entry.environmentId,
     projectId,

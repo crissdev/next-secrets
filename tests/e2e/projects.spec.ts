@@ -49,9 +49,38 @@ test.describe('Home page', () => {
 
     await expect(page.getByTestId('secret-name-0')).toHaveText(secretName);
     await expect(page.getByTestId('secret-description-0')).toHaveText(secretDescription);
+    await expect(page.getByTestId('secret-group-0')).toHaveText('Runtime app');
 
     await expect(page.getByTestId('project-secrets-count')).toHaveText('1 secret');
     await expect(page.getByTestId('no-secrets-message')).not.toBeAttached();
     await expect(page.getByTestId('no-secrets-hint')).not.toBeAttached();
+  });
+
+  test('Group secrets by usage', async ({ page, projectsPage }) => {
+    await page.goto('/');
+    await projectsPage.createProjectViaModal();
+
+    await page.getByTestId('empty-list-add-secret').click();
+    await page.getByRole('textbox', { name: 'Secret name' }).fill('DATABASE_URL');
+    await page.getByRole('textbox', { name: 'Secret value' }).fill(faker.internet.url());
+    await page.getByRole('button', { name: 'Add secret' }).click();
+
+    await page.getByTestId('topbar-add-secret').click();
+    await page.getByRole('textbox', { name: 'Secret name' }).fill('GH_TOKEN');
+    await page.getByRole('combobox', { name: 'Secret group' }).click();
+    await page.getByRole('option', { name: 'GitHub Actions' }).click();
+    await page.getByRole('textbox', { name: 'Secret value' }).fill(faker.string.alphanumeric(32));
+    await page.getByRole('button', { name: 'Add secret' }).click();
+
+    await expect(page.getByTestId('project-secrets-count')).toHaveText('2 secrets');
+    await expect(page.getByTestId('secret-name-0')).toHaveText('DATABASE_URL');
+    await expect(page.getByText('GH_TOKEN')).not.toBeVisible();
+
+    await page.getByRole('combobox', { name: 'Select secret group' }).click();
+    await page.getByRole('option', { name: 'GitHub Actions' }).click();
+
+    await expect(page.getByTestId('secret-name-0')).toHaveText('GH_TOKEN');
+    await expect(page.getByTestId('secret-group-0')).toHaveText('GitHub Actions');
+    await expect(page.getByText('DATABASE_URL')).not.toBeVisible();
   });
 });

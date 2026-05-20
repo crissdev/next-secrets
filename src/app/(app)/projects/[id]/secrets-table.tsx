@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getSecretValueAction } from '@/lib/actions';
-import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, DEFAULT_SECRET_GROUPS, type Secret } from '@/lib/definitions';
 import { toTitleCase } from '@/lib/string-util';
 
 export function formatDate(date: Date | string) {
@@ -101,13 +101,15 @@ function useSortingState() {
 // Columns hidden below certain breakpoints
 const colClasses: Record<string, string> = {
   type: 'hidden sm:table-cell',
+  group: 'hidden md:table-cell',
   environmentId: 'hidden sm:table-cell',
   updatedAt: 'hidden lg:table-cell',
 };
 
 // Pinned column widths — Name column gets the remainder via table-fixed
 const colWidth: Record<string, string> = {
-  type: 'sm:w-28 lg:w-44',
+  type: 'sm:w-24 lg:w-36',
+  group: 'md:w-32 lg:w-40',
   environmentId: 'sm:w-24 lg:w-32',
   value: 'w-20 lg:w-52',
   updatedAt: 'lg:w-32',
@@ -157,6 +159,28 @@ export default function SecretsTable(props: {
                 </span>
               </div>
             </div>
+          );
+        },
+      },
+      {
+        header: ({ column }) => (
+          <Button
+            variant={'ghost'}
+            onClick={() => onChangeSorting(column)}
+            className="hover:!bg-transparent w-full justify-start"
+          >
+            Group
+            <SortIcon direction={column.getIsSorted()} />
+          </Button>
+        ),
+        accessorKey: 'group',
+        cell: ({ row }) => {
+          const group = row.getValue<Secret['group']>('group');
+          const groupName = DEFAULT_SECRET_GROUPS.find((secretGroup) => secretGroup.id === group)?.name;
+          return (
+            <Badge variant={'secondary'} className={'rounded-full'} data-testid={`secret-group-${row.index}`}>
+              {groupName ?? 'Other'}
+            </Badge>
           );
         },
       },

@@ -102,8 +102,8 @@ export async function createSecretAction(
   data: Omit<Secret, 'id' | 'updatedAt' | 'projectId'>,
 ): Promise<ActionSuccessResult<Secret> | ActionErrorResult> {
   try {
-    const { name, description, type, environmentId, value } = data;
-    const newSecret = await createSecret(projectId, { name, description, type, environmentId, value });
+    const { name, description, type, group, environmentId, value } = data;
+    const newSecret = await createSecret(projectId, { name, description, type, group, environmentId, value });
     revalidateSecrets(projectId);
     revalidatePath(`/projects/${projectId}`);
     refresh();
@@ -213,12 +213,13 @@ export async function importSecretsAction(
   projectId: string,
   entries: Array<{ name: string; value: string }>,
   environmentId: string,
+  group: Secret['group'],
   mode: 'skip' | 'overwrite',
 ): Promise<ActionSuccessResult<{ imported: number; skipped: number }> | ActionErrorResult> {
   try {
     const result = await importSecrets(
       projectId,
-      entries.map((e) => ({ ...e, environmentId })),
+      entries.map((e) => ({ ...e, environmentId, group })),
       mode,
     );
     revalidateSecrets(projectId);

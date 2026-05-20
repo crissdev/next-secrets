@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
 
-import { SecretType } from '@/lib/db/prisma-client/enums';
+import { SecretGroup, SecretType } from '@/lib/db/prisma-client/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecrets, updateSecret } from '@/lib/services/secrets.service';
@@ -24,6 +24,7 @@ describe('Secret service', () => {
       value: faker.string.alphanumeric(10),
       description: faker.lorem.sentence(),
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.RUNTIME_APPLICATION,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
       ...overrides,
     });
@@ -38,6 +39,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: envId,
     });
 
@@ -47,6 +49,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: envId,
       projectId: project.id,
       createdAt: expect.any(Date),
@@ -63,6 +66,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: envId,
     });
     const secrets = await getSecrets(project.id);
@@ -73,6 +77,7 @@ describe('Secret service', () => {
         value: '[REDACTED]',
         description: 'Token used in CI',
         type: SecretType.ENVIRONMENT_VARIABLE,
+        group: SecretGroup.GITHUB_ACTIONS,
         environmentId: envId,
         projectId: project.id,
         createdAt: expect.any(Date),
@@ -89,6 +94,7 @@ describe('Secret service', () => {
       value: '12345',
       description: 'Token used in CI',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.RUNTIME_APPLICATION,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     });
 
@@ -97,6 +103,7 @@ describe('Secret service', () => {
       name: 'Updated CI Token',
       description: 'Updated token used in CI',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: DEFAULT_ENVIRONMENTS[1].id,
     });
 
@@ -106,6 +113,7 @@ describe('Secret service', () => {
       value: '[REDACTED]',
       description: 'Updated token used in CI',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.GITHUB_ACTIONS,
       environmentId: DEFAULT_ENVIRONMENTS[1].id,
       projectId: project.id,
       createdAt: expect.any(Date),
@@ -124,6 +132,7 @@ describe('Secret service', () => {
         name: faker.lorem.words(2),
         description: faker.lorem.sentence(),
         type: SecretType.ENVIRONMENT_VARIABLE,
+        group: SecretGroup.RUNTIME_APPLICATION,
         value: '',
         environmentId: DEFAULT_ENVIRONMENTS[0].id,
       }),
@@ -138,6 +147,21 @@ describe('Secret service', () => {
 
     const secrets = await downloadSecrets(project.id, [secret2.id]);
     expect(secrets).toEqual([{ name: secret2.name, value: secret2.value }]);
+  });
+
+  test('Allow the same secret name in different groups', async () => {
+    const project = await createTestProject();
+    const secretName = 'SHARED_TOKEN';
+
+    await createTestSecret(project.id, { name: secretName, group: SecretGroup.RUNTIME_APPLICATION });
+    await createTestSecret(project.id, { name: secretName, group: SecretGroup.GITHUB_ACTIONS });
+
+    const secrets = await getSecrets(project.id);
+    expect(secrets).toHaveLength(2);
+    expect(secrets.map((secret) => secret.group).sort()).toEqual([
+      SecretGroup.GITHUB_ACTIONS,
+      SecretGroup.RUNTIME_APPLICATION,
+    ]);
   });
 
   test('Download all secrets for a project', async () => {

@@ -117,6 +117,7 @@ export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 
         name: secret.name,
         description: secret.description,
         type: secret.type,
+        group: secret.group,
         environmentId: secret.environmentId,
         updatedAt: new Date(),
       },
@@ -141,7 +142,7 @@ export async function updateSecretValue(secretId: string, secretValue: string): 
 export async function upsertSecret(input: Omit<Secret, 'id' | 'updatedAt'>): Promise<{ created: boolean }> {
   return await performDatabaseAction(async (prisma) => {
     const existing = await prisma.secret.findFirst({
-      where: { name: input.name, projectId: input.projectId, environmentId: input.environmentId },
+      where: { name: input.name, projectId: input.projectId, environmentId: input.environmentId, group: input.group },
       select: { id: true },
     });
     if (existing) {

@@ -22,8 +22,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { createSecretAction, updateSecretAction, updateSecretValueAction } from '@/lib/actions';
-import { SecretType } from '@/lib/db/prisma-client/enums';
-import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
+import { SecretGroup, SecretType } from '@/lib/db/prisma-client/enums';
+import { DEFAULT_ENVIRONMENTS, DEFAULT_SECRET_GROUPS, type Secret } from '@/lib/definitions';
 import { SERVICE_ERROR } from '@/lib/service-error-codes';
 import { createSecretSchema } from '@/lib/services/schemas';
 
@@ -52,6 +52,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
       description: '',
       value: '',
       type: SecretType.ENVIRONMENT_VARIABLE,
+      group: SecretGroup.RUNTIME_APPLICATION,
       environmentId: DEFAULT_ENVIRONMENTS[0].id,
     },
   });
@@ -73,6 +74,7 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
         name: props.secret.name,
         description: props.secret.description,
         type: props.secret.type,
+        group: props.secret.group,
         value: props.secret.value,
         environmentId: props.secret.environmentId,
       });
@@ -198,6 +200,30 @@ export default function EditSecretDialog(props: EditSecretDialogProps) {
                         {SecretTypes.map(({ label, value }) => (
                           <SelectItem value={value} key={value}>
                             {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={'group'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor={`${idPrefix}-secret-group`}>Secret group</FormLabel>
+                  <FormControl>
+                    <Select {...field} onValueChange={(value) => field.onChange(value)} value={field.value}>
+                      <SelectTrigger id={`${idPrefix}-secret-group`} className={'w-full'}>
+                        <SelectValue placeholder="Select where this secret is used" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DEFAULT_SECRET_GROUPS.map(({ id, name }) => (
+                          <SelectItem key={id} value={id}>
+                            {name}
                           </SelectItem>
                         ))}
                       </SelectContent>

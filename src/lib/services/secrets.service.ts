@@ -11,6 +11,7 @@ export async function createSecret(
     name: secretInput.name,
     description: secretInput.description,
     type: secretInput.type,
+    group: secretInput.group,
     value: secretInput.value,
     environmentId: secretInput.environmentId,
   });
@@ -37,6 +38,7 @@ export async function updateSecret(input: Omit<Secret, 'value' | 'projectId' | '
     name: secretInput.name,
     description: secretInput.description,
     type: secretInput.type,
+    group: secretInput.group,
     environmentId: secretInput.environmentId,
   });
   return {
@@ -47,7 +49,7 @@ export async function updateSecret(input: Omit<Secret, 'value' | 'projectId' | '
 
 export async function downloadSecrets(projectId: string, secretIds?: string[]) {
   const secrets = await storage.getSecrets(projectId);
-  const filteredSecrets = secretIds?.length ? secrets.filter((secret) => secretIds.includes(secret.id)) : secrets;
+  const filteredSecrets = secretIds ? secrets.filter((secret) => secretIds.includes(secret.id)) : secrets;
   return filteredSecrets.map((secret) => ({
     name: secret.name,
     value: secret.value,

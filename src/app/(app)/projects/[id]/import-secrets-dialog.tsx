@@ -18,7 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { importSecretsAction } from '@/lib/actions';
-import { DEFAULT_ENVIRONMENTS } from '@/lib/definitions';
+import { SecretGroup } from '@/lib/db/prisma-client/enums';
+import { DEFAULT_ENVIRONMENTS, DEFAULT_SECRET_GROUPS } from '@/lib/definitions';
 import { parseEnvFile } from '@/lib/env-parser';
 
 interface ImportResult {
@@ -38,6 +39,7 @@ export default function ImportSecretsDialog({
   const router = useRouter();
   const [content, setContent] = useState('');
   const [environmentId, setEnvironmentId] = useState(DEFAULT_ENVIRONMENTS[0].id);
+  const [group, setGroup] = useState<SecretGroup>(SecretGroup.RUNTIME_APPLICATION);
   const [overwrite, setOverwrite] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -75,6 +77,7 @@ export default function ImportSecretsDialog({
       projectId,
       parsed.map((e) => ({ name: e.key, value: e.value })),
       environmentId,
+      group,
       overwrite ? 'overwrite' : 'skip',
     );
     setLoading(false);
@@ -209,6 +212,24 @@ export default function ImportSecretsDialog({
                     {DEFAULT_ENVIRONMENTS.map((env) => (
                       <SelectItem key={env.id} value={env.id}>
                         {env.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex-1 space-y-0.5">
+                  <Label htmlFor="group-select">Target group</Label>
+                </div>
+                <Select value={group} onValueChange={(value) => setGroup(value as SecretGroup)}>
+                  <SelectTrigger id="group-select" className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEFAULT_SECRET_GROUPS.map(({ id, name }) => (
+                      <SelectItem key={id} value={id}>
+                        {name}
                       </SelectItem>
                     ))}
                   </SelectContent>
