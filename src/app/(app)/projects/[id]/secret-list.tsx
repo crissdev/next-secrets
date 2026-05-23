@@ -7,7 +7,7 @@ import AddSecretButton from '@/app/(app)/projects/[id]/add-secret-button';
 import SecretsTable from '@/app/(app)/projects/[id]/secrets-table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type SecretType } from '@/lib/db/prisma-client/enums';
+import { type SecretType } from '@/lib/db/prisma-client/postgresql/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { toTitleCase } from '@/lib/string-util';
 

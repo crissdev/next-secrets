@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import SecretList from '@/app/(app)/projects/[id]/secret-list';
-import { SecretType } from '@/lib/db/prisma-client/enums';
+import { SecretType } from '@/lib/db/prisma-client/postgresql/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { getSecretValue } from '@/lib/store/storage';
 import { toTitleCase } from '@/lib/string-util';

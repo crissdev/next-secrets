@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
 
 import { prisma } from '@/lib/db/prisma';
-import { type PrismaClient } from '@/lib/db/prisma-client/client';
+import { type PrismaClient } from '@/lib/db/prisma';
 import {
   type PrismaClientInitializationError,
   type PrismaClientKnownRequestError,
-} from '@/lib/db/prisma-client/internal/prismaNamespace';
+} from '@/lib/db/prisma-client/postgresql/internal/prismaNamespace';
 import { type Project, type Secret } from '@/lib/definitions';
 
 export async function addProject(input: Omit<Project, 'id'>, userId: string) {

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { describe, expect, test, vi } from 'vitest';
 
 import EditSecretDialog from '@/app/(app)/projects/edit-secret-dialog';
-import { SecretType } from '@/lib/db/prisma-client/enums';
+import { SecretType } from '@/lib/db/prisma-client/postgresql/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createSecret, updateSecret, updateSecretValue } from '@/lib/store/storage';
 

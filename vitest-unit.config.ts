@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    include: ['tests/unit/ui/**/*.{spec,test}.{ts,tsx}'],
+    include: ['tests/unit/**/*.{spec,test}.{ts,tsx}'],
     setupFiles: ['./vitest-unit.setup.ts'],
     coverage: {
       exclude: ['src/components/ui/**', 'src/hooks/use-mobile.ts', 'src/**/*.d.ts'],

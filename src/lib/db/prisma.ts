@@ -1,8 +1,13 @@
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-import { PrismaClient } from '@/lib/db/prisma-client/client';
+import { type DatabaseEnv, getDatabaseConfig } from './database-provider';
+import { PrismaClient as PostgresPrismaClient } from './prisma-client/postgresql/client';
+import { PrismaClient as SqlitePrismaClient } from './prisma-client/sqlite/client';
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+export type PrismaClient = PostgresPrismaClient;
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 export let prisma: PrismaClient = getPrismaClient();
 
 export function setPrismaClient(client: PrismaClient) {
@@ -12,15 +17,25 @@ export function setPrismaClient(client: PrismaClient) {
   prisma = client;
 }
 
+export function createPrismaClient(env: DatabaseEnv = process.env as DatabaseEnv): PrismaClient {
+  const { provider, url } = getDatabaseConfig(env);
+
+  if (provider === 'sqlite') {
+    return new SqlitePrismaClient({
+      adapter: new PrismaBetterSqlite3({ url }),
+    }) as unknown as PrismaClient;
+  }
+
+  return new PostgresPrismaClient({
+    adapter: new PrismaPg({ connectionString: url }),
+  });
+}
+
 function getPrismaClient() {
   if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma ??= new PrismaClient({
-      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
-    });
+    globalForPrisma.prisma ??= createPrismaClient();
     return globalForPrisma.prisma;
   } else {
-    return new PrismaClient({
-      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
-    });
+    return createPrismaClient();
   }
 }

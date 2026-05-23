@@ -1,12 +1,12 @@
 // Data source
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 // Generator
 generator client {
   provider = "prisma-client"
-  output   = "../src/lib/db/prisma-client/postgresql"
+  output   = "../src/lib/db/prisma-client/sqlite"
 }
 
 model User {

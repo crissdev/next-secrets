@@ -6,8 +6,9 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "dev": "node validate-env.mts && next dev",
-    "build": "prisma generate && next build",
+    "db:generate": "prisma generate --schema prisma/schema.prisma && prisma generate --schema prisma/schema.sqlite.prisma",
+    "dev": "node validate-env.mts && pnpm run db:generate && next dev",
+    "build": "pnpm run db:generate && next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -17,7 +18,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:ci": "npm run test:unit && npm run test:integration",
-    "test:e2e:ci": "start-server-and-test 'npm run build && npm run start' http://localhost:3000 'playwright test'",
+    "test:e2e:ci": "start-server-and-test 'npm run build && npm run start' ${PLAYWRIGHT_BASE_URL:-http://localhost:3000} 'playwright test'",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "prepare": "husky",
@@ -33,6 +34,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -46,6 +48,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-table": "^8.21.3",
     "better-auth": "^1.6.11",
+    "better-sqlite3": "^12.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
@@ -100,5 +103,10 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.3",
     "vitest": "^4.1.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   }
 }

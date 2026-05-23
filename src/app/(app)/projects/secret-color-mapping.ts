@@ -1,4 +1,4 @@
-import { SecretType } from '@/lib/db/prisma-client/enums';
+import { SecretType } from '@/lib/db/prisma-client/postgresql/enums';
 
 export const secretTypeColors: Record<SecretType, string> = {
   [SecretType.API_KEY]: 'bg-blue-100 text-blue-800',

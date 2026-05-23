@@ -34,7 +34,12 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ### Data Storage
 
-The application stores data in a PostgreSQL database. The database connection must be configured using the `DATABASE_URL` environment variable.
+The application stores data in either PostgreSQL or SQLite. Choose the database with `DATABASE_PROVIDER`:
+
+- `DATABASE_PROVIDER=postgresql` with a `postgres://` or `postgresql://` `DATABASE_URL`
+- `DATABASE_PROVIDER=sqlite` with a local `file:` `DATABASE_URL`, for example `file:./dev.db`
+
+SQLite paths are resolved from the project root so Prisma migrations and the application runtime use the same database file.
 
 ### Optional Encryption
 
@@ -60,6 +65,21 @@ cp .env.example .env
 ```
 
 Then edit `.env` as needed for your environment.
+
+For local-only storage without a cloud database, use SQLite:
+
+```env
+DATABASE_PROVIDER=sqlite
+DATABASE_URL=file:./dev.db
+```
+
+Then apply the SQLite migrations and seed the default environments:
+
+```sh
+touch dev.db
+pnpm prisma migrate deploy
+pnpm prisma db seed
+```
 
 Create a `.env.local` file in the project root with the following variables:
 
@@ -108,7 +128,6 @@ You can run the application and its PostgreSQL database using Docker Compose. Th
    ```
 
    This will:
-
    - Start the PostgreSQL database
    - Run database migrations and seed the database
    - Start the Next.js development server on [http://localhost:3000](http://localhost:3000)
