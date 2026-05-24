@@ -52,12 +52,26 @@ export function formatDate(date: Date | string) {
 
 function SortIcon(props: { direction: false | SortDirection }) {
   return props.direction === false ? (
-    <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground opacity-75" />
+    <ArrowUpDown className="ml-2 size-4 shrink-0 text-muted-foreground opacity-75" />
   ) : props.direction === 'asc' ? (
-    <ArrowUp className="ml-2 h-4 w-4" />
+    <ArrowUp className="ml-2 size-4 shrink-0" />
   ) : props.direction === 'desc' ? (
-    <ArrowDown className="ml-2 h-4 w-4" />
+    <ArrowDown className="ml-2 size-4 shrink-0" />
   ) : null;
+}
+
+function SortableHeader(props: { column: Column<Secret>; label: string; onSort: (column: Column<Secret>) => void }) {
+  return (
+    <Button
+      variant={'ghost'}
+      onClick={() => props.onSort(props.column)}
+      className="w-full min-w-0 max-w-full justify-start overflow-hidden px-0 hover:!bg-transparent"
+      title={`Sort by ${props.label}`}
+    >
+      <span className="min-w-0 truncate">{props.label}</span>
+      <SortIcon direction={props.column.getIsSorted()} />
+    </Button>
+  );
 }
 
 function useSortingState() {
@@ -110,8 +124,8 @@ const colWidth: Record<string, string> = {
   type: 'sm:w-28 lg:w-44',
   environmentId: 'sm:w-24 lg:w-32',
   value: 'w-20 lg:w-52',
-  updatedAt: 'lg:w-32',
-  actions: 'w-20',
+  updatedAt: 'lg:w-36',
+  actions: 'w-24',
 };
 
 export default function SecretsTable(props: {
@@ -125,16 +139,7 @@ export default function SecretsTable(props: {
   const columns = useMemo<ColumnDef<Secret>[]>(
     () => [
       {
-        header: ({ column }) => (
-          <Button
-            variant={'ghost'}
-            onClick={() => onChangeSorting(column)}
-            className="hover:!bg-transparent w-full justify-start"
-          >
-            Name
-            <SortIcon direction={column.getIsSorted()} />
-          </Button>
-        ),
+        header: ({ column }) => <SortableHeader column={column} label="Name" onSort={onChangeSorting} />,
         accessorKey: 'name',
         cell: ({ row }) => {
           return (
@@ -161,16 +166,7 @@ export default function SecretsTable(props: {
         },
       },
       {
-        header: ({ column }) => (
-          <Button
-            variant={'ghost'}
-            onClick={() => onChangeSorting(column)}
-            className="hover:!bg-transparent w-full justify-start"
-          >
-            Type
-            <SortIcon direction={column.getIsSorted()} />
-          </Button>
-        ),
+        header: ({ column }) => <SortableHeader column={column} label="Type" onSort={onChangeSorting} />,
         accessorKey: 'type',
         cell: ({ row }) => {
           const type = row.getValue<Secret['type']>('type');
@@ -185,16 +181,7 @@ export default function SecretsTable(props: {
         },
       },
       {
-        header: ({ column }) => (
-          <Button
-            variant={'ghost'}
-            onClick={() => onChangeSorting(column)}
-            className="hover:!bg-transparent w-full justify-start"
-          >
-            Environment
-            <SortIcon direction={column.getIsSorted()} />
-          </Button>
-        ),
+        header: ({ column }) => <SortableHeader column={column} label="Environment" onSort={onChangeSorting} />,
         accessorKey: 'environmentId',
         cell: ({ row }) => {
           const environmentId = row.getValue<Secret['environmentId']>('environmentId');
@@ -310,16 +297,7 @@ export default function SecretsTable(props: {
         },
       },
       {
-        header: ({ column }) => (
-          <Button
-            variant={'ghost'}
-            onClick={() => onChangeSorting(column)}
-            className="hover:!bg-transparent w-full justify-start"
-          >
-            Last Updated
-            <SortIcon direction={column.getIsSorted()} />
-          </Button>
-        ),
+        header: ({ column }) => <SortableHeader column={column} label="Last Updated" onSort={onChangeSorting} />,
         sortDescFirst: true,
         accessorKey: 'updatedAt',
         cell: function LastUpdatedCellRenderer({ row }) {
@@ -351,7 +329,7 @@ export default function SecretsTable(props: {
       },
       {
         id: 'actions',
-        header: () => <div className={'text-right pr-4'}>Actions</div>,
+        header: () => <div className={'overflow-hidden pr-4 text-right'}>Actions</div>,
         cell: function ActionsCellRenderer({ row }) {
           const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
           const [editDialogOpen, setEditDialogOpen] = useState(false);

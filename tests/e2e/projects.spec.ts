@@ -32,6 +32,7 @@ test.describe('Home page', () => {
   });
 
   test('Create secret for new project', async ({ page, projectsPage }) => {
+    await page.setViewportSize({ width: 1024, height: 720 });
     await page.goto('/');
     await projectsPage.createProjectViaModal();
 
@@ -53,5 +54,16 @@ test.describe('Home page', () => {
     await expect(page.getByTestId('project-secrets-count')).toHaveText('1 secret');
     await expect(page.getByTestId('no-secrets-message')).not.toBeAttached();
     await expect(page.getByTestId('no-secrets-hint')).not.toBeAttached();
+
+    const lastUpdatedSortIcon = page.getByRole('button', { name: 'Last Updated' }).locator('svg');
+    const actionsHeader = page.getByRole('columnheader', { name: 'Actions' });
+    await expect(lastUpdatedSortIcon).toBeVisible();
+    await expect(actionsHeader).toBeVisible();
+
+    const sortIconBox = await lastUpdatedSortIcon.boundingBox();
+    const actionsHeaderBox = await actionsHeader.boundingBox();
+    expect(sortIconBox).not.toBeNull();
+    expect(actionsHeaderBox).not.toBeNull();
+    expect(sortIconBox!.x + sortIconBox!.width).toBeLessThanOrEqual(actionsHeaderBox!.x + 1);
   });
 });
