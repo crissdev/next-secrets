@@ -48,6 +48,7 @@ export async function createSecret(
     environmentId: secret.environmentId,
     projectId,
   };
+  await db.ensureDefaultEnvironments();
   return await db.createSecret(newSecret);
 }
 
@@ -65,6 +66,7 @@ export async function deleteSecret(secretId: string): Promise<void> {
 }
 
 export async function updateSecret(secret: Omit<Secret, 'updatedAt' | 'value' | 'projectId'>): Promise<Secret> {
+  await db.ensureDefaultEnvironments();
   return await db.updateSecret(secret);
 }
 
@@ -79,6 +81,7 @@ export async function importSecrets(
 ): Promise<{ imported: number; skipped: number }> {
   let imported = 0;
   let skipped = 0;
+  await db.ensureDefaultEnvironments();
 
   const base = (entry: { name: string; value: string; environmentId: string }): Omit<Secret, 'id' | 'updatedAt'> => ({
     name: entry.name,
@@ -94,8 +97,12 @@ export async function importSecrets(
       try {
         await db.createSecret(base(entry));
         imported++;
-      } catch {
-        skipped++;
+      } catch (error) {
+        if (error instanceof db.UniqueConstraintError) {
+          skipped++;
+        } else {
+          throw error;
+        }
       }
     } else {
       const result = await db.upsertSecret(base(entry));

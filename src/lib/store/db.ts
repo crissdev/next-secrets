@@ -6,7 +6,7 @@ import {
   type PrismaClientInitializationError,
   type PrismaClientKnownRequestError,
 } from '@/lib/db/prisma-client/postgresql/internal/prismaNamespace';
-import { type Project, type Secret } from '@/lib/definitions';
+import { DEFAULT_ENVIRONMENTS, type Project, type Secret } from '@/lib/definitions';
 
 export async function addProject(input: Omit<Project, 'id'>, userId: string) {
   return performDatabaseAction((prisma) =>
@@ -61,6 +61,25 @@ export async function updateProject(id: string, input: Omit<Project, 'id' | 'sec
       },
     }),
   );
+}
+
+export async function ensureDefaultEnvironments(): Promise<void> {
+  await performDatabaseAction(async (prisma) => {
+    for (const env of DEFAULT_ENVIRONMENTS) {
+      await prisma.environment.upsert({
+        where: { name: env.name },
+        update: {
+          id: env.id,
+          description: '',
+        },
+        create: {
+          id: env.id,
+          name: env.name,
+          description: '',
+        },
+      });
+    }
+  });
 }
 
 export async function createSecret(input: Omit<Secret, 'id' | 'updatedAt'>): Promise<Secret> {

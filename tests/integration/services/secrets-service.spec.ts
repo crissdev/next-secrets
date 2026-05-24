@@ -1,10 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
 
+import { prisma } from '@/lib/db/prisma';
 import { SecretType } from '@/lib/db/prisma-client/postgresql/enums';
 import { DEFAULT_ENVIRONMENTS, type Secret } from '@/lib/definitions';
 import { createProject } from '@/lib/services/projects.service';
 import { createSecret, downloadSecrets, getSecrets, updateSecret } from '@/lib/services/secrets.service';
+import { importSecrets } from '@/lib/store/storage';
 
 describe('Secret service', () => {
   async function createTestProject() {
@@ -52,6 +54,46 @@ describe('Secret service', () => {
       createdAt: expect.any(Date),
       updatedAt: expect.any(Date),
     });
+  });
+
+  test('Create a secret restores default environments when reference rows are missing', async () => {
+    const project = await createTestProject();
+    await prisma.environment.deleteMany();
+
+    const envId = DEFAULT_ENVIRONMENTS[0].id;
+    const secret = await createSecret(project.id, {
+      name: 'CI Token',
+      value: '12345',
+      description: 'Token used in CI',
+      type: SecretType.ENVIRONMENT_VARIABLE,
+      environmentId: envId,
+    });
+
+    expect(secret.environmentId).toBe(envId);
+    await expect(prisma.environment.findUniqueOrThrow({ where: { id: envId } })).resolves.toMatchObject({
+      id: envId,
+      name: DEFAULT_ENVIRONMENTS[0].name,
+    });
+  });
+
+  test('Import secrets restores default environments and skips duplicates', async () => {
+    const project = await createTestProject();
+    await prisma.environment.deleteMany();
+
+    const envId = DEFAULT_ENVIRONMENTS[0].id;
+    const entries = [{ name: 'IMPORTED_TOKEN', value: '12345', environmentId: envId }];
+
+    await expect(importSecrets(project.id, entries, 'skip')).resolves.toEqual({ imported: 1, skipped: 0 });
+    await expect(importSecrets(project.id, entries, 'skip')).resolves.toEqual({ imported: 0, skipped: 1 });
+
+    await expect(getSecrets(project.id)).resolves.toMatchObject([
+      {
+        name: 'IMPORTED_TOKEN',
+        value: '[REDACTED]',
+        environmentId: envId,
+        projectId: project.id,
+      },
+    ]);
   });
 
   test('Retrieve a list of secrets for a project', async () => {
